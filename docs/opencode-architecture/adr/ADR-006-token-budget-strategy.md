@@ -2,85 +2,121 @@
 
 ## Estado
 
-**Propuesto** — Pendiente de baseline de tokens. **No aprobar aún.**
+**Aprobado** — Decisión estratégica del usuario (2026-06-09). Reducir contexto fijo mediante lazy-loading, desduplicación y movimiento a documentación versionada.
 
-> ⚠️ **Fase B0**: La estimación de ~29,000 fue corregida a ~18,500–22,000 (rango conservador). Pero sigue siendo una estimación, no medido. Se requiere Test 8 (baseline) antes de decidir objetivos de reducción. Mantener PROPUESTO.
+> ⚠️ **Pendiente de medición baseline**: La estimación se corrigió de ~29k a ~18,500–22,000 (Fase B0) pero sigue siendo estimación. Se requiere Test 8 antes de implementar optimizaciones.
+
+---
 
 ## Contexto
 
-El sistema actual tiene un **contexto fijo estimado de ~29,000 tokens por sesión**, compuesto por:
+El sistema actual tiene un **contexto fijo estimado de ~18,500–22,000 tokens por sesión**, compuesto por:
 
-| Fuente | Tokens |
-|--------|--------|
-| System prompt base | ~3,000 |
-| AGENTS.md (.codex) | ~12,000 (solo si gentle-orch activo) |
-| AGENTS.md (.config/opencode) | ~7,000 (solo si Manager activo) |
-| Available skills list | ~3,000 |
-| Engram MEMORY_INSTRUCTIONS | ~2,500 |
-| Design skills protocol | ~1,500 |
-| Background-agents rules | ~1,000 |
+| Fuente | Tokens estimados | Estado |
+|--------|-----------------|--------|
+| System prompt base | ~3,000 | INFERIDO |
+| AGENTS.md (agente activo) | ~7,000–12,000 | INFERIDO (depende del agente) |
+| Available skills list | ~3,000 | INFERIDO |
+| Engram MEMORY_INSTRUCTIONS | ~2,500 | INFERIDO |
+| Design skills protocol | ~1,500 | INFERIDO |
+| **Total estimado** | **~18,500–22,000** | **INFERIDO — pendiente de Test 8** |
 
-> ⚠️ **Corrección Fase B0**: La suma de ~29,000 asume ambos AGENTS.md activos simultáneamente, lo cual es incorrecto. Solo UN agente se carga por sesión. El rango conservador es **~18,500–22,000 tokens**. Pendiente de medición runtime (Test 8).
+> ⚠️ **Corrección Fase B0**: La estimación anterior de ~29,000 asumía ambos AGENTS.md activos simultáneamente, lo cual es incorrecto. Solo el agente activo carga su AGENTS.md.
 
-Este contexto se inyecta siempre, antes del primer mensaje del usuario. Con GPT-5.5, esto tiene impacto directo en latencia y costo.
+Con la decisión de ADR-001 (Manager único primary), el AGENTS.md de gentle-orchestrator (~12,000 tokens) ya no se carga por defecto. Esto reduce automáticamente el piso del rango.
 
-**Problemas detectados**:
-1. Instrucciones Engram duplicadas en 3 fuentes (~2,500 tokens redundantes).
-2. Design skills protocol siempre inyectado aunque no haya tarea frontend (~1,500 tokens).
-3. Available skills list con 48 skills aunque solo unas pocas aplican al proyecto actual (~3,000 tokens).
-4. AGENTS.md (.codex) con ~12,000 tokens que incluye secciones movibles a docs.
-5. MCP schemas agregando ~4,000-10,000 tokens adicionales según MCP activos.
+### Problemas detectados
+
+1. **Instrucciones Engram duplicadas** en 3 fuentes (~2,500 tokens redundantes).
+2. **Design skills protocol siempre inyectado** aunque no haya tarea frontend (~1,500 tokens).
+3. **Available skills list** con 48 skills aunque solo unas pocas aplican al proyecto activo (~3,000 tokens).
+4. **AGENTS.md** (~7,000–12,000 tokens) incluye secciones movibles a docs.
+5. **MCP schemas** agregando ~4,000–10,000 tokens adicionales según MCP activos.
+
+---
 
 ## Decisión
 
-**Reducir el contexto fijo de ~18,500–22,000 a ~15,000-18,000 tokens mediante lazy-loading, desduplicación y movimiento a documentación versionada.**
+**Reducir el contexto fijo de ~18,500–22,000 a ~15,000–18,000 tokens mediante:**
 
-### Acciones concretas
+1. **Desduplicar instrucciones Engram** (~2,500 tokens de ahorro)
+   - Eliminar protocolo Engram de AGENTS.md.
+   - Dejar solo en plugin engram.ts como mecanismo runtime.
+   - Markdown versionado (engram-instructions.md) como fuente de verdad humana.
 
-1. **Desduplicar instrucciones Engram**: eliminar de AGENTS.md, dejar solo en plugin engram.ts. **Ahorro: ~2,500 tokens.**
-2. **Mover Design Skills Protocol a skill bajo demanda**: crear skill `frontend-design-gate` que se cargue solo cuando haya tarea frontend. **Ahorro: ~1,500 tokens.**
-3. **Reducir available skills**: en lugar de listar 48 skills globales, listar solo triggers relevantes al proyecto activo. **Ahorro: ~1,500 tokens.**
-4. **Compactar AGENTS.md (.config)**: remover secciones que viven en plugin (Engram protocol). **Ahorro: ~3,000 tokens.**
-5. **Mover secciones extensas de AGENTS.md (.codex) a docs/**: cargar bajo demanda con Document Retriever. **Ahorro: ~5,000 tokens.**
+2. **Mover Design Skills Protocol a skill bajo demanda** (~1,500 tokens de ahorro)
+   - Crear skill `frontend-design-gate` que se cargue solo cuando haya tarea frontend.
+   - Eliminar del Manager prompt.
 
-## Razón
+3. **Reducir available skills** (~1,500 tokens de ahorro)
+   - En lugar de listar 48 skills, listar solo las relevantes al proyecto activo.
+   - Las skills específicas se descubren vía skill registry.
 
-1. Cada token tiene costo (monetario y de latencia) con GPT-5.5.
-2. El contexto fijo no escala: más skills, más MCP, más plugins = más tokens.
-3. La información que no se necesita para el request actual no debería ocupar contexto.
-4. Lazy-loading es un patrón probado: cargar solo lo necesario cuando se necesita.
+4. **Compactar AGENTS.md** (~3,000–5,000 tokens de ahorro)
+   - Remover secciones que viven en plugin o docs.
+   - Mantener solo instrucciones operativas mínimas.
 
-## Alternativas evaluadas
+5. **MCP bajo demanda** (~4,000–10,000 tokens de ahorro en requests no-MCP)
+   - No cargar schemas de MCP que no se usarán.
+   - Activar solo cuando el request lo requiera.
 
-| Alternativa | Pros | Contras |
-|-------------|------|---------|
-| **A: Lazy-loading + desduplicación** (esta decisión) | Ahorro significativo, comportamiento preservado | Requiere implementación cuidadosa |
-| **B: Mantener estado actual** | Sin cambios | ~29k tokens fijos permanentemente |
-| **C: Eliminar todas las fuentes no críticas** | Máximo ahorro | Riesgo de perder comportamiento necesario |
+### Objetivo de contexto fijo post-optimización
 
-**Decisión: Alternativa A.**
+| Fuente | Antes | Después | Diferencia |
+|--------|-------|---------|------------|
+| System prompt base | ~3,000 | ~3,000 | 0 |
+| AGENTS.md (manager activo) | ~7,000 | ~4,000–5,000 | -2,000–3,000 |
+| Available skills | ~3,000 | ~1,500 | -1,500 |
+| Engram instructions | ~2,500 | ~0 (en plugin) | -2,500 |
+| Design skills protocol | ~1,500 | ~0 (skill bajo demanda) | -1,500 |
+| MCP schemas (default) | ~4,000–10,000 | ~0 (bajo demanda) | -4,000–10,000 |
+| **Total** | **~18,500–22,000** | **~8,500–9,500** | **-10,000–12,500** |
+
+---
 
 ## Consecuencias positivas
 
-- Reducción de ~11,000-14,000 tokens fijos por sesión.
+- Reducción significativa de tokens fijos por sesión (~50-60%).
 - Menor latencia en requests simples.
-- Menor costo operativo con GPT-5.5.
+- Menor costo operativo (especialmente con GPT-5.5).
+- Comportamiento preservado: la información está disponible bajo demanda.
 
 ## Consecuencias negativas
 
 - Las fuentes movidas a lazy-load pueden tardar en cargarse cuando se necesiten.
 - Riesgo de que el modelo no sepa qué skills/documentos están disponibles.
 - Esfuerzo de implementación: modificar AGENTS.md, crear skills, ajustar plugins.
+- Las optimizaciones deben validarse una por una para no romper comportamiento.
 
-## Evidencia
+---
 
-- **ID en Evidence Register**: E041, E042, E043, E044
-- **Documento relacionado**: `05-token-cost-map.md`
+## Prioridad de implementación
+
+| Prioridad | Acción | Ahorro estimado | Dependencia |
+|-----------|--------|-----------------|-------------|
+| P0 | Mover secretos a env vars (B-Security) | — | Ninguna |
+| P1 | MCP bajo demanda | ~4,000–10,000 | B-Security completada |
+| P1 | Desduplicar instrucciones Engram | ~2,500 | Reparar pipeline Engram |
+| P2 | Mover Design Skills Protocol a skill | ~1,500 | Ninguna |
+| P2 | Compactar AGENTS.md | ~2,000–3,000 | ADR-001 completado |
+| P3 | Reducir available skills | ~1,500 | Proyecto estable |
+
+---
 
 ## Validación requerida
 
-1. [ ] Medir tokens fijos actuales con precisión (Test 8 del plan).
-2. [ ] Verificar que desduplicar Engram no pierde funcionalidad de memoria.
-3. [ ] Verificar que Design Skills Protocol se carga correctamente bajo demanda.
-4. [ ] Medir tokens después de cada optimización.
+1. [ ] Medir tokens fijos actuales con precisión (Test 8).
+2. [ ] Medir tokens después de cada optimización.
+3. [ ] Verificar que desduplicar Engram no pierde funcionalidad de memoria.
+4. [ ] Verificar que Design Skills Protocol se carga correctamente bajo demanda.
 5. [ ] Verificar comportamiento del modelo no degradado.
+6. [ ] Medir latencia de requests con y sin MCP activos.
+
+---
+
+## Evidencia
+
+- **Fase B0**: Estimación corregida de ~29k a ~18,500–22,000.
+- **Archivo**: `05-token-cost-map.md`.
+- **ADR relacionados**: ADR-001 (primary — gentle-orch AGENTS.md ya no se carga), ADR-004 (Engram — desduplicación), ADR-007 (MCP — bajo demanda).
+- **ID en Evidence Register**: E041, E042, E043, E044.

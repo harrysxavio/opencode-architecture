@@ -243,10 +243,10 @@ gantt
 | **B-Security** | Rotación y externalización de secretos | config.toml, .gitignore, env vars | config.toml, .gitignore | 🟡 Medio | Sin secretos en texto plano en config |
 | **B1** | Observabilidad mínima | Solo añadir logging/métricas | Plugin observabilidad | 🟡 Medio | Cada request produce métricas |
 | **C** | Tests de flujo | Solo scripts de test | tests/flows/* | 🟢 Bajo | 8 escenarios ejecutables |
-| **D** | Resolver agente primario | opencode.json, prompts | opencode.json, AGENTS.md | 🟡 Medio | Solo Manager responde default |
-| **E** | Gobernanza de memoria | engram.ts, AGENTS.md | plugins/engram.ts, AGENTS.md | 🟡 Medio | mem_save persiste observaciones |
-| **F** | Reducir contexto fijo | AGENTS.md, skills, prompts | AGENTS.md, skills/ | 🟡 Medio | ~18.5–22k → ~15-18k tokens fijos |
-| **G** | Optimizar MCP surface | Config MCP | opencode.json, .jsonc, config.toml | 🟡 Medio | MCP activos solo bajo demanda |
+| **D** | Consolidar MCP y skills | opencode.json, MCP, skills | Config MCP, skills/ | 🟡 Medio | MCP consolidados, skills bajo demanda |
+| **E** | Reparar memoria Engram | engram.ts, AGENTS.md | plugins/engram.ts, AGENTS.md | 🟡 Medio | mem_save persiste observaciones |
+| **F** | Token optimization | AGENTS.md, skills, prompts | AGENTS.md, skills/ | 🟡 Medio | ~18.5–22k → ~8.5-9.5k tokens fijos |
+| **G** | Config consolidation | opencode.json, .jsonc, config.toml | Config OpenCode | 🟡 Medio | gentle-orch mode: subagent. Config única. |
 | **H** | Consolidar arquitectura | Todo | Todos | 🔴 Alto | Arquitectura objetivo implementada y testeada |
 
 ## 4. Dependencias entre fases

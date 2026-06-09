@@ -2,7 +2,24 @@
 
 ## Contexto
 
-OpenCode es un ecosistema agentic AI con múltiples capas de orquestación, memoria, skills y herramientas. El usuario ha ejecutado 3 auditorías paralelas y solicita una consolidación documental verificable para entender la arquitectura actual y planificar su evolución.
+OpenCode es un ecosistema agentic AI con múltiples capas de orquestación, memoria, skills y herramientas. El usuario ha ejecutado 3 auditorías paralelas + Fase B0 (corrección documental + validación runtime) y ha definido una **decisión estratégica explícita** sobre la arquitectura objetivo.
+
+### Decisión estratégica del usuario (2026-06-09)
+
+```
+Manager = único primary / router / decisor / sintetizador
+gentle-orchestrator = SDD Pipeline especializado (no primary)
+sdd-* = subagentes ejecutores por fase
+Engram = memoria gobernada, no basurero de prompts
+Markdown versionado = fuente de verdad arquitectónica
+Skill registry = índice de capacidades, no memoria semántica
+Inventory = catálogo técnico generado, no contexto permanente
+MCP = herramientas bajo demanda, no superficie siempre activa sin control
+```
+
+**Principio rector**: Una sola arquitectura, no un collage. Manager es el único primary. gentle-orchestrator no compite. Sus bondades SDD se integran bajo control del Manager.
+
+**Finalidad principal**: Mejorar la memoria. Hacer que la memoria funcione como una biblioteca estructurada de decisiones, criterios, aprendizajes y contexto útil.
 
 ## Hallazgos principales
 
@@ -85,22 +102,41 @@ Engram, Context7, NotebookLM, Supabase, Playwright, GitHub, fastmcp-toolkit, bro
 **VALIDADO**: `inventory.md` (1,635 líneas) y `inventory.json` existen con catálogo de agentes, MCP, skills, plugins.
 **NO VALIDADO**: Fecha de generación: 2026-05-28. Puede estar desactualizado respecto a cambios posteriores.
 
-## Decisión propuesta principal
+## Decisiones estratégicas adoptadas (Fase B0 — ADRs 001-009)
 
-**Unificar bajo un solo orquestador primario**. Mantener Manager como orquestador global por defecto. Migrar gentle-orchestrator a un rol de "SDD Pipeline especializado" invocable explícitamente, eliminando su modo `primary`.
+| ADR | Decisión | Estado |
+|-----|----------|--------|
+| **ADR-001** | Manager = único primary. gentle-orchestrator = SDD Pipeline especializado (Opción B). Manager SÍ invoca gentle-orch cuando el flujo lo requiere. | ✅ **Aprobado** |
+| **ADR-002** | Manager = router, clasificador, decisor de contexto, controlador de memoria, sintetizador. NO ejecutor universal. | ✅ **Aprobado** |
+| **ADR-003** | gentle-orchestrator = SDD Pipeline invocable por Manager. NO primary. Bondades preservadas. Regla "NO llamar" → "SÍ llamar cuando corresponda". | ✅ **Aprobado** |
+| **ADR-004** | Engram = memoria gobernada. Markdown = fuente de verdad. 7 capas de memoria. Ciclo de vida: crear → usar → actualizar → invalidar. | ✅ **Aprobado** |
+| **ADR-005** | Skill registry = context index oficial. NO crear CONTEXT_INDEX.md. Inventory = catálogo humano. | ✅ **Aprobado** |
+| **ADR-006** | Reducir contexto fijo de ~18,500–22,000 a ~8,500–9,500 tokens. Lazy-loading, desduplicación, MCP bajo demanda. | ✅ **Aprobado** |
+| **ADR-008** | Delegar por complejidad. task() sync default, delegate() async solo para >5 min. Envelope compacto. Executor boundary. | ✅ **Aprobado** |
+| **ADR-009** | Observabilidad mínima + 8 tests de flujo (T1-T8). Medir antes de optimizar. | ✅ **Aprobado** |
+
+> ⚠️ **ADRs aprobados como dirección estratégica, no como implementación.** Varios requieren validación runtime (Test 1, Test 5, Test 8) y Fase B-Security antes de cambios de configuración.
 
 ## Arquitectura objetivo (resumen)
 
 ```
-Manager (router principal)
-├── Memory Router (Engram query + governance)
-├── Document Retriever (Markdown versionado)
-├── Tool/MCP Router (bajo demanda)
-├── SDD Pipeline (gentle-orchestrator como especialista)
-├── Subagentes SDD y especializados
-└── Observability Logger
+User Request
+    ↓
+OpenCode Runtime → Manager (único primary)
+    ↓
+Clasificación de intención
+    ├── Tiny → respuesta directa
+    ├── Small → acción directa controlada
+    ├── Needs Memory → Memory Governance Flow
+    ├── Needs Docs → Document Retriever
+    ├── Needs Tool → Tool/MCP Router (bajo demanda)
+    ├── Needs Specialist → Subagente especializado
+    └── Needs Structured Change → SDD Pipeline (gentle-orchestrator)
+                                      └── sdd-* executors
+    ↓
+Manager sintetiza → Quality Gate → Respuesta → Memory Save Decision
 ```
 
 ## Próximo paso inmediato
 
-Revisar y aprobar esta documentación como línea de base antes de cualquier cambio funcional.
+**🔴 Fase B-Security**: Rotar secretos expuestos (GitHub PAT, Browserbase API key) antes de cualquier cambio de configuración.

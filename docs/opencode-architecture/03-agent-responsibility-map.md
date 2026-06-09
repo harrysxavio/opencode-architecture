@@ -1,11 +1,23 @@
 # Agent Responsibility Map — Mapa de Responsabilidades
 
-## 1. Matriz de responsabilidades actual vs recomendada
+> ✅ **Decisión estratégica (2026-06-09)**: Manager único primary. gentle-orchestrator como SDD Pipeline. Ver ADRs 001-009.
 
-| Actor | Responsabilidad actual | Responsabilidad recomendada | Puede delegar | Puede escribir memoria | Puede usar MCP | Riesgo actual |
-|-------|----------------------|---------------------------|---------------|----------------------|----------------|---------------|
-| **Manager** | Orquestador global: intake, diseño, SDD, review, debugging, GPT-5.5 gate | Router principal + decisor estratégico. NO ejecutor universal. | ✅ Sí (subagentes SDD + especializados) | ✅ sí (proactivo) | ✅ sí (bajo demanda) | 🔴 ALTO: prompt ~7k, puede hacer inline, referencia subagentes inexistentes |
-| **gentle-orchestrator** | Coordinador SDD, nunca ejecuta inline | SDD Pipeline especializado. NO orquestador primario por defecto. | ✅ Sí (solo subagentes SDD) | ⚠️ Solo por subagentes | ⚠️ Limitado por tools | 🔴 ALTO: compite como primary con Manager |
+## 0. Estado de las decisiones estratégicas
+
+| Decisión | Estado | ADR |
+|----------|--------|-----|
+| Manager único primary | ✅ Aprobado | ADR-001 |
+| Manager como router, no ejecutor | ✅ Aprobado | ADR-002 |
+| gentle-orchestrator como SDD Pipeline invocable | ✅ Aprobado | ADR-003 |
+| Manager SÍ invoca gentle-orch para SDD | ✅ Aprobado | ADR-001 |
+| Regla "NO llamar a gentle-orch" reemplazada | ✅ Aprobado | ADR-001 |
+| review-gpt55 / debug-gpt55 no se implementan | ✅ Aprobado | ADR-008 |
+| data-memory-curator evaluar evolución | ✅ Aprobado | ADR-004 |
+
+| Actor | Responsabilidad actual | Responsabilidad objetivo (post-ADRs) | Puede delegar | Puede escribir memoria | Puede usar MCP | Riesgo actual |
+|-------|----------------------|--------------------------------------|---------------|----------------------|----------------|---------------|
+| **Manager** | Orquestador global: intake, diseño, SDD, review, debugging, GPT-5.5 gate | **Único primary**. Router + clasificador + controlador de memoria + sintetizador. Invoca gentle-orch para SDD. | ✅ Sí (gentle-orch + subagentes SDD + especializados) | ✅ sí (proactivo, con gobernanza) | ✅ sí (bajo demanda) | 🟡 MEDIO: prompt ~7k, riesgo de clasificación incorrecta |
+| **gentle-orchestrator** | Coordinador SDD, nunca ejecuta inline | **SDD Pipeline especializado**. NO primary. Invocado por Manager para cambios estructurados Medium/Large. | ✅ Sí (solo subagentes SDD vía task/delegate) | ⚠️ Solo por subagentes | ⚠️ Limitado por tools | 🟢 BAJO: ya no compite como primary |
 | **sdd-apply** | Implementar código | Implementar código (sin cambios) | ❌ No (executor boundary) | ✅ sí (progress + artifacts) | ✅ sí (según tarea) | 🟢 BAJO |
 | **sdd-explore** | Investigar codebase | Investigar codebase (sin cambios) | ❌ No | ✅ sí (artifacts) | ✅ sí (según tarea) | 🟢 BAJO |
 | **sdd-propose** | Crear propuestas | Crear propuestas (sin cambios) | ❌ No | ✅ sí | ✅ sí | 🟢 BAJO |
@@ -24,56 +36,64 @@
 
 > ⚠️ **Corrección Fase B0**: Separar ESTADO ACTUAL de ARQUITECTURA OBJETIVO. No mezclarlos.
 
-### ESTADO ACTUAL — Manager DEBE
-- Clasificar requests como Tiny/Small/Medium/Large.
-- Ejecutar intake, clarificación y diseño approval.
-- Decidir si usa Graphify Context Gate.
-- Decidir si entra en SDD y qué subagentes usar.
-- Controlar el ciclo SDD, delegando fases a subagentes.
-- Ejecutar inline solo cuando no hay subagente disponible.
+### ARQUITECTURA OBJETIVO — Manager DEBE
+- Ser el **único primary**. Responder por defecto a todos los requests.
+- Clasificar requests como Tiny/Small/Medium/Large/NeedsMemory/NeedsDocs/NeedsTool/NeedsSpecialist/NeedsSDD.
+- Ejecutar intake, clarificación y diseño approval para Medium/Large.
+- Aplicar **Memory Governance Flow** antes de buscar o guardar memoria.
+- Decidir si usa Document Retriever, Tool/MCP Router, SDD Pipeline o subagentes.
+- **Invocar gentle-orchestrator** para cambios estructurados Medium/Large (SDD Pipeline).
+- Controlar el ciclo SDD, delegando fases a gentle-orch o subagentes SDD.
+- Ejecutar inline solo para Tiny/Small (1 archivo, mecánico).
 - Aplicar TDD, review y debugging.
-- Invocar quality gates (Judgment Day, GPT-5.5).
-- **NO llamar a gentle-orchestrator** (regla explícita actual).
-- Hacer mem_save proactivo de decisiones, bugs, descubrimientos.
+- Invocar quality gates (Judgment Day, Superpowers Review).
+- Hacer mem_save proactivo de decisiones, bugs, descubrimientos (con gobernanza).
 - Ejecutar mem_session_summary al cerrar sesión.
+- Sintetizar outputs de subagentes (no pasar crudos).
 
-### ESTADO ACTUAL — Manager NO DEBE
-- **NO** ser ejecutor universal de todo el trabajo.
+### ARQUITECTURA OBJETIVO — Manager NO DEBE
+- **NO** ser ejecutor universal de todo el trabajo (delegar Medium/Large).
 - **NO** saltarse el design approval (salvo fast-track explícito).
-- **NO** delegar a gentle-orchestrator (regla actual, podría cambiar en ADR-001).
+- **NO** **ignorar a gentle-orchestrator** — debe invocarlo cuando el flujo SDD lo requiera.
 - **NO** expandir scope sin aprobación.
-- **NO** usar Graphify sin aprobación del usuario.
+- **NO** usar MCP sin justificación (bajo demanda).
 - **NO** cargar skills sin trigger claro.
-- **NO** recuperar memoria sin objetivo.
+- **NO** recuperar memoria sin aplicar política de búsqueda.
+- **NO** guardar memoria sin aplicar política de guardado.
 - **NO** pasar outputs largos de subagentes sin resumir.
 - **NO** decir "done" sin verificación.
+- **NO** cargar todo el inventory en contexto.
 
-### ESTADO ACTUAL — gentle-orchestrator DEBE
-- Coordinar el pipeline SDD delegando fases.
+### ARQUITECTURA OBJETIVO — gentle-orchestrator DEBE
+- **NO responder como primary** — solo cuando Manager lo invoca o el usuario usa @gentle-orchestrator.
+- Coordinar el pipeline SDD delegando fases a subagentes sdd-*.
 - Mantener conversación thin (no inflar contexto).
 - Delegar trabajo real a subagentes vía task/delegate.
 - Leer 1-3 archivos inline solo para decidir.
 - Delegate 4+ archivos, escritura multi-file, tests, tools externos.
-- Sintetizar resultados de subagentes.
+- Sintetizar resultados de subagentes en envelope compacto.
 - NO ejecutar inline código de implementación.
+- Retornar envelope {status, phase, summary, evidence, decisions, risks, next_action}.
 
-### ESTADO ACTUAL — gentle-orchestrator NO DEBE
-- **NO** competir como orquestador primario por defecto (pero actualmente es mode: primary).
+### ARQUITECTURA OBJETIVO — gentle-orchestrator NO DEBE
+- **NO** ser primary bajo ninguna circunstancia.
+- **NO** responder por defecto a requests del usuario.
 - **NO** ejecutar inline trabajo de 4+ archivos.
 - **NO** tener tools de glob, grep, skill (ya no las tiene).
 - **NO** escribir implementación directamente.
 - **NO** orquestar fuera del pipeline SDD.
+- **NO** expandir scope del cambio sin coordinación con Manager.
 
 ---
 
-### ARQUITECTURA OBJETIVO (propuesta ADR-001, pendiente de validación)
+### ARQUITECTURA OBJETIVO (ADRs 001-009 aprobados)
 
-| Aspecto | Estado actual | Propuesta objetivo |
-|---------|---------------|-------------------|
+| Aspecto | Estado anterior | Estado objetivo |
+|---------|----------------|----------------|
 | **Orquestador primario** | 2 (Manager + gentle-orch) — ambos `mode: "primary"` | 1 (Manager como único primary) |
 | **Rol de gentle-orchestrator** | Primary competidor | SDD Pipeline invocable explícitamente (no primary) |
-| **Manager llama a gentle-orch?** | NO (prohibición explícita) | Sí, cuando el flujo SDD lo requiera |
-| **Estado de decisión** | — | **PENDIENTE ADR-001 + validación runtime** |
+| **Manager llama a gentle-orch?** | NO (prohibición explícita) | SÍ, cuando el flujo SDD lo requiera (cambio estratégico) |
+| **Estado de decisión** | — | ✅ **APROBADO** — ADR-001. Pendiente de validación runtime (Test 1, Test 5) antes de cambios de configuración. |
 
 ### Subagentes SDD DEBEN
 - Ejecutar su fase específica.
