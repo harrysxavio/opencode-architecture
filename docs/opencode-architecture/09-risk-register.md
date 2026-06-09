@@ -1,0 +1,87 @@
+# Risk Register — Registro de Riesgos
+
+## Matriz de riesgos
+
+| # | Riesgo | Severidad | Probabilidad | Impacto | Evidencia | Mitigación propuesta | Prioridad |
+|---|--------|-----------|-------------|---------|-----------|---------------------|-----------|
+| R01 | **Doble orquestador primario**: Manager y gentle-orchestrator ambos mode: "primary" sin regla de resolución clara | 🔴 **CRÍTICO** | Alta (80%) | El orquestador incorrecto responde, flujo incorrecto, posible loop | opencode.json:4-51 ambos primary | ADR-001: Elegir Manager como único primary por defecto; gentle como SDD pipeline explícito invocable | P1 |
+| R02 | **Memoria Engram no funcional**: memorias_1.sqlite sin observaciones a pesar de protocolo definido | 🔴 **CRÍTICO** | Alta (80%) | Pérdida total de memoria cross-session, sesiones inician sin contexto | Auditoría: 4KB DB sin tabla observations | ADR-004: Diagnosticar y reparar pipeline de guardado. Verificar que mem_save persista | P1 |
+| R03 | **Contexto fijo excesivo**: ~29,000 tokens por sesión antes del primer mensaje | 🔴 **ALTO** | Muy alta (95%) | Latencia + costo elevado, peor experiencia de usuario | Suma estimada de 6+ fuentes de contexto | ADR-006: Token budget. Desduplicar. Mover a lazy-load. Reducir fixed overhead a ~15k | P1 |
+| R04 | **Duplicación de instrucciones de memoria**: Engram protocol en 3 fuentes | 🟠 **MEDIO** | Muy alta (95%) | ~2,500 tokens redundantes, posible contradicción | AGENTS.md (.config):72-166, (.codex):355-449, engram.ts:64-141 | Desduplicar: una sola fuente de instrucciones de memoria | P1 |
+| R05 | **Guardado de ruido en memoria**: Prompt capture guarda prompts completos sin filtro | 🟠 **MEDIO** | Alta (80%) | Memoria contaminada con datos transitorios, difícil retrieval semántico | engram.ts:343-381 captura todo input | Implementar filtro de guardado: solo observaciones útiles, no prompts completos | P2 |
+| R06 | **MCP surface demasiado grande**: 9+ MCP servers configurados, varios duplicados | 🟠 **MEDIO** | Alta (80%) | ~2-8k tokens extra en schemas, superficie de error ampliada, riesgos de seguridad | opencode.json + .jsonc + config.toml tienen MCP duplicados | ADR-007: MCP bajo demanda. Activar solo los necesarios para cada request | P1 |
+| R07 | **Subagentes referenciados que no existen**: review-gpt55, debug-gpt55 | 🟠 **MEDIO** | Media (60%) | Quality gates de GPT-5.5 no disponibles | Manager prompt menciona pero no hay agentes configurados | Decidir si implementar o eliminar referencias. Usar Judgment Day como alternativa | P2 |
+| R08 | **Manager puede hacer demasiado**: Sin límite claro de inline execution | 🟡 **BAJO-MEDIO** | Media (50%) | Manager ejecuta inline tareas complejas, inflando contexto | Manager prompt permite inline cuando no hay subagente | Fortalecer regla: si 4+ archivos o lógica nueva, delegar siempre | P2 |
+| R09 | **Falta de observabilidad**: No hay medición de tokens, tiempo, decisiones | 🟡 **BAJO-MEDIO** | Muy alta (90%) | No se puede optimizar sin datos | No se encontró logging de métricas de flujo | Fase B del roadmap: agregar observabilidad mínima (request_id, agent, tools, tokens) | P1 |
+| R10 | **Falta de tests de flujo**: Sin pruebas que validen el comportamiento real | 🟡 **BAJO-MEDIO** | Alta (80%) | Cambios pueden romper el flujo sin detectarse | No hay test files visibles | Fase C del roadmap: crear escenarios de prueba reproducibles | P2 |
+| R11 | **Secretos expuestos en config**: GitHub token y Browserbase API key en texto plano | 🔴 **ALTO** | Muy alta (95%) | Exposición de credenciales si el repo es compartido o auditado | config.toml:112 (GitHub PAT), 126 (Browserbase API key) | **Fase B-Security**: Mover a variables de entorno. Rotar tokens expuestos. Antes de cualquier cambio en MCP, memoria o arquitectura. | P0 — INMEDIATA |
+| R12 | **Inventory desactualizado**: inventory.json del 2026-05-28 puede no reflejar estado actual | 🟡 **BAJO** | Alta (80%) | Decisiones basadas en datos incorrectos | Fecha en metadatos de inventory | Regenerar inventory periódicamente o bajo demanda | P3 |
+| R13 | **Context index inexistente**: CONTEXT_INDEX.md no existe pero se referencia | 🟢 **BAJO** | Media (50%) | Confusión sobre qué archivo usar como índice de contexto | frontend-specialist lo referencia pero no existe | Aclarar: skill-registry.md es el índice. Decidir si crear CONTEXT_INDEX.md separado | P3 |
+| R14 | **openspec no implementado**: Modo de persistencia SDD referenciado pero sin directorios | 🟢 **BAJO** | Alta (80%) | Sin fallback a filesystem para artefactos SDD | persistence-contract.md menciona modo openspec | Decidir si implementar openspec/ o usar solo Engram | P3 |
+| R15 | **Graphify sin uso**: Instalado pero sin graphify-out/ en ningún proyecto | 🟢 **BAJO** | Baja (20%) | Recurso instalado sin beneficio | Skill existe, sin directorio de salida | No requiere acción hasta que se necesite | P3 |
+| R16 | **Loops de instrucciones**: Manager prohibe llamar a gentle-orch, pero el runtime podría elegir a gentle-orch como primary | 🔴 **ALTO** | Media (60%) | Sistema en estado inconsistente, posible comportamiento impredecible | Manager prompt vs opencode.json mode config | ADR-001: resolver ambigüedad de primario | P1 |
+| R17 | **Context drift**: Diferentes fuentes de contexto pueden desviar el comportamiento del modelo | 🟡 **BAJO-MEDIO** | Media (50%) | Comportamiento inconsistente entre sesiones | Múltiples AGENTS.md + plugins + skills | Consolidar contexto en una fuente de verdad por capa | P2 |
+| R18 | **Delegación async fuera de undo**: background-agents.ts escribe a disco sin posibilidad de revertir | 🟡 **BAJO-MEDIO** | Alta (80%) | Cambios no deshacibles si la delegación es destructiva | background-agents.ts:609-612, 843-876, 1302-1303 | Documentar tradeoff. Usar con cuidado en operaciones destructivas | P3 |
+
+## 2. Priorización de riesgos
+
+### Críticos (P0/P1 — acción inmediata)
+| # | Riesgo | Mitigación | Fase |
+|---|--------|-----------|------|
+| **R11** | **Secretos expuestos** | **Mover a env vars, rotar tokens** | **🔴 B-Security (INMEDIATA)** |
+| R01 | Doble orquestador primario | ADR-001: Unificar primary | D |
+| R02 | Memoria Engram no funcional | ADR-004: Reparar pipeline | E |
+| R03 | Contexto fijo excesivo | ADR-006: Token budget | F |
+| R04 | Duplicación instrucciones memoria | Desduplicar | E+F |
+| R06 | MCP surface grande | ADR-007: MCP bajo demanda | G |
+| R09 | Falta de observabilidad | Fase B1: logging mínimo | B1 |
+| R16 | Loops de instrucciones | ADR-001: resolver primary | D |
+
+### Medios (P2 — planificar próximas)
+| # | Riesgo | Mitigación |
+|---|--------|-----------|
+| R05 | Guardado de ruido en memoria | Filtro de guardado |
+| R07 | Subagentes que no existen | Decidir implementar o eliminar |
+| R08 | Manager sin límite inline | Fortalecer reglas |
+| R10 | Falta de tests de flujo | Fase C: test plan |
+| R17 | Context drift | Consolidar fuentes |
+
+### Bajos (P3 — monitorear)
+| # | Riesgo | Mitigación |
+|---|--------|-----------|
+| R12 | Inventory desactualizado | Regenerar periódicamente |
+| R13 | Context index inexistente | Decidir sobre CONTEXT_INDEX.md |
+| R14 | openspec no implementado | Decidir modo de persistencia |
+| R15 | Graphify sin uso | No requiere acción |
+| R18 | Delegación async fuera de undo | Documentar tradeoff |
+
+## 3. Distribución de riesgos
+
+```mermaid
+pie title Distribución por severidad
+    "CRÍTICO" : 2
+    "ALTO" : 3
+    "MEDIO" : 6
+    "BAJO-MEDIO" : 4
+    "BAJO" : 3
+```
+
+```mermaid
+pie title Distribución por prioridad
+    "P1 - Inmediata" : 8
+    "P2 - Planificar" : 5
+    "P3 - Monitorear" : 5
+```
+
+## 4. Mapa de riesgos por componente
+
+| Componente | Riesgos asociados |
+|-----------|-------------------|
+| Manager | R01 (doble primary), R03 (contexto), R08 (inline sin límite), R16 (loops) |
+| gentle-orchestrator | R01 (doble primary), R16 (loops) |
+| Engram / memoria | R02 (no funcional), R04 (duplicación), R05 (ruido) |
+| MCP servers | R06 (surface grande), R11 (secretos expuestos) |
+| Subagentes SDD | R07 (faltantes), R14 (openspec no impl) |
+| Config general | R03 (contexto), R09 (observabilidad), R10 (tests), R12 (inventory) |
+| Documentación | R13 (context index), R17 (context drift) |
+| Plugins | R18 (delegación fuera de undo) |

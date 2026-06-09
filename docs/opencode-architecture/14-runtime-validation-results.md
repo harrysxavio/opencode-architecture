@@ -1,0 +1,106 @@
+# 14 — Runtime Validation Results
+
+> Documento creado en Fase B0. Almacena resultados de validaciones read-only ejecutadas para confirmar o refutar supuestos de la arquitectura OpenCode.
+
+## Estado general
+
+**Parcial** — 4 de 7 validaciones ejecutadas. Algunas requieren comandos adicionales o acceso a runtime del modelo.
+
+## Objetivo
+
+Validar con evidencia runtime los principales supuestos de la arquitectura OpenCode, sin modificar archivos funcionales.
+
+---
+
+## Validaciones ejecutadas
+
+| ID | Validación | Estado | Método | Resultado | Evidencia | Impacto |
+|----|-----------|--------|--------|-----------|-----------|---------|
+| P1 | Agente primary por defecto | NO VALIDADO | Revisión de logs (logs_2.sqlite 14,947 entradas), session_index.jsonl (57 entradas), rollout files | No se encontró evidencia en logs de cuál agente responde por defecto. Ambos quedan `mode: "primary"` en opencode.json. Los logs tienen target `codex_core::session::handlers` pero no registran selección de agente. | logs_2.sqlite, session_index.jsonl, rollout files | 🔴 ALTO: no se puede confirmar cuál agente responde sin Test 1 o testeo directo |
+| P2 | Engram DB — observaciones | VALIDADO NO FUNCIONAL | sqlite3 directo sobre memories_1.sqlite (40KB) | DB NO tiene tablas `observations` ni `prompts`. Solo tablas: `_sqlx_migrations`, `stage1_outputs` (0 rows), `jobs`. Schema es de pipeline interno, no de memoria semántica. Tamaño 40KB (no 4KB como se reportó). | memories_1.sqlite `.tables` y `.schema` | 🔴 ALTO: Engram MCP no está escribiendo observaciones. La DB es para procesamiento interno, no para memoria agente. |
+| P3 | Session summaries | NO VALIDADO | grep en session_index.jsonl + memories/ | session_index.jsonl tiene 57 entradas pero NINGUNA contiene "summary" o "session_summary". memories/memory_summary.md contiene solo placeholder ("No durable memory yet"). rollout_summaries/ vacío. | session_index.jsonl, memories/memory_summary.md | 🟡 MEDIO: protocolo mem_session_summary definido pero sin evidencia de ejecución real |
+| P4 | Config merge (opencode.json + .jsonc) | NO VALIDADO | Revisión de archivos + logs | Ambos archivos existen. opencode.json (63KB) tiene agents, MCP. opencode.jsonc (621 bytes) tiene engram (path diferente) y playwright. No hay evidencia runtime de si se fusionan o sobreescriben. | opencode.json, opencode.jsonc | 🟡 MEDIO: no se puede confirmar merge behavior sin test específico |
+| P5 | MCP duplicados en runtime | PARCIAL — 8 procesos engram | procesos + configs | Engram en 3 configs (opencode.json, .jsonc, config.toml). Playwright en 2 (.jsonc, .toml). Context7 en 2 (.json, .toml). **8 procesos engram.exe activos simultáneamente** confirman múltiples instancias. | `Get-Process -Name "engram"`, archivos de config | 🟡 MEDIO: duplicación confirmada en config, 8 instancias runtime consumiendo recursos |
+| P6 | frontend-specialist activo | VALIDADO — duplicado confirmado | file listing | agent/frontend-specialist.md (22,019 bytes) y agents/frontend-specialist.md (14,899 bytes) — ambos existen con diferente contenido. | agent/ y agents/ file listing | 🟡 MEDIO: duplicado con contenido diferente, no se sabe cuál gana |
+| P7 | Secretos expuestos | VALIDADO — 🔴 confirmado | grep redactado en config.toml | Línea 112: bearer_token_env_var con valor de GitHub PAT (redactado). Línea 126: URL con Browserbase API key (redactado). Ambos en texto plano en config.toml. | config.toml líneas 112, 126 | 🔴 ALTO: riesgo inmediato de exposición de credenciales |
+
+---
+
+## Validaciones pendientes
+
+| ID | Validación | Por qué importa | Comando sugerido | Riesgo | Prioridad |
+|----|-----------|-----------------|-------------------|--------|-----------|
+| P1 | Agente primary real | Determina qué flujo se ejecuta por defecto | Enviar "Hola" (Test 1) o revisar UI de OpenCode | 🔴 Alto | P1 |
+| P4 | Merge de configs | Determina qué MCP/skills están activos realmente | Consultar docs de OpenCode o probar con MCP exclusivo en .jsonc | 🟡 Medio | P2 |
+| P3 | Session summaries | Determina si memoria cross-session funciona | Ejecutar mem_session_summary y verificar DB | 🟡 Medio | P2 |
+| — | Medición real de tokens baseline | Determina overhead real vs estimado | Test 8: "Dime 1 frase" | 🟡 Medio | P1 |
+
+---
+
+## Datos complementarios
+
+### Hallazgos adicionales fuera de las validaciones planificadas
+
+| Hallazgo | Detalle | Fuente |
+|----------|---------|--------|
+| **Sesiones reales: 27, no 55** | La documentación previa reportaba 55 sesiones. El conteo real es 27 directorios de sesión. | `Get-ChildItem sessions/ -Recurse -Directory -Depth 3` |
+| **engram-instructions.md: 70 líneas** | El archivo referenciado en `config.toml` como `model_instructions_file` contiene el protocolo Engram. | config.toml línea 4, engram-instructions.md |
+| **logs_2.sqlite: 14,947 entradas** | DB de logs con schema completo (ts, level, target, module_path, file, thread_id). Contiene trazas de conexión MCP, skills, plugins. Niveles: TRACE (6,744), DEBUG (4,069), INFO (3,992), WARN (142). | logs_2.sqlite `SELECT COUNT(*)`, PRAGMA table_info |
+| **state_5.sqlite: 69 threads** | DB de estado con tablas threads (69), agent_jobs, thread_dynamic_tools, thread_spawn_edges. Sin tablas de observaciones. | state_5.sqlite `.tables`, `SELECT COUNT(*) FROM threads` |
+| **goals_1.sqlite: vacía** | Tabla thread_goals con 0 registros. | goals_1.sqlite |
+| **memories/ directory** | Contiene memory_summary.md (placeholder), MEMORY.md (placeholder), raw_memories.md (37 bytes vacío), rollout_summaries/ (vacío), extensions/, .git. Sin memoria durable. | Get-ChildItem memories/ |
+| **8 procesos engram.exe** | Múltiples instancias de Engram MCP ejecutándose, con PIDs: 17124 (desde 22/05), 48308, 22004, 52620, 9792, 39920, 8552, 8972 (hoy). Dos parent PIDs diferentes (5264 y 49768, 6480). | Get-Process |
+| **CONTEXT_INDEX.md existe en otros proyectos** | Existe en PROJECT_TEMPLATE y SAMPLE_PROJECT de arquitectura-ia, y en backup retail. NO existe en el workspace actual de ARQUITECTURA OPENCODE. | glob |
+| **MCP servers en config.toml: 7** | playwright, github, fastmcp-toolkit, context7, browserbase, node_repl, engram. | config.toml grep `[mcp_servers.` |
+
+---
+
+## Conclusiones
+
+1. **Engram (memoria semántica) NO está operativo.** La DB tiene schema de pipeline interno, no de observaciones. No hay tabla `observations` ni `prompts`. La memoria cross-session no funciona como se esperaba.
+
+2. **Secretos expuestos confirmados.** GitHub PAT y Browserbase API key en texto plano. Deben rotarse y externalizarse antes de cualquier otro cambio.
+
+3. **No se pudo validar el agente primary.** Los logs no registran qué agente responde por defecto. Se necesita Test 1 (request simple) para confirmar.
+
+4. **Session summaries no tienen evidencia.** El protocolo está definido pero no hay rastro de ejecución en session_index.jsonl ni en memories/.
+
+5. **Múltiples instancias de Engram confirman duplicación.** 8 procesos engram.exe corriendo indican que la triple configuración (opencode.json, .jsonc, config.toml) resulta en instancias múltiples.
+
+6. **La estimación de 29k tokens era incorrecta.** El rango realista es ~18,500–22,000 porque ambos AGENTS.md NO se cargan simultáneamente (solo el agente activo). Pendiente de medición con Test 8.
+
+7. **27 sesiones, no 55.** El dato de 55 sesiones en la documentación original es incorrecto.
+
+---
+
+## Recomendación Go / No-Go
+
+### Para pasar a Fase B-Security (rotación de secretos): **GO ✅**
+
+**Condiciones:**
+- Secretos confirmados en texto plano → acción inmediata requerida.
+- No depende de más validaciones.
+- Riesgo: 🔴 ALTO. No esperar a Test 8 ni a resolución de primary.
+
+### Para pasar a Fase B1 (observabilidad): **GO condicional ⚠️**
+
+**Condiciones:**
+- Ejecutar Fase B-Security primero.
+- Ejecutar Test 8 (baseline de tokens) para tener métrica de referencia.
+- Confirmar agente primary con Test 1.
+
+### Para pasar a Fase C (tests de flujo): **NO-GO hasta completar B-Security y B1**
+
+**Razón:**
+- Sin observabilidad, los tests no producen métricas comparables.
+- Sin resolver secretos, los tests pueden exponer credenciales en logs.
+- Sin baseline de tokens, no se puede medir impacto de optimizaciones.
+
+### Para modificar configuración (opencode.json, AGENTS.md, config.toml): **NO-GO 🔴**
+
+**Razón:**
+- No se ha validado el agente primary real.
+- No se ha medido el baseline de tokens.
+- No se ha resuelto la duplicación de MCP.
+- No se han rotado los secretos.
+- Cualquier cambio de configuración sin estas validaciones puede romper el flujo existente sin capacidad de detectarlo.

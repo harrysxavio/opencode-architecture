@@ -1,0 +1,779 @@
+AUDITORIA 1:
+
+Buenísimo, tengo TODO el mapa. Dejame armarte la auditoría completa.
+
+🕵️ Auditoría de Arquitectura OpenCode — Fotografía Actual
+1. Estructura Relevante del Proyecto
+El ecosistema se divide en 4 zonas de configuración más 1 zona de proyecto documental:
+
+C:\Users\harry\.config\opencode\          ← Config principal de OpenCode (agentes, skills, MCP)
+C:\Users\harry\.codex\                    ← Core engine (memoria, sesiones, plugins, config.toml)
+C:\Users\harry\OneDrive\Documentos\GitHub\Tools\.agents\skills\  ← Skills adicionales (bigquery-expert, etc.)
+C:\Users\harry\.agents\skills\            ← Skills globales (graphify)
+C:\Users\harry\OneDrive\Documentos\GitHub\ARQUITECTURA OPENCODE\ ← Proyecto documental (skill-registry.md)
+2. Tabla de Archivos Clave
+Archivo	Rol	Líneas críticas
+~/.config/opencode/opencode.json	Config principal: agentes, permisos, MCP, comandos	235
+~/.config/opencode/opencode.jsonc	Config secundaria: MCP extra, paths de skills	30
+~/.config/opencode/AGENTS.md	Prompt del Manager (~7000 chars) + Engram protocol + Design skills	259
+~/.codex/AGENTS.md	Prompt del orchestrator SDD + Engram protocol (~12000 chars)	449
+~/.codex/config.toml	Modelo (gpt-5.5), plugins, MCP servers, engram settings	151
+~/.codex/engram-instructions.md	Protocolo Engram inline	96
+~/.codex/skills/_shared/sdd-phase-common.md	Contrato común SDD: carga skills, retrieval, persistencia, return envelope	109
+~/.codex/skills/engram-agent/SKILL.md	Skill Engram para subagentes	158
+~/.codex/skills/sdd-{explore,propose,spec,design,tasks,apply,verify,archive}/SKILL.md	8 skills SDD phased	140-246 c/u
+~/.config/opencode/agent/frontend-specialist.md	Subagente frontend (global)	872
+~/.config/opencode/agent/release-security-gate.md	Subagente deploy (usa gpt-5.5)	61
+~/.config/opencode/agents/bigquery-data-quality.md	Subagente BigQuery profiling	261
+~/.config/opencode/agents/sql-cleaning-agent.md	Orquestador limpieza SQL	143
+~/.config/opencode/agents/data-memory-curator.md	Sincronizador capas de memoria datos	137
+~/.config/opencode/agents/frontend-specialist.md	Duplicado del agent/ (misma definición)	544
+~/.codex/config.toml	Plugins activos (15+), MCP servers (9 en total)	151
+3. Flujo Real desde Input de Usuario hasta Respuesta Final
+flowchart TB
+    USR["🧑 Usuario escribe prompt"]
+
+    subgraph "LAYER 0: Codex Engine (Host)"
+        CENG["Codex Engine inicia sesión<br/>Lee config.toml → modelo gpt-5.5<br/>Carga AGENTS.md del proyecto<br/>Inyecta sistema de skills"]
+        SESSION["Session tracking (session_index.jsonl)"]
+    end
+
+    subgraph "LAYER 1: Context Injection (System Prompt)"
+        SYS["System prompt contiene:<br/>1. AGENTS.md del Manager<br/>2. Engram protocol<br/>3. Design skills protocol<br/>4. Available skills list<br/>5. Manager Orchestration Protocol<br/>6. Tools definition<br/>= ~15,000-20,000 tokens solo de sistema"]
+    end
+
+    subgraph "LAYER 2: Agent Resolution"
+        AR["OpenCode resuelve:<br/>- ¿Hay @mention? → activa ese agente<br/>- ¿Hay command /sdd-*? → activa gentle-orchestrator<br/>- ¿Default? → Manager (primary)"]
+    end
+
+    subgraph "LAYER 2a: GATE — gentle-orchestrator"
+        GO["**gentle-orchestrator**<br/>Coordina, nunca ejecuta inline<br/>Lee su prompt de opencode.json<br/>Delega a sdd-* subagentes<br/>Usa task/delegate async"]
+        GO_SKILL["Carga skill registry<br/>Resuelve skill paths<br/>Inyecta a subagentes"]
+        GO_SUB["Subagentes SDD:<br/>sdd-explore → sdd-propose →<br/>sdd-spec → sdd-design →<br/>sdd-tasks → sdd-apply →<br/>sdd-verify → sdd-archive"]
+    end
+
+    subgraph "LAYER 2b: GATE — Manager (custom hybrid)"
+        MGR["**Manager**<br/>~7000 chars de prompt propio<br/>NO puede llamar gentle-orchestrator<br/>Ejecuta flujo híbrido personalizado<br/>Puede usar sdd-* subagentes<br/>Inline cuando no hay subagente"]
+        MGR_SUB["Subagentes disponibles:<br/>frontend-specialist<br/>release-security-gate<br/>bigquery-data-quality<br/>sql-cleaning-agent<br/>data-memory-curator"]
+    end
+
+    subgraph "LAYER 3: SDD Phase Execution"
+        SDD_EX["sdd-explore: Lee código, compara enfoques<br/>sdd-propose: Define scope, approach, riesgos<br/>sdd-spec: Escribe Given/When/Then<br/>sdd-design: Arquitectura + decisiones<br/>sdd-tasks: Checklist con fases<br/>sdd-apply: Implementa código<br/>sdd-verify: Tests + compliance matrix<br/>sdd-archive: Mergea specs + archiva"]
+    end
+
+    subgraph "LAYER 4: Tools & MCP"
+        TOOLS["Tools base:<br/>read, write, edit, bash,<br/>glob, grep, task, delegate,<br/>todowrite, skill"]
+        MCP_SERVERS["MCP Servers:<br/>engram (memoria persistente)<br/>notebooklm-mcp (Google NotebookLM)<br/>context7 (documentación librerías)<br/>supabase (base de datos)<br/>playwright (navegador)<br/>github (GitHub API)<br/>browserbase (navegador cloud)<br/>fastmcp-toolkit (custom)<br/>node_repl (Node.js REPL)"]
+    end
+
+    subgraph "LAYER 5: Memory Systems"
+        ENGRAM["Engram (MCP local)<br/>memories_1.sqlite (4KB — vacía)<br/>32 archivos en memories/<br/>mem_save / mem_search / mem_session_summary<br/>Topic keys: sdd/{change}/{type}, architecture/*"]
+        SESSION_DB["State DB (state_5.sqlite)<br/>1.6MB — sesiones, plugins,<br/>estado de sesiones"]
+        SESSIONS["Sessions: 55 indexadas,<br/>67 archivos de sesión"]
+    end
+
+    subgraph "LAYER 6: Quality Gates"
+        REVIEWS["Superpowers review<br/>Judgment Day (dual blind)<br/>web-design-guidelines audit<br/>release-security-gate<br/>design-md lint"]
+    end
+
+    USR --> CENG
+    CENG --> SESSION
+    CENG --> SYS
+    SYS --> AR
+    AR -->|"@gentle-orchestrator o /sdd-*"| GO
+    AR -->|"default o @manager"| MGR
+    GO --> GO_SKILL
+    GO_SKILL --> GO_SUB
+    MGR --> MGR_SUB
+    GO_SUB --> SDD_EX
+    MGR_SUB -->|opcional| SDD_EX
+    SDD_EX --> TOOLS
+    SDD_EX --> MCP_SERVERS
+    SDD_EX --> ENGRAM
+    MCP_SERVERS --> ENGRAM
+    TOOLS --> MCP_SERVERS
+    SDD_EX --> REVIEWS
+    SESSION_DB -.->|"persiste estado"| SESSION
+4. Dónde se Consulta Memoria
+Punto	Mecanismo	Qué se busca	Frecuencia
+Inicio de sesión	mem_context()	Sesiones recientes	Cada sesión
+Primer mensaje del usuario	mem_search(proactive)	Proyecto/feature previa	Proactivo
+Manager: recordar algo	mem_context → mem_search → mem_get_observation	Lo que pida usuario	Bajo demanda
+SDD Explore/Propose/Spec	mem_search(query: "sdd-init/{project}")	Contexto de proyecto	Cada SDD cycle
+SDD Apply	mem_search(query: "sdd/{change}/apply-progress")	Progreso previo	Cada batch
+SDD Verify	mem_search(query: "sdd/{change}/spec")	Specs y tasks	Cada verify
+Gentle-orchestrator: skill registry	mem_search(query: "skill-registry")	Registry de skills	Cada delegación
+Subagentes SDD	mem_search + mem_get_observation	Artefactos previos de la fase	Cada fase
+5. Dónde se Escribe Memoria
+Punto	Mecanismo	Qué se guarda	Frecuencia
+Manager: decisión/bug/patrón	mem_save()	Decisiones, bugs, descubrimientos	Proactivo post-evento
+Manager: fin de sesión	mem_session_summary()	Resumen completo de sesión	Obligatorio al cerrar
+SDD Explore	mem_save(topic_key: "sdd/{change}/explore")	Análisis de exploración	Cada explore
+SDD Propose	mem_save(topic_key: "sdd/{change}/proposal")	Propuesta de cambio	Cada propose
+SDD Spec	mem_save(topic_key: "sdd/{change}/spec")	Especificaciones GWT	Cada spec
+SDD Design	mem_save(topic_key: "sdd/{change}/design")	Diseño técnico	Cada design
+SDD Tasks	mem_save(topic_key: "sdd/{change}/tasks")	Checklist de tareas	Cada tasks
+SDD Apply	mem_save(topic_key: "sdd/{change}/apply-progress")	Progreso de impl.	Cada batch
+SDD Verify	mem_save(topic_key: "sdd/{change}/verify-report")	Reporte de verificación	Cada verify
+SDD Archive	mem_save(topic_key: "sdd/{change}/archive-report")	Cierre de cambio	Cada archive
+Problema detectado: la base memories_1.sqlite tiene solo 4KB y la tabla observations no existe aún. Esto indica que Engram está configurado pero nunca se ha usado efectivamente o fue comprimido/regenerado. Contrasta con las 32 entradas en el directorio memories/ (probablemente archivos de sesión, no observaciones persistentes).
+
+6. Qué Contexto se Inyecta al Modelo (por capa)
+Capa	Contenido	Tokens estimados
+System prompt base	Instrucciones de Codex Engine + herramientas	~3,000
+AGENTS.md (.codex)	Rules, Personality, SDD orchestrator, Engram protocol	~12,000
+AGENTS.md (.config/opencode)	Manager protocol + Engram + Design skills	~7,000
+Available skills	Lista de skills con triggers (50+ skills)	~3,000
+Engram protocol inline	Instrucciones de memoria	~2,500
+Design skills protocol	Frontend Design Gate, skill-creator flow	~1,500
+Total contexto fijo	—	~29,000 tokens
+Esto es por sesión — antes de que el usuario escriba una sola palabra. A gpt-5.5 esto le duele en latencia y costo.
+
+7. Qué Herramientas se Activan por Agente
+Agente	Herramientas permitidas	Restricciones clave
+Manager	read, write, edit, bash, glob, grep, skill, task, todowrite	bash: ask, edit: ask
+gentle-orchestrator	bash, delegate, delegation_list, delegation_read, edit, read, write	No tiene skill, glob, grep
+sdd-apply/verify/etc	bash, edit, read, write	No tiene task/delegate
+frontend-specialist	read, grep, glob, list, lsp, skill, edit, bash	edit: ask, bash: solo npm/pnpm/yarn permitidos
+release-security-gate	read, glob, grep, list, skill, todowrite, edit, webfetch, bash	edit: ask, usa gpt-5.5
+bigquery-data-quality	read, grep, glob, list, skill, bash	edit: deny, bash: ask
+sql-cleaning-agent	read, grep, glob, list, skill, bash	edit: deny, bash: ask
+data-memory-curator	read, grep, glob, list, skill, bash	edit: deny, bash: ask
+8. Decisiones del Manager vs Gentle-Orchestrator
+Decisión	Manager	Gentle-Orchestrator
+Requirement intake	✅ Propietario (Superpowers)	❌ No lo hace
+Design approval	✅ Requerido	❌ Salta directo a SDD
+Graphify context	✅ Opcional (Phase 2.5)	❌ No lo usa
+Clasificación tarea	✅ Tiny/Small/Medium/Large	❌ No clasifica
+TDD/Review/Debugging	✅ Fases propias	❌ Solo SDD pipeline
+Selección subagente	Decide qué sdd-* llamar	Decide qué sdd-* llamar
+GPT-5.5 review	✅ Quality gate final	❌ No lo tiene
+Skill resolution	✅ Vía tool skill()	✅ Vía skill registry
+Engram saves	✅ Proactivo + session_summary	✅ Solo por subagentes
+Frontend Design Gate	✅ Opcional (Phase 2.5b)	❌ No lo tiene
+9. Cómo Derivan Tareas
+Manager → Subagentes:
+Manager evalúa: ¿Tengo subagente para esta fase?
+  ├── Sí → task(subagent_type: sdd-explore | sdd-propose | ... )
+  │        El subagente ejecuta, NO delega más
+  │        Retorna envelope con status/summary/next
+  │
+  └── No → Manager ejecuta INLINE siguiendo las rules del protocolo
+
+Manager evalúa: ¿Tarea frontend?
+  ├── Sí → Puede delegar a frontend-specialist
+  └── No → Sigue SDD normal
+
+Manager evalúa: ¿Tarea BigQuery?
+  ├── Sí → Delegar a bigquery-data-quality o sql-cleaning-agent
+  └── No → Sigue normal
+Gentle-Orchestrator → Subagentes:
+Gentle-Orchestrator:
+  └── task(subagent_type: sdd-explore | sdd-propose | ... )
+       El subagente ejecuta, NO delega más
+       Retorna envelope con status/summary/next
+       Orchestrator sintetiza y decide si continuar
+
+  NO ejecuta inline NUNCA — salvo reads de 1-3 archivos
+Diferencia clave: Manager puede ejecutar inline cuando falta subagente. Gentle-orchestrator NUNCA ejecuta inline (su prompt se lo prohíbe).
+
+10. Evidencia por Archivo, Función y Línea
+Archivo	Línea(s)	Evidencia
+.config/opencode/opencode.json:4-33	agent.gentle-orchestrator → mode: "primary", permisos solo task sdd-*, prompt orquestador	Es PRIMARY junto con Manager
+.config/opencode/opencode.json:34-51	agent.manager → mode: "primary", permisos: read/write/edit ask, task allow, skill allow	Manager también PRIMARY
+.config/opencode/opencode.json:52-171	8 sdd-* agents con mode: "subagent", hidden: true, sin task/delegate	Ejecutores puros
+.config/opencode/AGENTS.md:1-70	Persona + Rules + Engram protocol	Manager prompt raíz
+.config/opencode/AGENTS.md:72-166	Engram protocol completo (SAVE/SEARCH/SESSION CLOSE)	Memoria obligatoria
+.config/opencode/AGENTS.md:168-259	Design Skills Integration	Frontend Design Gate
+.codex/AGENTS.md:70-353	SDD orchestrator + Agent Teams Lite	Gentle orchestrator rules
+.codex/AGENTS.md:355-449	Engram protocol (duplicado)	Engram desde .codex
+.codex/config.toml:1-2	model = "gpt-5.5", model_reasoning_effort = "medium"	Modelo y razonamiento
+.codex/config.toml:90-93	memories = true, generate_memories = true, use_memories = true	Memorias activadas
+.codex/config.toml:4	model_instructions_file = "engram-instructions.md"	Instrucciones inline de memoria
+.codex/skills/_shared/sdd-phase-common.md:5	"Executor boundary: every SDD phase agent is an EXECUTOR"	No pueden delegar
+.codex/skills/_shared/sdd-phase-common.md:20-35	Retrieval protocol: mem_search → mem_get_observation	Dos pasos obligatorios
+.codex/skills/_shared/sdd-phase-common.md:39-68	Persistence contract: mem_save con capture_prompt: false	SDD artifacts no capturan prompt
+.codex/skills/engram-agent/SKILL.md:138-143	Retrieval protocol (2 steps)	Confirmado
+.codex/skills/sdd-apply/SKILL.md:19-21	Executor Override: "Do NOT delegate. Do NOT call the Skill tool."	Ejecutor puro
+memories_1.sqlite	4KB, sin tabla observations	Engram vacío
+11. Partes NO Validadas
+Aspecto	Por qué no se pudo validar
+Engram real en uso	memories_1.sqlite tiene 4KB — sin observaciones. No hay evidencia de mem_save real funcionando. No pude confirmar que el protocolo Engram se ejecute efectivamente.
+Context Index	No existe CONTEXT_INDEX.md ni en .codex/ ni en .config/opencode/. El user lo menciona pero no está implementado.
+Superpowers brainstorming skill real	superpowers es un plugin de OpenAI, no un skill con SKILL.md. No encontré superpowers/brainstorming como archivo. El Manager lo referencia pero no pude verificar que exista el skill.
+GPT-5.5 review/debug subagents	No existen @review-gpt55 ni @debug-gpt55 como agentes configurados. El Manager dice delegar a ellos pero no están definidos.
+Ciclo SDD completo ejecutado	No hay evidencia de artefactos SDD en Engram (4KB) ni en filesystem openspec/ (no existe en ningún proyecto visible). El pipeline está definido pero parece no haberse ejecutado aún.
+Graphify en uso	No hay graphify-out/ en ningún proyecto visible. La skill está instalada pero no hay evidencia de uso.
+Dual orchestrator conflict	Ambos son mode: "primary" en opencode.json. No pude probar cuál gana cuando ambos están definidos ni cómo Codex resuelve la ambigüedad.
+Engram save en subagentes	El protocolo dice que subagentes deben hacer mem_save antes de retornar, pero sin observaciones en la DB no hay evidencia de que ocurra.
+Session close protocol	55 sesiones indexadas pero sin mem_session_summary confirmadas. No pude verificar que se ejecute.
+Matriz de Memoria/Contexto
+Sistema	Tipo	Backend	Tamaño	Estado	Propósito
+Engram	MCP local	SQLite (memories_1.sqlite)	4KB	✅ Configurado, ❌ Vacío	Memoria persistente cross-session
+State DB	SQLite	state_5.sqlite	1.6MB	✅ Activo	Estado de sesiones, plugins, config
+Session Index	JSONL	session_index.jsonl	7KB	✅ Activo	55 sesiones indexadas
+Session files	Archivos	sessions/	—	✅ Activo	67 archivos de sesión
+Memory files	Archivos	memories/	—	✅ Activo	32 archivos
+Context Index	—	No existe	—	❌ Ausente	Mencionado en frontend-specialist pero inexistente
+Graphify	Skill	.agents/skills/graphify/	—	✅ Instalado, ❌ Sin uso	Knowledge graph de proyectos
+OpenSpec	Directorio	openspec/	—	❌ No implementado	Artefactos SDD en filesystem
+Riesgos Preliminares
+#	Riesgo	Severidad	Explicación
+1	Duelo de orquestadores	🔴 ALTO	gentle-orchestrator y manager son ambos mode: "primary". Si Codex elige al equivocado, el Manager queda inactivo. Si el Manager llama a gentle-orchestrator (contra su propia regla), hay loop.
+2	Engram no está funcionando	🔴 ALTO	4KB con tabla vacía. Todo el protocolo de memoria (save, search, session_summary) está definido pero no produce persistencia real.
+3	Contexto fijo masivo	🟠 MEDIO	~29,000 tokens de sistema antes del primer user message. Cada sesión paga este costo. Con gpt-5.5, es latencia y $$$.
+4	AGENTS.md duplicado	🟠 MEDIO	El protocolo Engram aparece en .codex/AGENTS.md Y .config/opencode/AGENTS.md. Si Codex los mergea ambos, hay duplicación de instrucciones.
+5	Subagentes GPT-5.5 faltantes	🟠 MEDIO	@review-gpt55 y @debug-gpt55 no existen. El flujo del Manager los referencia pero no hay implementación.
+6	Sin CONTEXT_INDEX.md	🟡 BAJO	El frontend-specialist lo busca pero no existe en ningún proyecto.
+7	Session Close Protocol no verificado	🟡 BAJO	55 sesiones sin evidencia de mem_session_summary. Posible pérdida de contexto cross-session.
+8	Superpowers sin skill físico	🟡 BAJO	El Manager instruye "load Superpowers brainstorming" pero el skill no existe como SKILL.md — solo como plugin de OpenAI.
+Preguntas Abiertas
+¿Cuál de los dos orquestadores (manager vs gentle-orchestrator) gana cuando ambos son mode: "primary"? ¿Cómo resuelve Codex Desktop la ambigüedad?
+¿Engram se configuró correctamente? 4KB sugiere que el MCP engram mcp --tools=agent no está conectando o no se ha usado nunca.
+¿Hay proyectos reales donde se haya corrido SDD? No encontré openspec/ ni artefactos en Engram.
+¿El model_instructions_file = "engram-instructions.md" en config.toml reemplaza o complementa el AGENTS.md?
+¿El opencode.jsonc es activo además del opencode.json o es un backup? Ambos tienen MCP servers diferentes.
+¿Frontend-specialist está duplicado intencionalmente? Aparece en agent/ y agents/ con contenidos ligeramente diferentes.
+¿Hay budget/rate limit considerations para gpt-5.5 con 29k tokens de contexto fijo?
+Plan de Pruebas para Validar el Flujo
+Prueba 1: Resolución de agente primario
+Given: opencode.json con manager (primary) y gentle-orchestrator (primary)
+When: Usuario escribe un mensaje sin @mention
+Then: Verificar cuál agente responde
+Prueba 2: Engram save/load cycle
+Given: Sesión activa con Manager
+When: Manager llama mem_save(title: "test-audit", type: "discovery")
+Then: Verificar que memories_1.sqlite tenga la observación
+When: Manager cierra sesión con mem_session_summary
+Then: Verificar que el summary persista
+When: Nueva sesión, Manager llama mem_context()
+Then: Verificar que el summary aparezca
+Prueba 3: SDD pipeline completo (dry-run)
+Given: Manager activo
+When: Manager inicia SDD para un cambio mínimo
+Then: Verificar que cada fase sdd-{x} se ejecute y persista
+Then: Verificar artefactos en Engram (mem_search)
+Then: Verificar que subagentes no deleguen a su vez
+Prueba 4: Dual orchestrator isolation
+Given: Manager activo
+When: Manager intenta llamar gentle-orchestrator
+Then: Verificar que el prompt se lo prohíba (debería fallar)
+Given: gentle-orchestrator activo
+When: Intenta ejecutar inline código
+Then: Verificar que su prompt se lo prohíba
+Prueba 5: Contexto inyectado
+Given: Cualquier sesión
+Then: Extraer system prompt (si es posible) y medir tokens reales
+Then: Comparar contra estimación de ~29,000 tokens
+Then: Identificar secciones duplicadas (engram protocol en ambos AGENTS.md)
+Prueba 6: Gasto de tokens por operación
+Given: Manager ejecuta "hola" (mensaje simple)
+Then: Registrar tokens de contexto + respuesta
+Given: Manager ejecuta SDD completo para cambio simple
+Then: Registrar tokens totales del ciclo
+Then: Identificar fugas (skills cargados pero no relevantes)
+Resumen: Tenés una arquitectura extremadamente bien pensada pero con dos problemas estructurales graves: (1) Engram está configurado pero vacío — toda la memoria cross-session no funciona, y (2) tenés dos orquestadores primarios compitiendo, lo que puede producir comportamientos impredecibles. El resto son problemas de maduración: skills y subagentes que el Manager referencia pero no existen aún.
+
+
+------------------------------------------------------------------------
+
+
+AUDITORIA 2:
+
+
+1. Resumen ejecutivo
+Tu OpenCode tiene dos agentes primarios de orquestación:
+
+manager: orquestador global principal actual.
+gentle-orchestrator: orquestador SDD original de Gentle AI.
+La arquitectura actual separa responsabilidades así:
+
+Usuario
+  → OpenCode runtime
+    → agente primario elegido: manager o gentle-orchestrator
+      → skills cargadas por trigger
+      → tools MCP / nativas
+      → subagentes SDD o especializados
+      → Engram para memoria persistente
+      → respuesta final
+Punto clave: el Manager está explícitamente configurado para NO invocar ni depender de gentle-orchestrator. Ambos pueden usar los mismos subagentes SDD, pero no deben orquestarse entre sí.
+
+2. Tabla de archivos relevantes
+Archivo	Rol	Evidencia
+C:\Users\harry\.config\opencode\opencode.json	Config global principal: agentes, MCP, permisos, comandos	gentle-orchestrator líneas 4-32; manager líneas 34-50; subagentes SDD líneas 52-181; MCP líneas 193-223; permisos líneas 224-243
+C:\Users\harry\.config\opencode\opencode.jsonc	Config adicional: MCP y paths de skills	Engram/playwright MCP líneas 3-21; skills paths líneas 23-29
+C:\Users\harry\.config\opencode\AGENTS.md	Instrucciones globales inyectadas al agente	persona líneas 1-70; Engram protocol líneas 72-166; design integration líneas 168-259
+plugins\engram.ts	Plugin OpenCode → Engram	flujo OpenCode events → HTTP → SQLite líneas 1-9; prompt capture líneas 343-381; system injection líneas 416-432; compaction líneas 434-466
+plugins\background-agents.ts	Delegación async/persistente	delegate tool líneas 1164-1218; crea sesiones líneas 614-620; desactiva nested delegate/task líneas 675-691; persiste output líneas 843-876
+skills\_shared\persistence-contract.md	Contrato SDD de memoria y artifacts	modos líneas 3-16; Engram/OpenSpec/hybrid tabla líneas 35-40; reglas subagentes líneas 76-89
+skills\_shared\sdd-phase-common.md	Protocolo común SDD	executor boundary líneas 3-6; retrieval Engram líneas 19-35; persistence líneas 37-67; return envelope líneas 69-82
+skills\sdd-*.md	Skills de fases SDD	todos tienen gate “ORCHESTRATOR STOP” y executor override, ej. sdd-apply líneas 13-21
+inventory\inventory.md	Inventario cacheado de agentes/MCP/skills/plugins	Manager líneas 838-848; gentle-orchestrator líneas 868-878; MCP líneas 1511-1584; plugins líneas 1587-1623
+.atl\skill-registry.md	Context index / skill registry del proyecto	fuentes líneas 7-15; contrato líneas 16-20; skills líneas 22-50
+inventory\generate-static-inventory.mjs	Script generador del inventario	config paths líneas 89-96; escaneo agentes líneas 815-840; escaneo skills líneas 856-895; MCP líneas 899-913
+3. Estructura relevante actual
+C:\Users\harry\.config\opencode
+├─ opencode.json
+├─ opencode.jsonc
+├─ AGENTS.md
+├─ plugins
+│  ├─ engram.ts
+│  ├─ background-agents.ts
+│  └─ model-variants.ts
+├─ skills
+│  ├─ _shared
+│  │  ├─ persistence-contract.md
+│  │  ├─ sdd-phase-common.md
+│  │  └─ engram-convention.md
+│  ├─ sdd-init
+│  ├─ sdd-explore
+│  ├─ sdd-propose
+│  ├─ sdd-spec
+│  ├─ sdd-design
+│  ├─ sdd-tasks
+│  ├─ sdd-apply
+│  ├─ sdd-verify
+│  └─ sdd-archive
+└─ inventory
+   ├─ inventory.md
+   ├─ inventory.json
+   ├─ metadata.json
+   └─ generate-static-inventory.mjs
+
+Proyecto actual:
+C:\Users\harry\OneDrive\Documentos\GitHub\ARQUITECTURA OPENCODE
+└─ .atl
+   ├─ skill-registry.md
+   └─ .skill-registry.cache.json
+No encontré graphify-out/ en el proyecto ni en .config\opencode.
+
+4. Flujo real input → respuesta final
+flowchart TD
+  U[Usuario escribe prompt] --> OC[OpenCode runtime]
+
+  OC --> CFG[Config global opencode.json/jsonc]
+  CFG --> A{Agente primario activo}
+
+  A -->|Manager| M[manager]
+  A -->|Gentle AI explícito| G[gentle-orchestrator]
+
+  M --> MI[Instrucciones Manager + AGENTS.md + Engram plugin + delegation rules]
+  G --> GI[Prompt Gentle-orchestrator + AGENTS.md + Engram plugin + delegation rules]
+
+  MI --> MSK[Skill loading por trigger]
+  GI --> GSK[Skill loading por trigger]
+
+  M --> MD{Decisión Manager}
+  MD -->|Tiny/Small| INLINE[Responder o inspeccionar inline]
+  MD -->|Medium/Large| SDDM[SDD controlado por Manager]
+  MD -->|Frontend| FDG[Frontend design gate]
+  MD -->|Contexto útil| GRAPH[Graphify opcional, requiere aprobación si build/update]
+
+  G --> GD{Decisión Gentle-orchestrator}
+  GD -->|Complejidad baja| GINLINE[Inline limitado]
+  GD -->|Complejidad SDD| SDDG[Delegar fases SDD]
+
+  SDDM --> SUB[Subagentes SDD: explore/propose/spec/design/tasks/apply/verify/archive]
+  SDDG --> SUB
+
+  SUB --> ART[Artifacts SDD]
+  ART -->|engram mode| MEMSAVE[mem_save / mem_update]
+  ART -->|openspec mode| FS[filesystem openspec]
+  ART -->|hybrid| BOTH[Engram + filesystem]
+
+  M --> TOOLS[Tools nativas + MCP]
+  G --> TOOLS
+  SUB --> TOOLS
+
+  TOOLS --> MCP[MCP: Engram, Context7, NotebookLM, Supabase, Playwright]
+  TOOLS --> BG[delegate/delegation_read/delegation_list]
+
+  BG --> DSESSION[Sesión aislada subagente]
+  DSESSION --> DFILE[Output persistido a disco]
+  DFILE --> DN[Notificación compacta al padre]
+
+  MEMSAVE --> RESP[Respuesta sintetizada]
+  FS --> RESP
+  DN --> RESP
+  INLINE --> RESP
+  GINLINE --> RESP
+
+  RESP --> U
+5. Dónde se consulta memoria
+Capa	Quién consulta	Cuándo	Evidencia
+Engram MCP directo	Manager / agente actual	Al inicio si hay referencia a trabajo previo o primera mención de proyecto/problema	AGENTS.md líneas 122-132; engram.ts MEMORY_INSTRUCTIONS líneas 95-107
+Engram SDD artifacts	Subagentes SDD	En fases con dependencias: proposal/spec/design/tasks/etc.	persistence-contract.md líneas 76-89 y 101-119
+Engram project context	SDD explore/init	sdd-init/{project}, sdd/*	sdd-explore/SKILL.md líneas 37-48
+Engram durante compaction	Plugin Engram	Antes/durante compactación	engram.ts líneas 442-453
+Skill registry	Subagentes SDD	Para resolver skills si no se inyectaron paths	sdd-phase-common.md líneas 7-17
+Delegation outputs	Manager/orquestador	Cuando llega notificación y usa delegation_read(id)	background-agents.ts líneas 1221-1234
+6. Dónde se escribe memoria
+Escritura	Quién	Cuándo	Evidencia
+Prompt del usuario	Plugin Engram	Hook chat.message, antes del modelo	engram.ts líneas 343-381
+Sesiones	Plugin Engram	session.created o ensureSession()	engram.ts líneas 301-327 y 240-253
+Observaciones manuales	Agente/Manager/subagente	mem_save luego de decisiones, fixes, discoveries	AGENTS.md líneas 78-106
+Artifacts SDD	Subagentes SDD	Al terminar cada fase	sdd-phase-common.md líneas 37-55
+Estado SDD	Orquestador	Transición de fases	persistence-contract.md líneas 54-65
+Apply progress	sdd-apply	Durante implementación	sdd-apply/SKILL.md líneas 39-42 y 79-89
+Verify report	sdd-verify	Al verificar	sdd-verify/SKILL.md líneas 27-36
+Session summary	Top-level agent	Antes de cerrar	AGENTS.md líneas 134-156
+Passive Task learnings	Plugin Engram	Después de tool Task	engram.ts líneas 399-413
+Delegation output	background-agents plugin	Al finalizar subagente async	background-agents.ts líneas 843-876
+7. Qué contexto se inyecta al modelo
+Contexto	Inyectado por	Cuándo	Impacto tokens
+Prompt del agente manager	opencode.json	Cuando se usa Manager	Alto: prompt largo de orquestación
+Prompt del agente gentle-orchestrator	opencode.json	Cuando se usa gentle-orchestrator	Medio/alto
+AGENTS.md	OpenCode instructions	Siempre según configuración	Alto: persona + Engram + frontend integration
+Engram memory protocol	plugins\engram.ts system transform	Cada request	Medio; además duplica parcialmente AGENTS.md
+Delegation rules	plugins\background-agents.ts system transform	Cada request	Medio
+Skill content	skill() o skill loading	Solo por trigger	Variable; puede ser alto
+Tool schemas MCP/nativas	OpenCode runtime	Según herramientas disponibles	Alto si hay muchos MCP/tools activos
+Delegation context	background-agents compaction hook	Solo compaction con delegaciones	Bajo/medio
+Engram previous context	Engram compaction hook	Solo compaction	Variable
+.atl/skill-registry.md	Subagentes SDD fallback	Si no reciben skills exactas	Medio
+inventory.md	Solo comando/inventario/manual	No automático para cada request	No permanente salvo lectura explícita
+8. Herramientas activadas / disponibles
+MCP configurados
+MCP	Estado visto	Evidencia
+Engram	Configurado/conectado	opencode.json líneas 199-205; inventory.md líneas 1513-1521
+Context7	Configurado/conectado	opencode.json líneas 194-198; inventory.md líneas 1532-1539
+NotebookLM MCP	Configurado/conectado	opencode.json líneas 207-216; inventory.md líneas 1559-1566
+Supabase	Configurado, necesita auth según inventario	opencode.json líneas 217-222; inventory.md líneas 1577-1584
+Playwright	En opencode.jsonc	líneas 13-21; inventario líneas 1568-1575
+Plugins
+Plugin	Qué hace
+engram.ts	Memoria persistente, prompt capture, system prompt injection, compaction context
+background-agents.ts	Tools delegate, delegation_read, delegation_list; sesiones aisladas; outputs persistidos
+model-variants.ts	Cachea variantes de modelos para gentle-ai en ~/.gentle-ai/cache/model-variants.json
+9. Decisiones que toma Manager vs Gentle-orchestrator
+Manager
+Decide:
+
+Clasificación de request: Tiny / Small / Medium / Large.
+Si hace intake y aprobación de diseño.
+Si usa Graphify o no.
+Si entra en SDD.
+Qué subagente SDD ejecutar.
+Si usa frontend-design gate.
+Si activa TDD, review, debugging, GPT-5.5/Judgment Day.
+Cuándo bloquear por falta de verificación.
+Evidencia: opencode.json línea 49 contiene el protocolo completo del Manager; inventario lo resume en líneas 838-848.
+
+Gentle-orchestrator
+Decide:
+
+Si una acción se hace inline o se delega.
+Si usa delegate async o task sync.
+Qué fase SDD lanzar.
+Mantiene conversación “thin”, delegando trabajo real.
+Evidencia: opencode.json línea 23; inventario líneas 868-878.
+
+Diferencia crítica
+Manager es el orquestador global híbrido actual.
+gentle-orchestrator es el orquestador Gentle AI original.
+El Manager no debe llamar a gentle-orchestrator.
+10. Cómo derivan tareas
+Manager
+Manager
+  ├─ puede usar explore/general/frontend-specialist/release-security-gate
+  ├─ puede usar SDD subagents directamente
+  ├─ puede usar task para ejecución sync
+  ├─ puede usar delegate para async persistido
+  └─ NO puede delegar a gentle-orchestrator por regla explícita
+Evidencia: inventory.md líneas 838-844.
+
+Gentle-orchestrator
+gentle-orchestrator
+  ├─ sdd-init
+  ├─ sdd-onboard
+  ├─ sdd-explore
+  ├─ sdd-propose
+  ├─ sdd-spec
+  ├─ sdd-design
+  ├─ sdd-tasks
+  ├─ sdd-apply
+  ├─ sdd-verify
+  └─ sdd-archive
+Evidencia: inventory.md líneas 868-874.
+
+Subagentes SDD
+Cada subagente SDD tiene una frontera clara:
+
+Si el orquestador carga la skill, debe parar y delegar.
+Si el subagente executor la carga, debe ejecutar inline y no delegar.
+Evidencia: sdd-apply/SKILL.md líneas 13-21; patrón repetido en demás sdd-*.
+
+11. Context index / gentle-ai / inventario
+Hay dos piezas parecidas pero distintas:
+
+Pieza	Ubicación	Rol
+Skill registry / context index	.atl\skill-registry.md	Índice de skills para que delegadores pasen paths exactos
+Inventory	.config\opencode\inventory\inventory.md	Panel/cache global de agentes, MCP, skills, plugins
+gentle-ai CLI	C:\Users\harry\AppData\Local\gentle-ai\bin\gentle-ai.exe	Usado para refrescar skill registry
+Graphify	graphify.exe existe, pero sin graphify-out/	Disponible, no usado como grafo actual
+Evidencia:
+
+.atl\skill-registry.md líneas 16-20: contrato.
+background-agents.ts líneas 38-53: refresca registry con gentle-ai skill-registry refresh.
+generate-static-inventory.mjs líneas 89-96, 815-895, 899-913: escaneo config/agentes/skills/MCP.
+12. Matriz memoria/contexto
+Fuente	Tipo	Persistente	Se inyecta automáticamente	Quién la usa	Riesgo token
+AGENTS.md	Instrucciones globales	Sí	Sí	Todos/top-level	Alto
+Manager prompt	Agent prompt	Sí	Solo Manager	Manager	Alto
+Gentle prompt	Agent prompt	Sí	Solo gentle-orchestrator	gentle-orchestrator	Medio/alto
+Engram MEMORY_INSTRUCTIONS	Plugin system transform	Sí/config	Sí	Todos	Medio
+Delegation rules	Plugin system transform	Sí/config	Sí	Todos	Medio
+Engram observations	SQLite vía Engram	Sí	No, salvo consulta/compaction	Manager/subagentes	Variable
+Engram prompts	SQLite vía Engram	Sí	No	Engram retrieval	Bajo/medio
+SDD artifacts	Engram/OpenSpec/hybrid	Sí según modo	No directo	SDD fases	Alto si se inyectan; por eso subagentes leen directo
+.atl/skill-registry.md	Índice local	Sí	No directo	Subagentes fallback	Medio
+inventory.md/json	Inventario local	Sí	No directo	Usuario/comando inventory	Medio
+Delegation files	Disco local	Sí	No directo	delegation_read	Bajo hasta leer
+MCP tool schemas	Runtime tools	No como memoria	Sí como tool surface	Modelo	Alto si muchos MCP activos
+13. Evidencia por archivo / función / línea
+Archivo	Función/sección	Línea(s)	Qué prueba
+opencode.json	agent.gentle-orchestrator	4-32	Agente primario, permisos task limitados a SDD, tools propias
+opencode.json	agent.manager	34-50	Manager primario, permisos, prompt largo
+opencode.json	SDD agents	52-181	Subagentes hidden con modelo deepseek-v4-flash-free
+opencode.json	MCP	193-223	Context7, Engram, NotebookLM, Supabase
+opencode.json	permissions	224-243	Bash allow con git destructive ask; read deny para env/secrets
+opencode.jsonc	MCP extra	3-21	Engram bin explícito y Playwright
+opencode.jsonc	skills paths	23-29	Rutas globales de skills
+AGENTS.md	Skill loading	63-69	Skill matching obligatorio antes de responder
+AGENTS.md	Engram save/search/summary	72-166	Protocolo persistente siempre activo
+engram.ts	MEMORY_INSTRUCTIONS	64-141	Instrucciones memoria inyectables
+engram.ts	ensureSession	240-253	Crea sesión Engram bajo demanda
+engram.ts	event session.created	301-327	Evita inflar sesiones con subagentes
+engram.ts	chat.message	349-381	Captura prompts de usuario
+engram.ts	tool.execute.after	389-414	Cuenta tools y captura Task passiva
+engram.ts	experimental.chat.system.transform	426-432	Inyecta protocolo memoria al system prompt
+engram.ts	experimental.session.compacting	442-466	Inyecta contexto y FIRST ACTION REQUIRED
+background-agents.ts	refreshSkillRegistry	38-53	Llama gentle-ai skill-registry refresh
+background-agents.ts	resolveAgentModel	482-505	Usa modelo configurado del subagente
+background-agents.ts	delegate	573-703	Valida agente, crea sesión aislada, lanza prompt
+background-agents.ts	persistOutput	843-876	Guarda resultado de delegación en disco
+background-agents.ts	notifyParent	883-928	Notificación compacta al padre
+background-agents.ts	createDelegate	1164-1218	Tool delegate
+background-agents.ts	system.transform	1425-1430	Inyecta reglas de delegación
+persistence-contract.md	Mode resolution	3-16	Modos Engram/OpenSpec/hybrid/none
+persistence-contract.md	Sub-agent rules	76-89	Quién lee/escribe memoria
+sdd-phase-common.md	Executor boundary	3-6	SDD phase agents no delegan
+sdd-phase-common.md	Engram retrieval	19-35	Search + get_observation obligatorio
+sdd-phase-common.md	persistence	37-67	mem_save artifacts
+sdd-apply/SKILL.md	apply context	39-42	Lee proposal/spec/design/tasks y actualiza progress
+sdd-verify/SKILL.md	hard rules	27-36	Verifica con tests; no arregla
+.atl/skill-registry.md	contract	16-20	Registry es índice, no resumen
+inventory.md	Manager	838-848	Rol/calls/subagentes/skills
+inventory.md	gentle-orchestrator	868-878	Rol/calls/subagentes/skills
+inventory.md	MCP	1511-1584	Estado/capacidad MCP
+inventory.md	Plugins	1587-1623	Plugins activos relevantes
+14. Qué partes no pude validar
+No validé el merged config runtime exacto de OpenCode más allá de leer archivos globales/cacheados.
+No ejecuté un flujo real de gentle-orchestrator para observar mensajes runtime.
+No inspeccioné SQLite interno de Engram directamente; usé MCP/contexto disponible.
+No medí tokens reales por request; solo identifiqué fuentes de consumo.
+No validé si opencode.json y opencode.jsonc se fusionan exactamente como espera OpenCode en esta sesión.
+No validé estado OAuth real de Supabase; el inventario dice needs_auth.
+No construí ni consulté Graphify porque no hay graphify-out/ y no tengo aprobación para generar grafo.
+No regeneré inventario para evitar alterar archivos/cache.
+15. Preguntas abiertas
+¿Cuál agente usás como default real en la UI: manager, build, u otro?
+¿Querés que la próxima fase sea runtime-only, ejecutando comandos no destructivos para validar config activa?
+¿Querés medir token overhead aproximado por capas: Manager prompt, AGENTS, Engram plugin, delegation rules, tools MCP?
+¿El gentle-orchestrator sigue siendo usado explícitamente o solo queda para compatibilidad histórica?
+¿Querés auditar también configs project-level fuera de ARQUITECTURA OPENCODE?
+16. Plan de pruebas para validar el flujo
+Prueba	Objetivo	Método
+Config merge	Confirmar config activa final	Ejecutar diagnóstico OpenCode/gentle-ai no destructivo
+Agent availability	Ver agentes primarios/subagentes reales	Consultar lista runtime de agentes
+Manager dry-run	Ver decisiones reales sin modificar	Prompt de auditoría read-only con Manager
+Gentle dry-run	Ver flujo del gentle-orchestrator	Prompt SDD read-only usando gentle-orchestrator
+Engram prompt capture	Confirmar escritura de prompt	Enviar prompt marcador y buscarlo con mem_search
+Engram artifact flow	Confirmar SDD artifact retrieval/save	Simular mode=none primero; luego engram si se aprueba
+Delegation persistence	Confirmar delegate/delegation_read	Delegar exploración read-only y verificar archivo/lectura
+Compaction context	Confirmar inyección	Forzar/observar compactación controlada
+MCP surface	Confirmar herramientas activas	Listar tool surface/MCP health
+Token overhead	Estimar capas	Comparar prompt/system/tool schemas por sesión
+17. Riesgos preliminares
+Duplicación de instrucciones Engram: aparece en AGENTS.md y además se inyecta por plugin.
+Dos orquestadores primarios: correcto si se entiende, riesgoso si el usuario invoca el equivocado.
+Tool surface grande: varios MCP + plugins + skills aumentan tokens y superficie de error.
+Inventory cache viejo: inventory.json fue generado el 2026-05-28; puede estar desactualizado.
+Graphify instalado pero sin grafo actual: no hay graphify-out, así que no aporta contexto todavía.
+Supabase needs_auth según inventario: riesgo si una tarea asume que está operativo.
+Delegaciones async escriben a disco fuera del undo tree: background-agents.ts lo reconoce como tradeoff en líneas 609-612 y 1302-1303.
+
+
+
+
+----------------------------------------------------------------------------------------------------
+
+
+AUDITORIA 3:
+
+
+📋 AUDITORÍA COMPLETA — OpenCode Architecture & Request/Memory Flow
+1. ESTRUCTURA RELEVANTE DEL PROYECTO
+C:\Users\harry\.config\opencode\
+├── AGENTS.md                          # Persona + Protocolos globales (Engram, Design Skills, etc.)
+├── opencode.json                      # Configuración principal (agentes, MCP, skills, permissions)
+├── opencode.jsonc                     # Config local overlay
+├── .atl/
+│   ├── skill-registry.md              # Índice de skills disponibles (auto-generado)
+│   └── .skill-registry.cache.json     # Fingerprint del registry
+├── agent/                             # Agentes globales (subagent mode)
+│   ├── frontend-specialist.md         # Subagente global frontend
+│   ├── release-security-gate.md       # Security gate
+│   ├── bigquery-data-quality.md       # BigQuery data quality
+│   ├── data-memory-curator.md         # Sincronizador capas memoria datos
+│   └── sql-cleaning-agent.md          # Orquestador limpiezas SQL
+├── agents/                            # (Duplicado/sincronizado con agent/)
+├── commands/                          # Comandos personalizados
+├── design/
+│   └── DESIGN.md                      # Fallback global design system
+├── inventory/                         # Panel visual de inventario (TUI plugin)
+├── plugins/
+│   ├── background-agents.ts           # Plugin background agents
+│   ├── engram.ts                      # Plugin Engram MCP
+│   └── model-variants.ts              # Variantes de modelo
+├── skills/                            # Skills opencode (27 skills)
+│   ├── _shared/                       # Referencias compartidas SDD
+│   ├── sdd-init/                      # Bootstrap SDD
+│   ├── sdd-explore/                   # Exploración
+│   ├── sdd-propose/                   # Propuesta
+│   ├── sdd-spec/                      # Especificaciones
+│   ├── sdd-design/                    # Diseño técnico
+│   ├── sdd-tasks/                     # Planificación tareas
+│   ├── sdd-apply/                     # Implementación (+ strict-tdd.md)
+│   ├── sdd-verify/                    # Verificación (+ strict-tdd-verify.md)
+│   ├── sdd-archive/                   # Archivo
+│   ├── sdd-onboard/                   # Onboarding
+│   ├── frontend-design/               # Diseño visual audaz
+│   ├── canvas-design/                 # Arte visual, posters
+│   ├── design-md/                     # Extraer DESIGN.md
+│   ├── web-design-guidelines/         # Auditoría UI/UX/accesibilidad
+│   ├── bigquery-table-cleaning/       # Limpieza BigQuery
+│   ├── sandbox-data-loader/           # Carga segura sandbox
+│   ├── sql-learning/                  # Patrones SQL reutilizables
+│   ├── data-memory-governance/        # Gobernanza memoria datos
+│   ├── branch-pr/                     # PRs Gentle AI
+│   ├── chained-pr/                    # PRs encadenados >400 líneas
+│   ├── cognitive-doc-design/          # Docs bajo carga cognitiva
+│   ├── comment-writer/                # Comentarios cálidos
+│   ├── deploy-security-gate/          # Gate predeploy
+│   ├── engram-agent/                  # Memoria persistente Engram
+│   ├── flow-diagram/                  # Diagramas flujo ASCII
+│   ├── go-testing/                    # Testing Go
+│   ├── graphify/                      # Knowledge graph
+│   ├── hatch-pet/                     # Pets Codex
+│   ├── issue-creation/                # Issues Gentle AI
+│   ├── judgment-day/                  # Dual review adversarial
+│   ├── skill-creator/                 # Crear skills
+│   ├── skill-improver/                # Mejorar skills
+│   ├── skill-registry/                # Actualizar registry
+│   └── work-unit-commits/             # Commits como work units
+├── tui-plugins/
+│   └── opencode-inventory/            # Panel visual inventory
+└── node_modules/                      # Dependencias (zod, etc.)
+
+C:\Users\harry\.codex\skills\          # Skills Codex (duplicados/sincronizados)
+└── .system/                           # Skills sistema (imagegen, openai-docs, plugin-creator, skill-installer)
+2. ARCHIVOS CLAVE
+Archivo	Rol	Líneas	Tipo
+opencode.json	Config raíz: agentes, MCP, permisos, commands	235	JSON
+AGENTS.md	Persona + protocolos Engram + Design Skills Integration	259	MD
+.atl/skill-registry.md	Índice 48 skills con triggers, scopes, paths	57	MD
+skills/_shared/sdd-phase-common.md	Protocolo común fases SDD (skill loading, retrieval, persistence, envelope)	109	MD
+skills/_shared/skill-resolver.md	Protocolo resolución skills para delegación	72	MD
+skills/_shared/engram-convention.md	Convención naming/upsert Engram SDD	136	MD
+skills/_shared/openspec-convention.md	Convención archivos openspec/	103	MD
+skills/_shared/persistence-contract.md	Contrato persistencia por modo (engram/openspec/hybrid/none)	158	MD
+skills/sdd-init/SKILL.md	Bootstrap SDD + testing capabilities + registry	68	MD
+skills/sdd-explore/SKILL.md	Fase exploración	140	MD
+skills/sdd-propose/SKILL.md	Fase propuesta	181	MD
+skills/sdd-spec/SKILL.md	Fase especificaciones (delta specs)	236	MD
+skills/sdd-design/SKILL.md	Fase diseño técnico	176	MD
+skills/sdd-tasks/SKILL.md	Fase planificación + review workload forecast	246	MD
+skills/sdd-apply/SKILL.md	Fase implementación (Strict TDD opcional)	228	MD
+skills/sdd-apply/strict-tdd.md	Módulo Strict TDD (364 líneas)	364	MD
+skills/sdd-verify/SKILL.md	Fase verificación	70	MD
+skills/sdd-verify/strict-tdd-verify.md	Módulo verificación Strict TDD	12,876	MD
+skills/sdd-archive/SKILL.md	Fase archivo + merge delta specs	157	MD
+agent/frontend-specialist.md	Subagente global frontend (544 líneas)	544	MD
+agents/frontend-specialist.md	Duplicado/sincronizado	872	MD
+design/DESIGN.md	Fallback global design system	299	MD
+plugins/engram.ts	Plugin Engram MCP	19,136	TS
+plugins/background-agents.ts	Plugin background agents	49,010	TS
+3. FLUJO REAL: USER INPUT → RESPUESTA FINAL
+flowchart TD
+    A[User Input] --> B{Manager Agent<br/>(global orchestrator)}
+    B --> C[Superpowers Brainstorming<br/>Intake → Clarification → Alternatives → Design Proposal → User Approval]
+    C --> D{Graphify Context Gate<br/>Optional}
+    D --> E[Manager-controlled SDD]
+    
+    E --> F1[/sdd-explore/] --> F2[/sdd-propose/] --> F3[/sdd-spec/]
+    F3 --> F4[/sdd-design/] --> F5[/sdd-tasks/]
+    F5 --> F6[/sdd-apply/] --> F7[/sdd-verify/] --> F8[/sdd-archive/]
+    
+    %% Delegation
+    B -.->|delegate| SA[sdd-explore subagent]
+    B -.->|delegate| SB[sdd-propose subagent]
+    B -.->|delegate| SC[sdd-spec subagent]
+    B -.->|delegate| SD[sdd-design subagent]
+    B -.->|delegate| SE[sdd-tasks subagent]
+    B -.->|delegate| SF[sdd-apply subagent]
+    B -.->|delegate| SG[sdd-verify subagent]
+    B -.->|delegate| SH[sdd-archive subagent]
+    
+    %% Skills injection
+    SA -.->|read skills| SK[Skill Registry<br/>.atl/skill-registry.md]
+    SB -.->|read skills| SK
+    SC -.->|read skills| SK
+    SD -.->|read skills| SK
+    SE -.->|read skills| SK
+    SF -.->|read skills| SK
+    SG -.->|read skills| SK
+    SH -.->|read skills| SK
+    
+    %% Memory
+    SA -.->|mem_save| EM[Engram MCP]
+    SB -.->|mem_save| EM
+    SC -.->|mem_save| EM
+    SD -.->|mem_save| EM
+    SE -.->|mem_save| EM
+    SF -.->|mem_save + mem_update| EM
+    SG -.->|mem_save| EM
+    SH -.->|mem_save| EM
+    
+    %% Filesystem (openspec/hybrid)
+    SA -.->|write| FS[openspec/changes/{name}/]
+    SB -.->|write| FS
+    SC -.->|write| FS
+    SD -.->|write| FS
+    SE -.->|write| FS
+    SF -.->|write + update| FS
+    SG -.->|write| FS
+    SH -.->|move + merge| FS
+    
+    %% Specialized subagents
+    SF -.->|if frontend| FE[frontend-specialist]
+    SG -.->|if frontend| WG[web-design-guidelines]
+    SD -.->|if frontend| DM[design-md] --> FD[frontend-design] --> CD[canvas-design]
+    
+    F8 --> I[Superpowers Quality Reinforcement<br/>TDD → Code Review → Debugging → GPT-5.5 Final Gate]
+    I --> J[Final Response to User]
+4. DÓNDE SE CONSULTA MEMORIA
+Momento	Agente	Qué busca	Tool
+Inicio sesión	Manager / gentle-orchestrator	mem_context() — sesiones recientes	mem_context
+Inicio sesión	Manager	mem_search(query: "sdd-init/{project}") — testing capabilities, strict TDD	mem_search + mem_get_observation
+Pre-SDD	Orchestrator	mem_search("skill-registry") — registry de skills	mem_search + mem_get_observation
+Cada fase SDD	Subagente fase	mem_search("sdd/{change-name}/{artifact}") — artefactos previos	mem_search + mem_get_observation
+sdd-apply	sdd-apply	mem_search("sdd/{change-name}/apply-progress") — progress previo	mem_search + mem_get_observation
+sdd-apply	sdd-apply	mem_search("sdd/{project}/testing-capabilities") — strict TDD	mem_search + mem_get_observation
+Ante "recuerda/remember"	Cualquier agente	mem_context() → mem_search(keywords)	mem_context + mem_search
+Frontend	frontend-specialist	mem_search("DESIGN.md") — design system	mem_search + mem_get_observation
+5. DÓNDE SE ESCRIBE MEMORIA
+| Momento |
+
+
+
