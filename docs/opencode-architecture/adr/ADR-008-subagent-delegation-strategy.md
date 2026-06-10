@@ -1,5 +1,7 @@
 # ADR-008: Estrategia de Delegación a Subagentes
 
+> Estado Fase D: Se agregaron guardrails anti-loop en Manager/gentle. `sdd-*` siguen sin modificarse. Validación runtime pendiente de D4.
+
 ## Estado
 
 **Aprobado** — Decisión estratégica del usuario (2026-06-09). Delegar por complejidad, especialidad y costo. Contexto mínimo, envelope compacto.

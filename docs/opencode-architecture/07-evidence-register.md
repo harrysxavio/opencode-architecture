@@ -164,3 +164,13 @@
 | D004 | Mover Design Skills Protocol a skill bajo demanda | DECISIÓN PROPUESTA | — | — | Solo cargar cuando haya tarea frontend | Ahorrar ~1,500 tokens fijos | Implementar en Fase F |
 | D005 | Desduplicar instrucciones Engram | DECISIÓN PROPUESTA | — | — | Una sola fuente de instrucciones de memoria | Ahorrar ~2,500 tokens fijos | Implementar en Fase E |
 | D006 | Activar MCP bajo demanda | DECISIÓN PROPUESTA | — | — | No cargar todos los MCP al inicio | Ahorrar ~5,000-10,000 tokens fijos | Aprobar ADR-007 |
+
+## 14. Hallazgos Fase D — Manager/gentle transition
+
+| ID | Hallazgo | Estado | Archivo | Línea/sección | Evidencia | Interpretación | Próxima validación |
+|----|----------|--------|---------|---------------|-----------|----------------|-------------------|
+| E074 | D3 aplicó `gentle-orchestrator` como subagent | ✅ VALIDADO CONFIG | `C:\Users\harry\.config\opencode\opencode.json` | `agent.gentle-orchestrator.mode` | mode cambió de `primary` a `subagent`; JSON válido. | Elimina competencia formal como primary, pendiente validación runtime post-restart. | Ejecutar D4 tras reinicio. |
+| E075 | D3 reemplazó regla conflictiva del Manager | ✅ VALIDADO CONFIG | `C:\Users\harry\.config\opencode\opencode.json` | prompt Manager | Prohibición absoluta reemplazada por regla controlada para SDD Pipeline. | Manager puede invocar gentle bajo guardrails, pendiente runtime. | D-T5 post-restart. |
+| E076 | D3 agregó rol SDD Pipeline subagent a gentle | ✅ VALIDADO CONFIG | `C:\Users\harry\.config\opencode\opencode.json` | prompt gentle | Prompt indica que no es primary, no llama Manager, usa task/delegate solo a sdd-* y retorna envelope. | Anti-loop documentado en prompt. | D-T5 dry-run post-restart. |
+| E077 | D-T1 post-restart confirma Manager directo | ✅ VALIDADO RUNTIME | OpenCode session `ses_14e2a2f4bffe54oyY00xcWl89B` | message metadata | `agent=manager`, `mode=manager`, no tools/MCP/memoria/skills/subagentes visibles, no gentle-orchestrator. | D3 no rompió Tiny routing; gentle no compite en request Tiny. | Ejecutar D-T5 y D-T3. |
+| E078 | D-T1 expone overhead real de 40k tokens | ✅ VALIDADO RUNTIME | OpenCode session metadata | tokens | input=40,017; output=27; reasoning=47; total=40,091. | La estimación preliminar ~18.5k–22k quedó subestimada para sesión real post-D3. | Fase F debe investigar fuentes de contexto. |

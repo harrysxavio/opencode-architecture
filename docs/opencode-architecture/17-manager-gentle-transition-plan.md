@@ -2,6 +2,8 @@
 
 > Creado en Fase B0 (2026-06-09). Describe la transición de la arquitectura actual (2 primaries ambiguos) a la arquitectura objetivo (Manager único primary, gentle-orch como SDD Pipeline).
 
+> Actualización Fase D (2026-06-09): D3 aplicado en `C:\Users\harry\.config\opencode\opencode.json`. `gentle-orchestrator` pasó a `mode: "subagent"`; prompt Manager permite invocarlo solo como SDD Pipeline bajo guardrails; prompt gentle declara rol SDD Pipeline subagent. JSON válido. D4 pendiente hasta reiniciar OpenCode.
+
 ---
 
 ## 1. Estado actual

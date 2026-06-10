@@ -1,5 +1,7 @@
 # ADR-001: Estrategia de Orquestador Primario
 
+> Estado Fase D: Config aplicada parcialmente. `gentle-orchestrator` fue cambiado a `mode: "subagent"` en `opencode.json`; validación runtime pendiente de reinicio y D4.
+
 ## Estado
 
 **Aprobado** — Decisión estratégica del usuario documentada en Fase B0. Pendiente de validación runtime (Test 1) antes de cambios de configuración.

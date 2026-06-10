@@ -2,6 +2,8 @@
 
 > ✅ **Decisión estratégica (2026-06-09)**: Manager único primary. gentle-orchestrator como SDD Pipeline. Ver ADRs 001-009.
 
+> Estado Fase D: D3 aplicado en `C:\Users\harry\.config\opencode\opencode.json` (`gentle-orchestrator.mode = subagent`, prompts actualizados, JSON válido). D4 runtime pendiente de reinicio.
+
 ## 0. Estado de las decisiones estratégicas
 
 | Decisión | Estado | ADR |

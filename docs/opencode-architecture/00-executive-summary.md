@@ -181,6 +181,20 @@ Manager sintetiza → Quality Gate → Respuesta → Memory Save Decision
 
 **🔵 Fase D — Resolver agente primario / conflicto Manager ↔ gentle-orchestrator**: T5 reveló que la arquitectura estratégica permite invocar gentle-orchestrator como SDD Pipeline, pero la regla runtime actual del Manager lo prohíbe.
 
+### Estado Fase D
+
+| Paso | Estado | Resultado |
+|---|---|---|
+| D0/D1/D2 | ✅ Completado | Auditoría, plan y diff aprobados |
+| D3 | ✅ Aplicado | `gentle-orchestrator` cambiado a `subagent`; prompts Manager/gentle actualizados; JSON válido |
+| D4 | 🔄 Parcial | D-T1 PASSED post-restart; faltan D-T5-read-only, D-T5-pipeline-dry-run y D-T3 |
+
+> Fase D NO queda completa hasta ejecutar los tests D-T5-read-only, D-T5-pipeline-dry-run y D-T3.
+
+### Hallazgo D-T1
+
+D-T1 confirmó que Manager responde Tiny directo después de D3, sin gentle/tools/MCP/memoria/skills/subagentes. También expuso tokens reales: **40,091 total** (40,017 input), lo que vuelve Fase F más importante pero no bloquea D4.
+
 ### Resultados Fase C
 
 | Test | Estado | Resultado |

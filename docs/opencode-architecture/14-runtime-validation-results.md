@@ -137,3 +137,34 @@ Validar con evidencia runtime los principales supuestos de la arquitectura OpenC
 - **Fase D — Resolver agente primario**: **GO condicionado**. T1/T8 validan Manager como default; T5 revela que hay que resolver explícitamente la contradicción Manager ↔ gentle-orchestrator.
 - **Fase E — Gobernanza memoria**: **GO**. T2/T7 muestran necesidad clara y camino conceptual; Engram sigue requiriendo diagnóstico de persistencia.
 - **Fase F — Optimización tokens**: **NO-GO**. Aún falta inventario de lazy-load y/o telemetría más robusta.
+
+---
+
+## Fase D3 — Implementación aplicada
+
+| Validación | Resultado |
+|---|---|
+| Archivo funcional | `C:\Users\harry\.config\opencode\opencode.json` |
+| `gentle-orchestrator.mode` | `subagent` aplicado |
+| Prompt Manager | Regla controlada aplicada |
+| Prompt gentle | Rol SDD Pipeline subagent + envelope aplicado |
+| JSON | ✅ válido (`opencode.json OK`) |
+| Runtime actual | ⏳ pendiente reinicio |
+
+La sesión actual NO valida runtime porque OpenCode no recarga config en caliente. No declarar GO final para Fase E hasta completar D4.
+
+### D-T1 post-restart
+
+| Métrica | Resultado |
+|---|---|
+| Estado | PASSED |
+| Agente | manager |
+| Modo | manager |
+| ¿Apareció gentle-orchestrator? | No |
+| Tools/MCP/memoria/skills/subagentes | Ninguno visible |
+| Input tokens reales | 40,017 |
+| Output tokens reales | 27 |
+| Reasoning tokens | 47 |
+| Total tokens | 40,091 |
+
+D-T1 confirma que Manager sigue respondiendo Tiny directo después de D3. D4 sigue incompleto hasta ejecutar D-T5-read-only, D-T5-pipeline-dry-run y D-T3.

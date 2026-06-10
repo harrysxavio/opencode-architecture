@@ -1,5 +1,7 @@
 # ADR-003: Rol de gentle-orchestrator
 
+> Estado Fase D: Prompt actualizado para declarar `gentle-orchestrator` como SDD Pipeline subagent, no primary. Validación runtime pendiente de D4 post-restart.
+
 ## Estado
 
 **Aprobado** — Decisión estratégica del usuario (2026-06-09). gentle-orchestrator es SDD Pipeline especializado invocable por Manager. NO es primary.

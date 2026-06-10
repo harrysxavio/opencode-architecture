@@ -287,3 +287,16 @@ graph LR
 ```
 
 > **Nota**: B0, B-Security y B1 deben ejecutarse secuencialmente (validar, asegurar, medir). A partir de C, las fases pueden solaparse si los recursos lo permiten.
+
+---
+
+## Estado D — Manager ↔ gentle transition (2026-06-09)
+
+| Paso | Estado | Evidencia |
+|---|---|---|
+| D0 auditoría | ✅ Completado | `test-runs/D-manager-gentle-transition-2026-06-09/D0-pre-change-audit.md` |
+| D1/D2 plan y diff | ✅ Aprobado | `D1-change-plan.md`, `D2-diff-review.md` |
+| D3 implementación | ✅ Aplicado | `gentle-orchestrator.mode = subagent`; JSON válido |
+| D4 tests post-cambio | 🔄 Parcial | D-T1 PASSED post-restart; faltan D-T5-read-only, D-T5-pipeline-dry-run y D-T3 |
+
+Fase D permanece **en validación** hasta ejecutar D-T5-read-only, D-T5-pipeline-dry-run y D-T3 en sesión nueva.

@@ -100,3 +100,15 @@ graph TD
 | C009 | ¿SDD persiste artefactos realmente? | ⚠️ Sigue abierto | T5 no invocó pipeline por regla runtime actual | Fase D/Fase C-ext: probar SDD end-to-end tras resolver regla |
 | C011 | ¿MCP bajo demanda funciona? | ✅ Parcialmente resuelto para Context7 | T4 activó Context7 solo con intención explícita | Fase G: consolidar MCP duplicados |
 | C016 | Conflicto ADR-003 vs regla runtime Manager | 🔴 NUEVO / ALTO | T5: arquitectura estratégica permite gentle-orch; prompt runtime lo prohíbe | Fase D debe corregir prompt/config de forma controlada |
+
+### Estado C016 después de D3
+
+| Conflicto | Estado | Evidencia | Pendiente |
+|---|---|---|---|
+| ADR-003 vs regla runtime Manager | CONFIG CORREGIDA / D-T1 PASSED | `opencode.json` actualizado; D-T1 post-restart confirmó Manager directo para Tiny | Ejecutar D-T5-read-only y D-T5 dry-run |
+
+### Nuevo riesgo observado en D-T1
+
+| ID | Riesgo | Estado | Evidencia | Próxima acción |
+|---|---|---|---|---|
+| C017 | Overhead real mayor al estimado | VALIDADO | D-T1 reportó 40,017 input tokens y 40,091 total | Investigar en Fase F; no bloquear D4 |
