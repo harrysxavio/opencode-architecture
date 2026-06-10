@@ -1,6 +1,6 @@
 # OpenCode Architecture — Agentic Runtime, Memory & Context Control
 
-> Documentación, auditoría y evolución de una arquitectura OpenCode real.
+> Documentación, auditoría y evolución de una arquitectura OpenCode real
 >
 > El foco: gobernar el flujo de peticiones, la memoria persistente, el consumo de tokens, las herramientas MCP y la delegación entre agentes, para que el modelo reciba **contexto limpio, mínimo, trazable y validado**.
 
