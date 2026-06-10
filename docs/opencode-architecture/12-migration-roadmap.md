@@ -129,24 +129,35 @@
 - **gentle-orchestrator**: cambiar a `mode: "subagent"` o eliminar su modo primary. Mantenerlo como agente invocable explícitamente para SDD.
 - Si se elimina el primary de gentle-orch, actualizar su prompt para reflejar que es un SDD Pipeline invocable, no un orquestador general.
 
-## Fase E — Gobernanza de Memoria
+## Fase E — Gobernanza de Memoria ✅ COMPLETADA
 
 | Aspecto | Detalle |
 |---------|---------|
-| **Objetivo** | Definir qué se guarda, dónde y cuándo. Reparar pipeline Engram |
-| **Cambios permitidos** | Modificar engram.ts (filtros), AGENTS.md (desduplicar protocolo) |
-| **Archivos probables** | `plugins/engram.ts`, AGENTS.md (.config y .codex) |
-| **Riesgo** | 🟡 Medio: modificar plugin activo |
-| **Prueba de aceptación** | mem_save persiste observaciones. Session summary persiste. DB tiene datos útiles |
+| **Objetivo** | Diagnosticar, estabilizar y gobernar Engram como memoria persistente real |
+| **Cambios permitidos** | opencode.json, opencode.jsonc (pin binario + project name), documentación |
+| **Archivos probables** | `opencode.json`, `opencode.jsonc`, docs de test-runs, README raíz |
+| **Riesgo** | 🟢 Bajo-Medio: cambios de configuración controlados con backup y rollback |
+| **Prueba de aceptación** | E4B-T1 a T7 PASSED. Doctor 4/4 OK. Binario único v1.16.1. Project name explícito. |
 
-### Tareas
+### Subfases ejecutadas
 
-1. Corregir diagnóstico previo: `memories_1.sqlite` es store interno Codex; Engram real vive en `~\.engram\engram.db`.
-2. Reparar pipeline de guardado (puede ser MCP, permisos o configuración).
-3. Consolidar instrucciones Engram: Markdown versionado (engram-instructions.md) como fuente de verdad; plugin engram.ts como mecanismo runtime; remover de AGENTS.md.
-4. Implementar filtro de guardado: no guardar prompts completos automáticamente.
-5. Validar que `mem_session_summary` funciona correctamente.
-6. Establecer política de guardado según sección 4 de 04-memory-context-map.md.
+| Subfase | Estado | Resultado |
+|---------|--------|-----------|
+| **E0** — Diagnóstico Engram | ✅ | Store real identificado (`~/.engram/engram.db`); `.codex/memories_1.sqlite` NO es store semántico |
+| **E1** — Pruebas controladas | ✅ | 7 tests (E-T1 a E-T7) con scope TEST-E-MEMORY-GOVERNANCE: todos PASSED |
+| **E2** — Root cause analysis | ✅ | Engram **sí persiste**; problema real es gobernanza/config duplicada/ruido/drift |
+| **E3** — Change plan | ✅ | Propuesta mínima de reparación documentada |
+| **E4A** — Gap review | ✅ | Revisión read-only de brechas: Context Pack, Read Escalation, métricas, Hybrid Retrieval |
+| **E4A-Docs-Cleanup** | ✅ | README raíz reescrito; docs README convertido a índice mínimo |
+| **E4A-Docs-Cleanup-v2** | ✅ | README raíz enriquecido como entrada completa del proyecto |
+| **E4B** — Engram stabilization | ✅ **Completada** | Pin a v1.16.1 + `--project=opencode-architecture`. Tests T1-T7 PASSED. Doctor OK |
+
+### Subfase planificada
+
+| Subfase | Estado | Objetivo |
+|---------|--------|----------|
+| **E5** | ⏳ Pendiente | Context Pack + Memory Writer/Validator contracts |
+| **E6** | ⏳ Pendiente | Prompt capture / noise gate
 
 ## Fase F — Reducir Contexto Fijo
 
@@ -230,10 +241,14 @@ gantt
     Resolver agente primario           :D, after C, 2d
     
     section Fase E
-    Gobernanza de memoria              :E, after D, 4d
+    E0-E3 Diagnóstico y tests          :done, E0, after D, 1d
+    E4A Gap review                     :done, E4A, after E0, 1d
+    E4A-Docs-Cleanup                   :done, E4A_DOCS, after E4A, 1d
+    E4B Stabilization                  :done, E4B, after E4A_DOCS, 1d
+    E5 Context Pack                    :E5, after E4B, 3d
     
     section Fase F
-    Reducir contexto fijo              :F, after E, 4d
+    Reducir contexto fijo              :F, after E5, 4d
     
     section Fase G
     Optimizar MCP surface              :G, after F, 3d
@@ -262,8 +277,9 @@ gantt
 | T5 | PARTIAL | Fase D debe resolver conflicto Manager ↔ gentle-orchestrator |
 | T6 | PASSED | Manager maneja ruido sin sobreorquestar |
 | T7 | PASSED | Contradicción ficticia manejada sin contaminar memoria real |
-| **D** | Consolidar MCP y skills | opencode.json, MCP, skills | Config MCP, skills/ | 🟡 Medio | MCP consolidados, skills bajo demanda |
-| **E** | Reparar memoria Engram | engram.ts, AGENTS.md | plugins/engram.ts, AGENTS.md | 🟡 Medio | mem_save persiste observaciones |
+| **D** | Resolver agente primario | opencode.json | .config/opencode/opencode.json | 🟢 **Completado** | ✅ gentle-orchestrator.mode = subagent. D-T1, D-T3, D-T5 PASSED |
+| **E** | Gobernanza de memoria Engram | opencode.json, opencode.jsonc, docs | Config OpenCode, docs/ | 🟢 **Completado** | ✅ E0-E3 diagnóstico, E4A gap review, E4B stabilization. Tests E-T1 a E-T7 + E4B-T1 a T7 PASSED |
+| **E5** | Context Pack (pendiente) | Documentación + contratos | docs/ | 🟡 Medio | Contrato Context Pack definido, Memory Writer/Validator operacional |
 | **F** | Token optimization | AGENTS.md, skills, prompts | AGENTS.md, skills/ | 🟡 Medio | ~18.5–22k → ~8.5-9.5k tokens fijos |
 | **G** | Config consolidation | opencode.json, .jsonc, config.toml | Config OpenCode | 🟡 Medio | gentle-orch mode: subagent. Config única. |
 | **H** | Consolidar arquitectura | Todo | Todos | 🔴 Alto | Arquitectura objetivo implementada y testeada |
@@ -278,11 +294,12 @@ graph LR
     B1 --> C[Fase C: Tests de flujo]
     C --> D[Fase D: Resolver primary]
     D --> E[Fase E: Gobernanza memoria]
-    E --> F[Fase F: Reducir contexto]
+    E --> E5[Fase E5: Context Pack]
+    E5 --> F[Fase F: Reducir contexto]
     F --> G[Fase G: MCP surface]
     G --> H[Fase H: Consolidar objetivo]
     
-    E -.->|comparte cambios| F
+    E5 -.->|requisito previo| F
     F -.->|comparte cambios| G
 ```
 
@@ -299,4 +316,4 @@ graph LR
 | D3 implementación | ✅ Aplicado | `gentle-orchestrator.mode = subagent`; JSON válido |
 | D4 tests post-cambio | ✅ Completado | D-T1, D-T5-read-only, D-T5-pipeline-dry-run y D-T3 PASSED |
 
-Fase D queda completada. Próximo paso recomendado: Fase E — Gobernanza memoria. Fase F queda NO-GO hasta diseñar investigación específica de tokens.
+Fase D completada. Fase E (E0-E4B) completada. Próximo paso recomendado: **Fase E5 — Context Pack**. Fase F queda NO-GO hasta completar E5 y estabilizar contrato de contexto.

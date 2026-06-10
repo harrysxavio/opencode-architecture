@@ -90,7 +90,7 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **Engram store real** | ✅ Validado | Store real es `~/.engram/engram.db`. NO `.codex/memories_1.sqlite` |
 | **Engram herramientas** | ✅ Validado | `mem_save`, `mem_search`, `mem_context`, `mem_session_summary`, `mem_judge` funcionan operativamente |
 | **Engram persistencia** | ✅ Validado | 292 observations, 302 user_prompts, 68 sessions — Engram **sí escribe** |
-| **Riesgo Engram** | ⚠️ Abierto | Prompt capture sin gate (302 capturas), project drift, duplicación config, procesos/bins duplicados |
+| **Riesgo Engram** | ⚠️ Parcial | Project drift resuelto (E4B). Prompt capture sin gate (302 capturas), duplicación opencode.jsonc, bin legacy v1.15.13 en Codex |
 | **MCP** | 🔶 Parcial | Context7 funciona bajo intención explícita. Playwright operativo. Duplicación entre opencode.json y .jsonc |
 | **Context Pack** | ⏳ Pendiente | Requerimiento detectado en E4A. Necesario antes de optimizar tokens |
 | **Hybrid Retrieval** | 🔮 Futuro | No bloquear Engram stabilization. Se abordará como Fase G |
@@ -110,8 +110,8 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **E0-E3** — Diagnóstico Engram | ✅ | Store real identificado, pruebas controladas, root cause, change plan |
 | **E4A** — Gap review | ✅ | Revisión read-only de brechas en arquitectura de memoria |
 | **E4A-Docs-Cleanup** | ✅ | README raíz reescrito, docs README convertido a índice mínimo |
-| **E4A-Docs-Cleanup-v2** | ▶️ **Actual** | README raíz enriquecido como entrada completa del proyecto |
-| **E4B** — Engram stabilization | ⏳ Pendiente | Pin binario, unificar project name, reducir ambigüedad config, validar |
+| **E4A-Docs-Cleanup-v2** | ✅ | README raíz enriquecido como entrada completa del proyecto |
+| **E4B** — Engram stabilization | ✅ **Completada** | Pin a v1.16.1 + `--project=opencode-architecture`. Tests T1-T7 PASSED |
 | **E5** — Context Pack | 🔮 Futuro | Contrato de contexto estructurado + Memory Writer/Validator |
 | **E6** — Noise gate | 🔮 Futuro | Control de captura de prompts en Engram |
 | **F** — Token reduction | 🔮 Futuro | Reducción de contexto con Context Pack como base |
@@ -199,27 +199,30 @@ Este principio recorrió todas las fases: el LLM no debe recibir conversaciones 
 
 ## Estado actual y próximo paso
 
-**Estado actual:** `E4A-Docs-Cleanup-v2` — README raíz enriquecido como entrada completa del proyecto.
+**Estado actual:** `E4B — Engram Stabilization` ✅ Completada.
 
-**Próximo paso:** `E4B — Engram Stabilization`, solo después de cerrar esta fase.
+**Próximo paso:** `E5 — Context Pack + Memory Writer/Validator contracts`.
 
-### Alcance de E4B (pendiente de aprobación)
+### Resultados de E4B
 
-- Pin de binario Engram único (una versión, no dos).
-- Unificar project name (`opencode-architecture`).
-- Reducir ambigüedad de configs.
-- Reiniciar OpenCode.
-- Validar procesos Engram (esperar 1 serve + 2 MCP, no duplicación).
-- Repetir validación de `mem_save`, `mem_search`, `mem_context`, `mem_session_summary`.
+| Test | Resultado | Detalle |
+|---|---|---|
+| T1 — Procesos | ✅ PASS | OpenCode usa v1.16.1; 3 procesos legacy v1.15.13 sin interferencia |
+| T2 — Doctor | ✅ PASS | 4/4 checks OK, 0 errores, 0 drift |
+| T3 — mem_context | ✅ PASS | Recupera contexto relevante de `opencode-architecture`, source `explicit_override` |
+| T4 — mem_save ficticio | ✅ PASS | Memoria TEST-E4B-STABILIZATION guardada (id=400) |
+| T5 — mem_search | ✅ PASS | Recupera id=400 correctamente |
+| T6 — mem_session_summary | ✅ PASS | Guardado como `observations.type=session_summary` (id=401) |
+| T7 — No guardar ruido | ✅ PASS | Sin `mem_save` por ruido; user_prompts sin nuevos capturados |
 
-### Lo que E4B NO incluirá
+### Lo que E4B NO modificó
 
-- ❌ Modificaciones al plugin `engram.ts`.
-- ❌ Modificaciones a `AGENTS.md` (salvo diff mínimo aprobado explícitamente).
-- ❌ Optimización de tokens.
-- ❌ MCP surface general.
-- ❌ Hybrid Retrieval.
-- ❌ Memory server avanzado.
+- ❌ Plugin `engram.ts`
+- ❌ `AGENTS.md`
+- ❌ Optimización de tokens
+- ❌ MCP surface general
+- ❌ Hybrid Retrieval
+- ❌ Memory server avanzado
 
 ---
 

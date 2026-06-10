@@ -1,12 +1,13 @@
 # 14 — Runtime Validation Results
 
-> Documento creado en Fase B0. Almacena resultados de validaciones read-only ejecutadas para confirmar o refutar supuestos de la arquitectura OpenCode. Actualizado en Fase B1 con resolución de B-Security y resultado de T8.
+> Documento creado en Fase B0. Almacena resultados de validaciones read-only ejecutadas para confirmar o refutar supuestos de la arquitectura OpenCode. Actualizado en Fase B1 con resolución de B-Security y resultado de T8. Actualizado en Fase E4B con resultados de estabilización Engram.
 
 ## Estado general
 
 **Completado (Fase B0)** — 7 de 7 validaciones ejecutadas.
 **Resuelto (Fase B-Security)** — P7: secretos rotados, backups eliminados, git history sin fugas.
 **Completado (Fase B1)** — T8 ejecutado en sesión limpia. T1 validado (Manager primary real). T5 diseñado.
+**Completado (Fase E4B)** — Engram estabilizado: v1.16.1 + `--project=opencode-architecture`. Tests E4B-T1 a T7 PASSED. Doctor 4/4 OK. Sin drift.
 
 ## Objetivo
 
