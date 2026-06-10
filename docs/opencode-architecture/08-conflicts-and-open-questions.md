@@ -13,12 +13,12 @@
 | C007 | ¿Graphify está instalado o realmente en uso? | Determina si hay valor de contexto graph | Skill graphify instalada en .agents/skills/graphify/ | No hay graphify-out/ en ningún proyecto visible | 🟢 BAJO: no hay impacto hasta que se use | Verificar si se ejecutó alguna vez |
 | C008 | ¿OpenSpec está implementado o solo referenciado? | Determina modo de persistencia SDD activo | persistence-contract.md referencia modo openspec | No hay directorios openspec/ visibles | 🟡 MEDIO: modo de persistencia SDD no determinado | Buscar openspec/ en todos los proyectos |
 | C009 | ¿Los subagentes SDD persisten artefactos realmente? | SDD puede no estar generando trazabilidad | sdd-phase-common.md define protocolo de persistencia | Engram DB vacía, sin openspec/ | 🔴 ALTO: SDD puede ejecutarse sin dejar rastro | Ejecutar SDD dry-run y verificar artefactos |
-| C010 | ¿Cuánto contexto fijo se inyecta realmente por request? | Determina eficiencia de tokens | Estimación: ~29k tokens | No hay medición directa | 🟡 MEDIO: inversión en optimización sin datos base | Usar herramienta de conteo de tokens |
+| C010 | ¿Cuánto contexto fijo se inyecta realmente por request? | Determina eficiencia de tokens | INFERIDO: ~18,500–22,000 (corregido de ~29k) | Pendiente Test 8 | 🟡 MEDIO: inversión en optimización sin datos base | Test 8: "Dime 1 frase" — pendiente de input exacto |
 | C011 | ¿Cuántos MCP/tools están visibles al modelo por defecto? | Determina superficie de error y tokens | 9+ MCP configurados entre 3 archivos | No se sabe cuáles están activos simultáneamente | 🔴 ALTO: puede haber MCP duplicados e inactivos consumiendo tokens | Listar MCP activos en runtime |
 | C012 | ¿Cuánto cuesta una petición simple (Tiny) en tokens? | Baseline para medir overhead mínimo | Estimación: ~20k-30k tokens | Sin medición real | 🟡 MEDIO: no hay baseline para optimización | Enviar "hola" y medir tokens de respuesta |
 | C013 | ¿cuál frontend-specialist es el activo? | Duplicado con contenido diferente | agent/frontend-specialist.md: 544 líneas | agents/frontend-specialist.md: 872 líneas | 🟡 MEDIO: comportamiento frontend impredecible | Verificar cuál gana en runtime |
 | C014 | ¿model_instructions_file reemplaza o complementa AGENTS.md? | Determina orden de carga de instrucciones | config.toml:4: `model_instructions_file = "engram-instructions.md"` | AGENTS.md cargado por defecto | 🟡 MEDIO: posible duplicación de instrucciones | Consultar documentación de Codex |
-| C015 | ¿Hay budget/rate limit considerations para gpt-5.5? | Costo operativo del sistema | Modelo gpt-5.5 configurado | 29k tokens fijos por sesión | 🟡 MEDIO: costo puede ser significativo | Monitorear uso de API |
+| C015 | ¿Hay budget/rate limit considerations para gpt-5.5? | Costo operativo del sistema | Modelo gpt-5.5 configurado | ~18,500–22,000 tokens fijos estimados por sesión (corregido de ~29k) | 🟡 MEDIO: costo puede ser significativo | Monitorear uso de API, ejecutar Test 8 |
 
 ## 2. Mapa de conflictos entre componentes
 
@@ -58,33 +58,33 @@ graph TD
 | Q003 | ¿El plugin superpowers@openai-curated inyecta contexto al system prompt? | Configurado en config.toml:50-51 | Puede agregar tokens no contabilizados |
 | Q004 | ¿Hay sesiones activas de SDD en algún proyecto que no sea ARQUITECTURA OPENCODE? | Solo se auditó este proyecto | SDD puede estar funcionando en otros proyectos |
 | Q005 | ¿El usuario ha ejecutado gentle-ai doctor alguna vez? | Herramienta de diagnóstico disponible | Puede revelar problemas de configuración |
-| Q006 | ¿Hay algún plan de rate limiting para gpt-5.5? | Modelo premium, 29k tokens fijos | Costo operativo |
+| Q006 | ¿Hay algún plan de rate limiting para gpt-5.5? | Modelo premium, ~18,500–22,000 tokens fijos estimados (corregido de ~29k) | Costo operativo pendiente de medición Test 8 |
 | Q007 | ¿El usuario quiere mantener ambos orquestadores o eliminar uno? | Decisión arquitectónica fundamental | Define todo el roadmap |
 | Q008 | ¿El usuario prefiere SDD completo para cambios pequeños o solo para cambios Medium/Large? | Manager clasifica, pero la preferencia del usuario puede diferir | Afecta frecuencia de uso de SDD |
 
-## 4. Conflictos resueltos o actualizados por Fase B0
+## 4. Conflictos resueltos o actualizados por Fase B0/B1
 
 | ID | Conflicto | Estado anterior | Estado actual | Evidencia |
 |----|-----------|----------------|---------------|-----------|
-| C001 | ¿Cuál agente primario responde? | Sin resolver | **SIGUE ABIERTO** — validación P1 no concluyente (logs sin registro de selección) | logs_2.sqlite no tiene target de selección de agente |
+| C001 | ¿Cuál agente primario responde? | Sin resolver | **PARCIALMENTE RESUELTO** — Manager validado como primary real por observación directa durante B1. Sin validación logs runtime. | Manager ejecutó B1 completo. gentle-orch no intervino. Ver `baselines/T1-primary-baseline.md` |
 | C003 | ¿Engram escribe observaciones? | Sin resolver | **VALIDADO NO FUNCIONAL** — DB sin tabla observations | memories_1.sqlite: solo tablas _sqlx_migrations, stage1_outputs, jobs |
-| C010 | ¿Cuánto contexto fijo realmente? | ~29k estimado | **CORREGIDO** — rango revisado ~18,500–22,000 | Ambos AGENTS.md no se cargan simultáneamente |
-| C012 | ¿Cuánto cuesta una petición Tiny? | ~20k-30k | **CORREGIDO** — rango revisado ~18,500–22,000 | Mismo razonamiento que C010 |
+| C010 | ¿Cuánto contexto fijo realmente? | ~29k estimado | **CORREGIDO** — rango revisado ~18,500–22,000 (INFERIDO). T8 preparado para medición. | Ambos AGENTS.md no se cargan simultáneamente |
+| C012 | ¿Cuánto cuesta una petición Tiny? | ~20k-30k | **CORREGIDO** — rango revisado ~18,500–22,000. Pendiente T8 para medición real. | Mismo razonamiento que C010 |
 | C013 | ¿Cuál frontend-specialist es activo? | Sin resolver | **VALIDADO DUPLICADO** — ambos existen con contenido diferente | agent/ (22KB) y agents/ (14.9KB) confirman duplicado |
+| R11 | Secretos expuestos | 🔴 P0 — No resuelto | ✅ **RESUELTO (B-Security)** | GitHub PAT actualizado. Browserbase eliminado. Backups limpios. Git sin fugas. |
 
-## 5. Próximas acciones para resolver conflictos (actualizado Fase B0)
+## 5. Próximas acciones para resolver conflictos (actualizado Fase B1)
 
-| Prioridad | Conflicto | Acción de validación | Método | Nota Fase B0 |
-|-----------|-----------|---------------------|--------|--------------|
-| 🔴 P0 | R11: Secretos expuestos | Rotar tokens, mover a env vars | Editar config.toml + .gitignore | **INMEDIATO — Fase B-Security** |
-| 🔴 P1 | C001: Agente primario real | Enviar mensaje sin @mention y registrar respuesta | Test manual controlado (Test 1) | No se pudo validar por logs — requiere interacción |
-| 🔴 P1 | C003: Engram funcional | Diagnosticar por qué no hay tabla observations | Revisar engram.ts MCP connection | DB tiene schema de pipeline, no de memoria |
-| 🔴 P1 | C009: SDD persiste artefactos | Ejecutar SDD dry-run mínimo | Task a subagente SDD modo none | — |
-| 🔴 P1 | — | Medir tokens baseline real | Test 8: "Dime 1 frase" | — |
-| 🟡 P2 | C002: Merge de configs | Consultar runtime OpenCode | Read de docs o test | — |
-| 🟡 P2 | C005: Context index | Resuelto: CONTEXT_INDEX.md existe en otros proyectos | Ya validado | Actualizar prompt de frontend-specialist si referencia |
-| 🟡 P2 | C006: Inventory actualizado | Regenerar inventory y comparar | Ejecutar script (no destructivo) | — |
-| 🟡 P2 | — | Resolver duplicación frontend-specialist | Decidir cuál mantener | agent/ (22KB) vs agents/ (14.9KB) |
-| 🟡 P2 | — | Session summaries sin evidencia | Ejecutar mem_session_summary y verificar DB | — |
-| 🟢 P3 | C007: Graphify usado | Verificar graphify-out/ en todos los proyectos | glob | Ya ejecutado: sin graphify-out/ |
-| 🟢 P3 | C008: OpenSpec implementado | Buscar openspec/ en todos los proyectos | glob | Pendiente |
+| Prioridad | Conflicto | Estado | Acción | Método | Fase |
+|-----------|-----------|--------|--------|--------|------|
+| 🔴 P1 | C001: Agente primario real | ✅ **Validado** — Manager responde | Ejecutar T1 con input exacto para reporte completo | Test manual | B1 ✅ → Cierre |
+| 🔴 P1 | C003: Engram funcional | ❌ No resuelto | Diagnosticar por qué no hay tabla observations | Revisar engram.ts MCP connection | E |
+| 🔴 P1 | C009: SDD persiste artefactos | ❌ No resuelto | Ejecutar SDD dry-run mínimo | Task a subagente SDD | C |
+| 🔴 P1 | T8: Token baseline | ⚠️ Preparado | Usuario envía "Dime 1 frase" como request independiente | Test manual | B1 → pendiente input |
+| 🟡 P2 | C002: Merge de configs | ❌ No resuelto | Consultar runtime OpenCode | Read de docs o test | C |
+| 🟡 P2 | C005: Context index | ✅ Resuelto | CONTEXT_INDEX.md existe en otros proyectos | Ya validado | ✔️ |
+| 🟡 P2 | C006: Inventory actualizado | ❌ No resuelto | Regenerar inventory y comparar | Ejecutar script | P3 |
+| 🟡 P2 | Duplicación frontend-specialist | ⚠️ Detectado | Decidir cuál mantener | agent/ (22KB) vs agents/ (14.9KB) | D |
+| 🟡 P2 | Session summaries evidencia | ❌ No resuelto | Ejecutar mem_session_summary y verificar DB | — | C |
+| 🟢 P3 | C007: Graphify usado | ✅ Verificado sin graphify-out/ | No requiere acción | glob | ✔️ |
+| 🟢 P3 | C008: OpenSpec implementado | ❌ No verificado | Buscar openspec/ en todos los proyectos | glob | P3 |

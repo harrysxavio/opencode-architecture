@@ -137,6 +137,29 @@ Clasificación de intención
 Manager sintetiza → Quality Gate → Respuesta → Memory Save Decision
 ```
 
-## Próximo paso inmediato
+## Progreso de fases
 
-**🔴 Fase B-Security**: Rotar secretos expuestos (GitHub PAT, Browserbase API key) antes de cualquier cambio de configuración.
+| Fase | Estado |
+|------|--------|
+| **Fase A** — Documentación y evidencia | ✅ Completada |
+| **Fase B0** — Corrección documental + validación | ✅ Completada |
+| **Fase B-Security** — Rotación de secretos | ✅ **Completada** |
+| **Fase B1** — Observabilidad mínima | 🔄 **En ejecución** |
+| **Fase C** — Tests de flujo | ⏳ Pendiente (requiere B1) |
+| **Fase D** — Resolver agente primario | ⏳ Pendiente |
+| **Fase E** — Gobernanza de memoria | ⏳ Pendiente |
+| **Fase F** — Reducir contexto fijo | ⏳ Pendiente |
+| **Fase G** — Optimizar MCP surface | ⏳ Pendiente |
+| **Fase H** — Consolidar arquitectura objetivo | ⏳ Pendiente |
+
+### B-Security (resuelto ✅)
+
+- GitHub PAT actualizado (nuevo token proporcionado por usuario).
+- Browserbase API key eliminado del config (ya no necesario).
+- 5 backups con secretos eliminados de `~/.codex/`.
+- Git history revisado — sin fugas.
+- Sin rastros del token viejo en entorno.
+
+### Próximo paso inmediato
+
+**🔵 Fase B1 — Observabilidad mínima**: Ejecutar Tests 8, 1 y 5 para medir baseline real antes de cualquier cambio arquitectónico.

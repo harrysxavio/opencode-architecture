@@ -23,8 +23,8 @@
 | ID | Hallazgo | Estado | Archivo | Línea/sección | Evidencia | Interpretación | Próxima validación |
 |----|----------|--------|---------|---------------|-----------|----------------|-------------------|
 | E010 | opencode.json y opencode.jsonc coexisten con MCP duplicados | VALIDADO | `opencode.json` + `opencode.jsonc` | .json:189-212, .jsonc:3-21 | Engram aparece en ambos, Playwright aparece en .jsonc y config.toml | Posible sobrescritura o merge | Verificar merge real |
-| E011 | Bearer token de GitHub expuesto en config.toml | VALIDADO | `config.toml` | 112 | `bearer_token_env_var = "github_pat_..."` | Token visible en texto plano | Rotar token y mover a variable de entorno |
-| E012 | API key de Browserbase expuesta en URL de config.toml | VALIDADO | `config.toml` | 126 | `url = "https://mcp.browserbase.com/mcp?browserbaseApiKey=bb_live_..."` | API key visible en URL | Rotar key y mover a variable de entorno |
+| E011 | Bearer token de GitHub expuesto en config.toml — **RESUELTO** | ✅ MITIGADO | `config.toml` | 112 | Token actualizado, 5 backups eliminados, git history sin fugas | ✅ B-Security: token rotado, sin rastros del viejo | Ninguna — resuelto |
+| E012 | API key de Browserbase expuesta en URL de config.toml — **RESUELTO** | ✅ MITIGADO | `config.toml` | 126 | Sección browserbase eliminada del config | ✅ B-Security: Browserbase eliminado (ya no necesario) | Ninguna — resuelto |
 | E013 | AGENTS.md (.config/opencode) tiene 259 líneas | VALIDADO | `AGENTS.md (.config)` | 1-259 | Conteo directo | ~7,000 tokens de contexto fijo | Medir tokens reales |
 | E014 | AGENTS.md (.codex) tiene 449 líneas | VALIDADO | `AGENTS.md (.codex)` | 1-449 | Conteo directo | ~12,000 tokens de contexto fijo | Medir tokens reales |
 | E015 | frontend-specialist duplicado en agent/ y agents/ | VALIDADO | `agent/frontend-specialist.md` vs `agents/frontend-specialist.md` | agent: 544 líneas, agents: 872 líneas | Contenido diferente | Riesgo de desincronización | Determinar cuál es la versión activa |
@@ -78,7 +78,7 @@
 
 | ID | Hallazgo | Estado | Archivo | Línea/sección | Evidencia | Interpretación | Próxima validación |
 |----|----------|--------|---------|---------------|-----------|----------------|-------------------|
-| E041 | Contexto fijo estimado en ~29,000 tokens — CORREGIDO | CONFLICTO | Suma de fuentes de contexto | — | AGENTS.md (.codex) ~12k + AGENTS (.config) ~7k + system ~3k + skills ~3k + engram ~2.5k + design ~1.5k | ~29k asume ambos AGENTS.md simultáneos, lo cual es incorrecto. Rango revisado: ~18,500–22,000 | Medir con Test 8 ("Dime 1 frase") |
+| E041 | Contexto fijo estimado en ~29,000 tokens — CORREGIDO B0/B1 | CONFLICTO → INFERIDO | Suma de fuentes de contexto | — | AGENTS.md (.codex) ~12k + AGENTS (.config) ~7k + system ~3k + skills ~3k + engram ~2.5k + design ~1.5k | ~29k asume ambos AGENTS.md simultáneos, lo cual es incorrecto. Rango revisado: ~18,500–22,000. B1: ✅ Manager validado como primary real. T8 preparado con metodología. | Ejecutar Test 8 ("Dime 1 frase") para medición real — pendiente de input exacto del usuario |
 | E042 | Engram protocol suma ~2,500 tokens duplicados | INFERIDO | AGENTS.md (.config) + AGENTS.md (.codex) + engram.ts | .config:72-166, .codex:355-449 | Mismo contenido en 3 fuentes | ~2,500 tokens redundantes por sesión | Calcular con precisión |
 | E043 | Available skills list estimado en ~3,000 tokens | INFERIDO | System prompt | — | 48 skills con triggers y descripciones | Cada skill agrega ~60 tokens promedio | Medir precisamente |
 | E044 | Design skills protocol agrega ~1,500 tokens | INFERIDO | AGENTS.md (.config) | 168-259 | 90 líneas de protocolo frontend | Siempre inyectado aunque no sea request frontend | Mover a skill bajo demanda |
@@ -125,7 +125,18 @@
 | D005 | Consolidar instrucciones Engram en Markdown versionado | DECISIÓN PROPUESTA (C8) | — | — | Markdown = fuente de verdad, plugin = runtime, AGENTS.md = referencias mínimas | Ahorrar ~2,500 tokens fijos + claridad arquitectónica | Implementar en Fase E |
 | D006 | Activar MCP bajo demanda | DECISIÓN PROPUESTA | — | — | No cargar todos los MCP al inicio. 8 instancias engram confirman duplicación. | Ahorrar ~5,000-10,000 tokens fijos | Aprobar ADR-007 después de B-Security |
 
-## 12. Correciones de evidencia previa (Fase B0)
+## 12. Hallazgos de validación Fase B1 (observabilidad)
+
+| ID | Hallazgo | Estado | Archivo | Línea/sección | Evidencia | Interpretación | Próxima validación |
+|----|----------|--------|---------|---------------|-----------|----------------|-------------------|
+| E061 | **Manager responde por defecto — VALIDADO** | ✅ VALIDADO | Esta sesión (Manager prompt activo) | Observación directa durante B1 | Manager ejecutó toda Fase B1 (documentación, tests, análisis) sin intervención de gentle-orch. Tool calls: read, edit, write, bash, engram_mem_*. | **Manager es el agente primario real.** La ambigüedad de doble primary está resuelta en la práctica. | Ejecutar T1 con input exacto para reporte completo |
+| E062 | **B-Security completada — secretos rotados** | ✅ MITIGADO | `config.toml` (~/.codex/) | Líneas 112 (actualizado), sección browserbase (eliminada) | GitHub PAT actualizado. Browserbase eliminado. 5 backups eliminados. Git history sin fugas. | R11 mitigado. Sin secretos expuestos. | Ninguna — resuelto |
+| E063 | **Routing SDD diseñado pero no ejecutado end-to-end** | ⚠️ DISEÑADO | `baselines/T5-sdd-routing-baseline.md` | Reporte completo | Manager puede clasificar y delegar a gentle-orch para SDD (ADR-001/003). Pipeline de 8 fases definido. | Routing conceptual validado. Falta ejecución runtime con cambio real. | Fase C: ejecutar cambio estructurado pequeño con SDD |
+| E064 | **Token baseline preparado, pendiente de ejecución** | ⚠️ PREPARADO | `baselines/T8-token-baseline.md` | Metodología + estimación | Metodología documentada. Estimación INFERIDA: ~18,500–22,000 tokens fijos. | No se puede medir sin input exacto "Dime 1 frase". | Usuario envía "Dime 1 frase" como request independiente |
+| E065 | **18-observability-design.md creado** | ✅ COMPLETADO | `docs/opencode-architecture/18-observability-design.md` | Documento completo | Define métricas mínimas, fuentes de evidencia, criterios de precisión, tests planificados. | Framework de observabilidad listo para fases posteriores. | Usar en Fase C para mediciones comparables |
+| E066 | **No se modificó arquitectura funcional** | ✅ VERIFICADO | N/A | N/A | Solo se crearon/actualizaron archivos .md en docs/. No se tocó opencode.json, .jsonc, AGENTS.md, prompts, MCP, plugins. | Restricción B1 respetada al 100%. | — |
+
+## 13. Correciones de evidencia previa (Fase B0/B1)
 
 | ID | Corrección | Estado anterior | Estado actual | Detalle |
 |----|-----------|----------------|---------------|---------|

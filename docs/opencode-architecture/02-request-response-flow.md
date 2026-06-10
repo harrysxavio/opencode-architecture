@@ -1,5 +1,7 @@
 # Request-Response Flow — Flujo Actual de Petición a Respuesta
 
+> ⚠️ **Corrección Fase B0/B1**: El diagrama siguiente muestra ambos AGENTS.md (#2 y #3) como fuentes simultáneas de contexto. En realidad, solo el AGENTS.md del agente ACTIVO se carga. La suma de ~29k asume ambos simultáneamente — el rango corregido es **~18,500–22,000 tokens** (INFERIDO). Pendiente de medición real con Test 8.
+
 ## 1. Diagrama Mermaid del flujo actual
 
 ```mermaid
@@ -18,7 +20,8 @@ flowchart TB
             6. Design skills protocol (~1.5k tokens)
             7. Background-agents delegation rules
             8. Tool schemas (nativas + MCP)
-            = ~29k+ tokens base
+             = ~18,5k–22k tokens base (INFERIDO)
+             → Nota: 29k asume ambos AGENTS.md simultáneos. Solo UNO se carga.
         "]
     end
 
@@ -102,7 +105,7 @@ flowchart TB
 |-------|---------|----------|--------|-----------|--------|
 | Codex Engine | Config persistida | Cargar config.toml + AGENTS.md + plugins | Sesión iniciada | config.toml líneas 1-5, 90-96 | — |
 | Engram plugin | Hook session.created | Crear o reusar sesión | session_id | engram.ts líneas 240-253 | — |
-| Engine | Fuentes de contexto | Construir system prompt con todas las capas | ~29k tokens de sistema | Inferido de suma de fuentes | 🔴 ALTO: contexto fijo masivo |
+| Engine | Fuentes de contexto | Construir system prompt con todas las capas | ~18,5k–22k tokens sistema (INFERIDO) ⚠️ | Inferido de suma de fuentes; corregido de ~29k (asumía ambos AGENTS.md simultáneos) | 🔴 ALTO: contexto fijo masivo — pendiente de medición real con Test 8 |
 
 ### Paso 1: Resolución de agente
 | Actor | Entrada | Decisión | Salida | Evidencia | Riesgo |
@@ -144,7 +147,7 @@ flowchart TB
 
 | Paso | Actor | Entrada | Decisión | Salida | Evidencia | Riesgo |
 |------|-------|---------|----------|--------|-----------|--------|
-| 0 | Codex Engine | Config persistida | Iniciar sesión, cargar contexto | ~29k tokens system | Inferido de suma de fuentes | 🔴 29k tokens fijos |
+| 0 | Codex Engine | Config persistida | Iniciar sesión, cargar contexto | ~18,5k–22k tokens (INFERIDO) | Inferido de suma de fuentes (corregido de ~29k) | 🔴 Contexto fijo masivo — pendiente Test 8 |
 | 1 | Runtime | Prompt usuario | ¿@mention? ¿comando? | Agente seleccionado | opencode.json:4-51 | 🔴 Dos primaries |
 | 2a | Manager | Prompt usuario | Tiny/Small/Medium/Large | Estrategia | Manager prompt | 🟡 Clasificación manual |
 | 2b | gentle-orch | Prompt usuario | ¿Inline o delegate? | Acción | gentle-orch prompt | 🟢 Claro |
@@ -159,7 +162,7 @@ flowchart TB
 
 | Punto | Componente | Tokens estimados | Naturaleza |
 |-------|-----------|-----------------|------------|
-| System prompt completo | Codex Engine | ~29,000 | Fijo por sesión |
+| System prompt completo | Codex Engine | ~18,500–22,000 (INFERIDO) ⚠️ | Fijo por sesión. Corregido de ~29k (asumía ambos AGENTS.md). Pendiente Test 8. |
 | Tool schemas MCP | OpenCode runtime | ~2,000-8,000 | Fijo según MCP activos |
 | Skill content cargado | skill() tool | ~2,000-10,000+ | Variable por trigger |
 | Output de subagentes | task/delegate | ~1,000-20,000+ | Variable por tarea |

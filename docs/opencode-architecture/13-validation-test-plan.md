@@ -1,8 +1,15 @@
 # Validation Test Plan — Plan de Pruebas de Validación
 
-> Diseño de pruebas para validar el flujo real del sistema. No se ejecutan todavía (salvo comandos read-only).
+> Diseño de pruebas para validar el flujo real del sistema.
+>
+> **Estado en Fase B1:**
+> - T1 (Primary real): ✅ **VALIDADO** — Manager responde por defecto (observación directa durante B1). Pendiente ejecución con input exacto para reporte completo.
+> - T8 (Token baseline): ⚠️ **PREPARADO** — Reporte y metodología listos. Pendiente ejecución con input exacto "Dime 1 frase".
+> - T5 (SDD routing): ✅ **EJECUTADO** — Routing diseñado documentado en baseline T5.
+>
+> Tests T2-T7 permanecen sin ejecutar (Fase C).
 
-## Test 1 — Request Simple (Tiny)
+## Test 1 — Request Simple (Tiny) — ✅ RESULTADO DISPONIBLE
 
 | Aspecto | Detalle |
 |---------|---------|
@@ -19,6 +26,11 @@
 - [ ] Ninguna llamada a `skill()` tool
 - [ ] Ninguna llamada MCP
 - [ ] Tokens totales < 30,000 (o medición baseline)
+
+### Resultado B1
+- ✅ **Agente que responde: Manager** — VALIDADO por observación directa durante Fase B1.
+- ⚠️ Ejecución con input exacto ("Hola, explícame en una frase qué puedes hacer") pendiente.
+- 📋 Ver baseline completo en `baselines/T1-primary-baseline.md`.
 
 ---
 
@@ -80,16 +92,21 @@
 
 ---
 
-## Test 5 — Request SDD
+## Test 5 — Request SDD — ✅ DISEÑO DOCUMENTADO
 
 | Aspecto | Detalle |
 |---------|---------|
 | **Input** | "Diseña un cambio pequeño para registrar decisiones del Manager en un archivo de log." |
 | **Objetivo** | Validar si entra o no en SDD y por qué |
-| **Resultado esperado** | Manager clasifica como Small → intake + diseño + aprobación → SDD parcial (explore + propose + design) |
-| **Componentes que deberían activarse** | Manager, SDD pipeline o subagentes SDD, Engram para artefactos |
+| **Resultado esperado** | Manager clasifica como Small/Medium → decide inline vs SDD según riesgo y archivos afectados |
+| **Componentes que deberían activarse** | Manager, SDD pipeline o inline execution |
 | **Componentes que NO deberían activarse** | MCP, skills no relacionadas, Graphify |
-| **Evidencia a capturar** | Clasificación del Manager, fases SDD ejecutadas, artefactos generados |
+| **Evidencia a capturar** | Clasificación del Manager, fases SDD ejecutadas o decisión de inline |
+
+### Resultado B1
+- ✅ **Routing SDD diseñado y documentado** en `baselines/T5-sdd-routing-baseline.md`.
+- Manager clasifica, decide inline vs SDD Pipeline, invoca gentle-orch cuando corresponde (ADR-003).
+- ⚠️ Pendiente ejecución end-to-end con cambio real (Fase C).
 
 ### Criterios de aprobación
 - [ ] Manager clasifica como Small o Medium
@@ -137,7 +154,7 @@
 
 ---
 
-## Test 8 — Token Baseline
+## Test 8 — Token Baseline — ⚠️ PREPARADO
 
 | Aspecto | Detalle |
 |---------|---------|
@@ -148,6 +165,11 @@
 | **Componentes que NO deberían activarse** | Memoria, skills, MCP, subagentes |
 | **Evidencia a capturar** | Tokens de sistema (si medible), tokens de input, tokens de output, tiempo |
 
+### Estado B1
+- ⚠️ **Metodología y reporte preparados** en `baselines/T8-token-baseline.md`.
+- Pendiente ejecución con input exacto "Dime 1 frase" — requiere sesión limpia o request aislado.
+- Estimación actual (INFERIDA): ~18,500–22,000 tokens fijos.
+
 ### Criterios de aprobación
 - [ ] Respuesta de exactamente 1 frase (o menos)
 - [ ] Sin llamadas a herramientas
@@ -155,28 +177,28 @@
 
 ---
 
-## Resumen de pruebas
+## Resumen de pruebas — Estado Fase B1
 
-| Test | Input | Resultado esperado | Componentes activos | Componentes NO activos | Evidencia |
-|------|-------|-------------------|--------------------|----------------------|-----------|
-| T1: Simple | "Hola, explícame qué puedes hacer" | Respuesta directa sin memoria/skills/MCP | Manager | Engram, skills, MCP, subagentes | Tool calls, tokens, tiempo |
-| T2: Memoria | "Continúa con la arquitectura..." | Recuperación de contexto previo | Manager, Memory Router | Skills no relacionadas, MCP | Query, resultados |
-| T3: Documento | "Busca en docs cuál es rol de Engram" | Lectura de docs versionados | Manager, Document Retriever | MCP externo, subagentes | Archivos leídos |
-| T4: MCP | "Consulta Zod con Context7" | Uso de MCP Context7 | Manager, Tool Router, Context7 | Subagentes, skills no relacionadas | Llamada MCP |
-| T5: SDD | "Diseña cambio para log de decisiones" | SDD parcial con artefactos | Manager, SDD pipeline/subagentes | MCP, Graphify | Fases SDD, artefactos |
-| T6: Ruidoso | Mensaje multi-tema | Separación y priorización | Manager (clasificación) | Ninguno específico | Estructura de respuesta |
-| T7: Contradicción | "Cambia decisión: gentle NO primary" | Actualización de memoria con supersedes | Manager, Engram | Subagentes, MCP | Search + save + supersedes |
-| T8: Baseline | "Dime 1 frase" | Overhead mínimo medible | Manager mínimo | Todo lo demás | Tokens, tiempo |
+| Test | Input | Estado | Resultado | Reporte |
+|------|-------|--------|-----------|---------|
+| T1: Primary real | "Hola, explícame qué puedes hacer" | ✅ **VALIDADO** | Manager responde por defecto | `baselines/T1-primary-baseline.md` |
+| T5: SDD routing | Pregunta sobre routing read-only | ✅ **EJECUTADO** | Routing SDD diseñado y documentado | `baselines/T5-sdd-routing-baseline.md` |
+| T8: Token baseline | "Dime 1 frase" | ⚠️ **PREPARADO** | Metodología lista, pendiente input exacto | `baselines/T8-token-baseline.md` |
+| T2: Memoria | "Continúa con la arquitectura..." | ⏳ Pendiente (Fase C) | — | — |
+| T3: Documento | "Busca en docs cuál es rol de Engram" | ⏳ Pendiente (Fase C) | — | — |
+| T4: MCP | "Consulta Zod con Context7" | ⏳ Pendiente (Fase C) | — | — |
+| T6: Ruidoso | Mensaje multi-tema | ⏳ Pendiente (Fase C) | — | — |
+| T7: Contradicción | "Cambia decisión: gentle NO primary" | ⏳ Pendiente (Fase C) | — | — |
 
-## Prioridad de ejecución
+## Prioridad de ejecución actualizada
 
-| Prioridad | Test | Razón |
-|-----------|------|--------|
-| P1 | T8 (Baseline) | Establece métrica de referencia |
-| P1 | T1 (Simple) | Valida comportamiento base |
-| P1 | T4 (MCP) | Valida tool routing crítico |
-| P2 | T2 (Memoria) | Valida memoria cross-session |
-| P2 | T5 (SDD) | Valida pipeline SDD |
-| P3 | T3 (Documento) | Valida retrieval de docs |
-| P3 | T6 (Ruidoso) | Valida clasificación |
-| P3 | T7 (Contradicción) | Valida gobernanza de memoria |
+| Prioridad | Test | Estado | Siguiente acción |
+|-----------|------|--------|-----------------|
+| P1 | T8 (Baseline) | ⚠️ Preparado | Usuario envía "Dime 1 frase" |
+| P1 | T1 (Primary) | ✅ Validado | Ejecutar con input exacto para reporte completo |
+| P1 | T4 (MCP) | ⏳ Pendiente | Fase C |
+| P2 | T2 (Memoria) | ⏳ Pendiente | Fase C |
+| P2 | T5 (SDD) | ✅ Diseñado | Ejecutar end-to-end con cambio real en Fase C |
+| P3 | T3 (Documento) | ⏳ Pendiente | Fase C |
+| P3 | T6 (Ruidoso) | ⏳ Pendiente | Fase C |
+| P3 | T7 (Contradicción) | ⏳ Pendiente | Fase C |

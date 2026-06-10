@@ -62,15 +62,17 @@ Se inyectan siempre, independientemente del request.
 
 ### Definición de rangos por tipo de request
 
-| Tipo de request | Token budget estimado | Tokens fijos | Tokens variables | Notas |
-|----------------|----------------------|-------------|-----------------|-------|
-| Simple (Tiny) | ~30,000-35,000 | ~29,000 | ~1,000-5,000 | Sin skills, sin MCP, sin memoria |
-| Con memoria | ~32,000-40,000 | ~29,000 | ~3,000-10,000 | mem_context + mem_search |
-| Con documento | ~32,000-50,000+ | ~29,000 | ~3,000-20,000+ | read + análisis |
-| Con SDD parcial | ~35,000-60,000 | ~29,000 | ~5,000-30,000 | 1-3 fases SDD |
-| Con SDD completo | ~40,000-100,000+ | ~29,000 | ~10,000-70,000+ | 8 fases + subagentes |
-| Con MCP | ~35,000-55,000 | ~29,000 | ~5,000-25,000 | MCP tool schemas + consultas |
-| Multiagente | ~50,000-150,000+ | ~29,000 | ~20,000-120,000+ | Delegaciones + outputs |
+| Tipo de request | Token budget estimado | Tokens fijos (INFERIDO) ⚠️ | Tokens variables | Notas |
+|----------------|----------------------|---------------------------|-----------------|-------|
+| Simple (Tiny) | ~20,000-27,000 | ~18,500–22,000 | ~1,000-5,000 | Sin skills, sin MCP, sin memoria |
+| Con memoria | ~22,000-32,000 | ~18,500–22,000 | ~3,000-10,000 | mem_context + mem_search |
+| Con documento | ~22,000-42,000+ | ~18,500–22,000 | ~3,000-20,000+ | read + análisis |
+| Con SDD parcial | ~24,000-52,000 | ~18,500–22,000 | ~5,000-30,000 | 1-3 fases SDD |
+| Con SDD completo | ~29,000-92,000+ | ~18,500–22,000 | ~10,000-70,000+ | 8 fases + subagentes |
+| Con MCP | ~24,000-47,000 | ~18,500–22,000 | ~5,000-25,000 | MCP tool schemas + consultas |
+| Multiagente | ~39,000-142,000+ | ~18,500–22,000 | ~20,000-120,000+ | Delegaciones + outputs |
+
+> ⚠️ **Corrección Fase B0/B1**: La columna "Tokens fijos" fue corregida de ~29,000 a ~18,500–22,000 porque ~29,000 asumía que ambos AGENTS.md (Manager + gentle-orchestrator) se cargan simultáneamente, lo cual es INCORRECTO — solo el agente activo carga su AGENTS.md. Pendiente de medición real con Test 8.
 
 ### Reglas de control
 

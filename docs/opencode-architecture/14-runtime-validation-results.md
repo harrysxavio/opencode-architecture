@@ -1,10 +1,12 @@
 # 14 — Runtime Validation Results
 
-> Documento creado en Fase B0. Almacena resultados de validaciones read-only ejecutadas para confirmar o refutar supuestos de la arquitectura OpenCode.
+> Documento creado en Fase B0. Almacena resultados de validaciones read-only ejecutadas para confirmar o refutar supuestos de la arquitectura OpenCode. Actualizado en Fase B1 con resolución de B-Security.
 
 ## Estado general
 
-**Parcial** — 4 de 7 validaciones ejecutadas. Algunas requieren comandos adicionales o acceso a runtime del modelo.
+**Completado (Fase B0)** — 7 de 7 validaciones ejecutadas.
+**Resuelto (Fase B-Security)** — P7: secretos rotados, backups eliminados, git history sin fugas.
+**En progreso (Fase B1)** — Tests 8, 1, 5 pendientes de ejecución para validar primary real y baseline de tokens.
 
 ## Objetivo
 
@@ -22,7 +24,7 @@ Validar con evidencia runtime los principales supuestos de la arquitectura OpenC
 | P4 | Config merge (opencode.json + .jsonc) | NO VALIDADO | Revisión de archivos + logs | Ambos archivos existen. opencode.json (63KB) tiene agents, MCP. opencode.jsonc (621 bytes) tiene engram (path diferente) y playwright. No hay evidencia runtime de si se fusionan o sobreescriben. | opencode.json, opencode.jsonc | 🟡 MEDIO: no se puede confirmar merge behavior sin test específico |
 | P5 | MCP duplicados en runtime | PARCIAL — 8 procesos engram | procesos + configs | Engram en 3 configs (opencode.json, .jsonc, config.toml). Playwright en 2 (.jsonc, .toml). Context7 en 2 (.json, .toml). **8 procesos engram.exe activos simultáneamente** confirman múltiples instancias. | `Get-Process -Name "engram"`, archivos de config | 🟡 MEDIO: duplicación confirmada en config, 8 instancias runtime consumiendo recursos |
 | P6 | frontend-specialist activo | VALIDADO — duplicado confirmado | file listing | agent/frontend-specialist.md (22,019 bytes) y agents/frontend-specialist.md (14,899 bytes) — ambos existen con diferente contenido. | agent/ y agents/ file listing | 🟡 MEDIO: duplicado con contenido diferente, no se sabe cuál gana |
-| P7 | Secretos expuestos | VALIDADO — 🔴 confirmado | grep redactado en config.toml | Línea 112: bearer_token_env_var con valor de GitHub PAT (redactado). Línea 126: URL con Browserbase API key (redactado). Ambos en texto plano en config.toml. | config.toml líneas 112, 126 | 🔴 ALTO: riesgo inmediato de exposición de credenciales |
+| P7 | Secretos expuestos | ✅ RESUELTO (B-Security) | Rotación manual + actualización config + limpieza backups | GitHub PAT actualizado (nuevo token). Browserbase API key eliminado (ya no needed). 5 backups con secretos eliminados de ~/.codex/. Git history sin fugas. Sin rastros de tokens viejos en ~/.codex/. | config.toml (actualizado), git log, ~/.codex/ (limpio) | 🟢 RESUELTO: B-Security completada. Sin secretos expuestos. |
 
 ---
 
@@ -75,26 +77,29 @@ Validar con evidencia runtime los principales supuestos de la arquitectura OpenC
 
 ## Recomendación Go / No-Go
 
-### Para pasar a Fase B-Security (rotación de secretos): **GO ✅**
+### Fase B-Security: **✅ COMPLETADA**
+
+**Resolución:**
+- GitHub PAT actualizado (nuevo token proporcionado por usuario).
+- Browserbase API key eliminado del config (ya no necesario).
+- 5 backups con secretos eliminados.
+- Git history sin fugas.
+- Sin rastros del token viejo en `~/.codex/`.
+
+### Para pasar a Fase B1 (observabilidad): **✅ EN EJECUCIÓN**
 
 **Condiciones:**
-- Secretos confirmados en texto plano → acción inmediata requerida.
-- No depende de más validaciones.
-- Riesgo: 🔴 ALTO. No esperar a Test 8 ni a resolución de primary.
+- ✅ B-Security completada.
+- ⬜ Ejecutar Test 8 (baseline de tokens) — pendiente.
+- ⬜ Ejecutar Test 1 (primary real) — pendiente.
+- ⬜ Ejecutar Test 5 (SDD routing) — pendiente.
 
-### Para pasar a Fase B1 (observabilidad): **GO condicional ⚠️**
-
-**Condiciones:**
-- Ejecutar Fase B-Security primero.
-- Ejecutar Test 8 (baseline de tokens) para tener métrica de referencia.
-- Confirmar agente primary con Test 1.
-
-### Para pasar a Fase C (tests de flujo): **NO-GO hasta completar B-Security y B1**
+### Para pasar a Fase C (tests de flujo): **NO-GO hasta completar B1**
 
 **Razón:**
 - Sin observabilidad, los tests no producen métricas comparables.
-- Sin resolver secretos, los tests pueden exponer credenciales en logs.
 - Sin baseline de tokens, no se puede medir impacto de optimizaciones.
+- Sin validación de primary real, los tests pueden validar el agente incorrecto.
 
 ### Para modificar configuración (opencode.json, AGENTS.md, config.toml): **NO-GO 🔴**
 
@@ -102,5 +107,4 @@ Validar con evidencia runtime los principales supuestos de la arquitectura OpenC
 - No se ha validado el agente primary real.
 - No se ha medido el baseline de tokens.
 - No se ha resuelto la duplicación de MCP.
-- No se han rotado los secretos.
 - Cualquier cambio de configuración sin estas validaciones puede romper el flujo existente sin capacidad de detectarlo.

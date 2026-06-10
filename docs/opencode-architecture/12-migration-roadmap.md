@@ -32,56 +32,64 @@
 15. ✅ Escribir ADRs
 16. ⬜ **Revisión y aprobación por el usuario**
 
-## Fase B-Security — Rotación y Externalización de Secretos
+## Fase B-Security — Rotación y Externalización de Secretos ✅ COMPLETADA
 
-> ⚠️ **Corrección Fase B0**: R11 (secretos expuestos) clasificado como 🔴 ALTO. Debe mitigarse ANTES de observabilidad, memoria, MCP o cambios arquitectónicos.
+> Ejecutada y resuelta antes de Fase B1. R11 mitigado.
 
 | Aspecto | Detalle |
 |---------|---------|
 | **Objetivo** | Eliminar secretos expuestos en texto plano de config.toml |
-| **Cambios permitidos** | Solo modificar config.toml (mover a env vars) y .gitignore. NO cambiar lógica de agentes/MCP/plugins |
-| **Archivos probables** | `config.toml`, `.gitignore`, documentación de entorno |
-| **Riesgo** | 🟡 Medio: cambiar configuración puede romper MCP que dependen de los valores actuales |
-| **Prueba de aceptación** | GitHub token y Browserbase API key no están en texto plano en ningún archivo de configuración |
+| **Cambios realizados** | GitHub PAT actualizado. Browserbase eliminado del config. 5 backups eliminados. |
+| **Archivos afectados** | `config.toml` (~/.codex/) — línea 112 actualizada, sección browserbase eliminada |
+| **Riesgo** | 🟢 Resuelto. Sin secretos expuestos. |
+| **Prueba de aceptación** | ✅ Sin secretos en texto plano. Git history limpio. Backups eliminados. |
 
-### Tareas
+### Tareas ejecutadas
 
-1. Revocar/rotar GitHub PAT (config.toml línea 112).
-2. Revocar/rotar Browserbase API key (config.toml línea 126).
-3. Mover ambos a variables de entorno (`GITHUB_TOKEN`, `BROWSERBASE_API_KEY`).
-4. Actualizar referencias en config.toml para usar variables de entorno.
-5. Verificar que no hay impresión de secretos en logs, prompts o docs.
-6. Revisar historial Git por commits con secretos (si aplica a repos compartidos).
-7. Documentar en README las variables de entorno requeridas.
+1. ✅ GitHub PAT actualizado (nuevo token proporcionado por usuario).
+2. ✅ Browserbase API key eliminado del config (ya no necesario).
+3. ✅ 5 backups con secretos eliminados de `~/.codex/`.
+4. ✅ Git history revisado — sin fugas.
+5. ✅ Sin rastros del token viejo en `~/.codex/`.
+6. ⬜ Variables de entorno: no implementado (decisión del usuario: personal project, token directo en config).
 
 ---
 
-## Fase B1 — Observabilidad Mínima
+## Fase B1 — Observabilidad Mínima (EN EJECUCIÓN 🔄)
 
 | Aspecto | Detalle |
 |---------|---------|
 | **Objetivo** | Medir flujo real sin cambiar lógica del sistema |
-| **Cambios permitidos** | Solo añadir logging/métricas. NO cambiar lógica agente/prompt |
-| **Archivos probables** | Plugin de observabilidad, hooks en engram.ts o background-agents.ts |
-| **Riesgo** | 🟡 Medio: agregar código a plugins existentes |
-| **Prueba de aceptación** | Cada request produce métricas: request_id, agent, tools, memory, tokens, tiempo |
+| **Cambios permitidos** | Solo documentación y scripts read-only. NO cambiar lógica agente/prompt/config |
+| **Archivos probables** | `docs/opencode-architecture/18-observability-design.md`, `docs/opencode-architecture/baselines/` |
+| **Riesgo** | 🟢 Bajo: solo documentación y scripts read-only |
+| **Prueba de aceptación** | Test 8 (token baseline), Test 1 (primary real), Test 5 (SDD routing) ejecutados y documentados |
 
-### Métricas a capturar por request
+### Métricas a capturar por request (diseño — ver 18-observability-design.md)
 
 ```json
 {
   "request_id": "uuid",
-  "timestamp": "ISO datetime",
-  "agent_selected": "manager | gentle-orchestrator | frontend-specialist",
-  "manager_decision": "tiny | small | medium | large",
-  "tools_called": ["read", "write", "edit", "bash", "task", "skill", ...],
-  "mcp_called": ["engram", "context7", "notebooklm", ...],
-  "memory_read": true/false,
-  "memory_written": true/false,
-  "context_sources": ["AGENTS.md (.config)", "AGENTS.md (.codex)", "skills list", "engram plugin"],
-  "estimated_context_tokens": 29000,
-  "execution_time_ms": 12345,
-  "final_response_summary": "Texto de la respuesta o summary"
+  "timestamp": "ISO-8601",
+  "input_type": "tiny | small | memory | docs | mcp | sdd | noisy",
+  "agent_selected": "manager | gentle-orchestrator | unknown",
+  "primary_resolution_method": "runtime | logs | inferred | not_validated",
+  "manager_decision": "tiny | small | medium | large | not_available",
+  "routing_path": ["manager", "memory", "docs", "mcp", "subagent", "sdd"],
+  "tools_called": [],
+  "mcp_called": [],
+  "skills_loaded": [],
+  "subagents_called": [],
+  "memory_read": false,
+  "memory_written": false,
+  "documents_read": [],
+  "estimated_fixed_context_tokens": null,
+  "estimated_dynamic_context_tokens": null,
+  "estimated_output_tokens": null,
+  "total_estimated_tokens": null,
+  "execution_time_ms": null,
+  "errors": [],
+  "final_response_summary": ""
 }
 ```
 
@@ -210,10 +218,10 @@ gantt
     Corrección documental + validación :done, B0, after A, 1d
     
     section Fase B-Security
-    Rotación de secretos               :B_SEC, after B0, 1d
+    Rotación de secretos               :done, B_SEC, after B0, 1d
     
     section Fase B1
-    Observabilidad mínima              :B1, after B_SEC, 3d
+    Observabilidad mínima              :active, B1, after B_SEC, 3d
     
     section Fase C
     Tests de flujo                     :C, after B1, 3d
@@ -240,8 +248,8 @@ gantt
 |------|----------|-------------------|-------------------|--------|---------------------|
 | **A** | Documentación y evidencia | Solo .md en docs/ | docs/opencode-architecture/*.md | 🟢 Bajo | Todos los docs creados, hallazgos clasificados |
 | **B0** | Corrección documental + validación read-only | Solo .md en docs/ + comandos read-only | docs/opencode-architecture/*.md | 🟢 Bajo | Contradicciones corregidas, validaciones registradas |
-| **B-Security** | Rotación y externalización de secretos | config.toml, .gitignore, env vars | config.toml, .gitignore | 🟡 Medio | Sin secretos en texto plano en config |
-| **B1** | Observabilidad mínima | Solo añadir logging/métricas | Plugin observabilidad | 🟡 Medio | Cada request produce métricas |
+| **B-Security** | Rotación y externalización de secretos | config.toml | ~/.codex/config.toml | 🟢 **Completado** | ✅ Sin secretos expuestos. Git history limpio. |
+| **B1** | Observabilidad mínima (🔴 **Activo**) | Solo documentación + scripts read-only | docs/opencode-architecture/18-observability-design.md, baselines/ | 🟢 Bajo | Tests 8, 1, 5 ejecutados y documentados |
 | **C** | Tests de flujo | Solo scripts de test | tests/flows/* | 🟢 Bajo | 8 escenarios ejecutables |
 | **D** | Consolidar MCP y skills | opencode.json, MCP, skills | Config MCP, skills/ | 🟡 Medio | MCP consolidados, skills bajo demanda |
 | **E** | Reparar memoria Engram | engram.ts, AGENTS.md | plugins/engram.ts, AGENTS.md | 🟡 Medio | mem_save persiste observaciones |
