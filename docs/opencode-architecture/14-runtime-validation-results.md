@@ -167,4 +167,18 @@ La sesión actual NO valida runtime porque OpenCode no recarga config en calient
 | Reasoning tokens | 47 |
 | Total tokens | 40,091 |
 
-D-T1 confirma que Manager sigue respondiendo Tiny directo después de D3. D4 sigue incompleto hasta ejecutar D-T5-read-only, D-T5-pipeline-dry-run y D-T3.
+D-T1 confirma que Manager sigue respondiendo Tiny directo después de D3.
+
+### D4 final
+
+| Test | Estado | Resultado |
+|---|---|---|
+| D-T1 | PASSED | Manager directo, sin gentle/tools/MCP/memoria/skills/subagentes |
+| D-T5-read-only | PASSED | Manager puede proponer ruta SDD sin regla conflictiva |
+| D-T5-pipeline-dry-run | PASSED | Manager invocó gentle-orchestrator como subagent; envelope compacto; no loop |
+| D-T3 | PASSED | Markdown docs confirman gentle como SDD Pipeline invocable |
+
+### Go / No-Go final D
+
+- **GO para Fase E — Gobernanza memoria**: D completo; T2/T7 ya mostraron necesidad clara.
+- **NO-GO para Fase F**: aunque D-T1 validó 40,091 tokens reales, no optimizar todavía; diseñar fase específica.

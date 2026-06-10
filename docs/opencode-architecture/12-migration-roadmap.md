@@ -297,6 +297,6 @@ graph LR
 | D0 auditoría | ✅ Completado | `test-runs/D-manager-gentle-transition-2026-06-09/D0-pre-change-audit.md` |
 | D1/D2 plan y diff | ✅ Aprobado | `D1-change-plan.md`, `D2-diff-review.md` |
 | D3 implementación | ✅ Aplicado | `gentle-orchestrator.mode = subagent`; JSON válido |
-| D4 tests post-cambio | 🔄 Parcial | D-T1 PASSED post-restart; faltan D-T5-read-only, D-T5-pipeline-dry-run y D-T3 |
+| D4 tests post-cambio | ✅ Completado | D-T1, D-T5-read-only, D-T5-pipeline-dry-run y D-T3 PASSED |
 
-Fase D permanece **en validación** hasta ejecutar D-T5-read-only, D-T5-pipeline-dry-run y D-T3 en sesión nueva.
+Fase D queda completada. Próximo paso recomendado: Fase E — Gobernanza memoria. Fase F queda NO-GO hasta diseñar investigación específica de tokens.

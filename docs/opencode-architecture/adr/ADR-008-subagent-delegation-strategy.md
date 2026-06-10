@@ -1,6 +1,6 @@
 # ADR-008: Estrategia de Delegación a Subagentes
 
-> Estado Fase D: Se agregaron guardrails anti-loop en Manager/gentle. `sdd-*` siguen sin modificarse. Validación runtime pendiente de D4.
+> Estado Fase D: Completado. Se agregaron guardrails anti-loop en Manager/gentle. `sdd-*` siguen sin modificarse. D4 dry-run validó envelope compacto y ausencia de loop.
 
 ## Estado
 

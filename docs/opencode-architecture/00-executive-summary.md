@@ -187,13 +187,25 @@ Manager sintetiza → Quality Gate → Respuesta → Memory Save Decision
 |---|---|---|
 | D0/D1/D2 | ✅ Completado | Auditoría, plan y diff aprobados |
 | D3 | ✅ Aplicado | `gentle-orchestrator` cambiado a `subagent`; prompts Manager/gentle actualizados; JSON válido |
-| D4 | 🔄 Parcial | D-T1 PASSED post-restart; faltan D-T5-read-only, D-T5-pipeline-dry-run y D-T3 |
+| D4 | ✅ Completado | D-T1, D-T5-read-only, D-T5-pipeline-dry-run y D-T3 PASSED |
 
-> Fase D NO queda completa hasta ejecutar los tests D-T5-read-only, D-T5-pipeline-dry-run y D-T3.
+> Fase D queda completada: Manager sigue siendo primary efectivo; gentle-orchestrator no compite como primary y puede ser invocado como SDD Pipeline subagent.
 
 ### Hallazgo D-T1
 
 D-T1 confirmó que Manager responde Tiny directo después de D3, sin gentle/tools/MCP/memoria/skills/subagentes. También expuso tokens reales: **40,091 total** (40,017 input), lo que vuelve Fase F más importante pero no bloquea D4.
+
+### Resultado final Fase D
+
+| Validación | Estado |
+|---|---|
+| Manager primary efectivo | ✅ PASSED |
+| gentle-orchestrator no-primary | ✅ PASSED |
+| Manager → gentle-orchestrator para SDD | ✅ PASSED |
+| Envelope compacto | ✅ PASSED |
+| Loop Manager/gentle | ✅ No observado |
+| Escritura funcional en tests read-only | ✅ No ocurrió |
+| Hallazgo tokens 40k | ⚠️ Riesgo Fase F, no bloquea D/E |
 
 ### Resultados Fase C
 

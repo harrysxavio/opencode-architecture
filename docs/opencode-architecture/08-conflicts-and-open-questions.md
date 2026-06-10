@@ -105,10 +105,14 @@ graph TD
 
 | Conflicto | Estado | Evidencia | Pendiente |
 |---|---|---|---|
-| ADR-003 vs regla runtime Manager | CONFIG CORREGIDA / D-T1 PASSED | `opencode.json` actualizado; D-T1 post-restart confirmó Manager directo para Tiny | Ejecutar D-T5-read-only y D-T5 dry-run |
+| ADR-003 vs regla runtime Manager | RESUELTO | D-T1, D-T5-read-only, D-T5-pipeline-dry-run y D-T3 PASSED | Mantener tests de regresión en próximos cambios |
 
 ### Nuevo riesgo observado en D-T1
 
 | ID | Riesgo | Estado | Evidencia | Próxima acción |
 |---|---|---|---|---|
 | C017 | Overhead real mayor al estimado | VALIDADO | D-T1 reportó 40,017 input tokens y 40,091 total | Investigar en Fase F; no bloquear D4 |
+
+### Estado Fase D
+
+Fase D resuelve C016: Manager puede invocar gentle-orchestrator como SDD Pipeline subagent sin loop observado. C017 queda abierto como riesgo de tokens para Fase F.

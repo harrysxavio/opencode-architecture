@@ -228,8 +228,8 @@ El flujo actual es sano para docs, memoria, MCP explícito, ruido y contradicci�
 | Test | Estado | Nota |
 |---|---|---|
 | D-T1 Tiny | PASSED | Post-restart: Manager directo, sin gentle/tools/MCP/memoria/skills/subagentes; tokens reales: 40,091 total |
-| D-T5 read-only | PENDING | Validar que Manager puede proponer/invocar gentle sin violar reglas |
-| D-T5 pipeline dry-run | PENDING | Validar envelope compacto y no-loop |
-| D-T3 docs | PENDING | Validar rol objetivo de gentle desde Markdown |
+| D-T5 read-only | PASSED | Manager puede proponer/invocar gentle sin violar reglas |
+| D-T5 pipeline dry-run | PASSED | Envelope compacto, no-loop, sin escritura funcional |
+| D-T3 docs | PASSED | Rol objetivo de gentle validado desde Markdown |
 
-La sesión actual no puede validar D4 porque OpenCode no recarga `opencode.json` en caliente.
+D4 completado después de reiniciar OpenCode.

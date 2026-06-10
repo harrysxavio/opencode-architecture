@@ -1,6 +1,6 @@
 # ADR-003: Rol de gentle-orchestrator
 
-> Estado Fase D: Prompt actualizado para declarar `gentle-orchestrator` como SDD Pipeline subagent, no primary. Validación runtime pendiente de D4 post-restart.
+> Estado Fase D: Completado. Prompt actualizado para declarar `gentle-orchestrator` como SDD Pipeline subagent, no primary. D4 validó invocación dry-run desde Manager con envelope compacto y sin loop.
 
 ## Estado
 
