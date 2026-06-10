@@ -41,6 +41,7 @@
 | D1 | Reinstalación controlada con setup oficial Engram OpenCode | ❌ NO-GO: plugin oficial descubierto pero falla por `Bun is not defined` |
 | D2 | Patch mínimo Node-compatible del plugin oficial Engram | ❌ NO-GO: `Bun.*` removido y sin error `engram.ts`, pero pregunta útil no aumentó `user_prompts` |
 | D3 | Hook/export diagnostic con `export default` + logs seguros temporales | ❌ NO-GO: hook entra, `finalContent=44`, POST `/prompts` responde HTTP 400 |
+| D4 | Diagnóstico contrato HTTP `/sessions` + `/prompts` | ⏳ Instrumentación aplicada; pendiente restart + test positivo |
 
 ## Archivos modificados
 
@@ -50,10 +51,12 @@
 | `plugins/engram.ts.e6b-backup` | Backup pre-cambio | ✅ |
 | `plugins/engram.ts.e6b-d2-backup` | Backup pre-D2 del plugin oficial reinstalado | ✅ |
 | `plugins/engram.ts.e6b-d3-backup` | Backup pre-D3 del plugin Node-compatible | ✅ |
+| `plugins/engram.ts.e6b-d4-backup` | Backup pre-D4 del plugin instrumentado | ✅ |
 | `opencode.jsonc` | Sin cambios | ✅ No necesario |
 | `E6B-D1-plugin-load-repair.md` | Registro de reparación controlada + setup oficial | ✅ |
 | `E6B-D2-node-compatible-plugin-patch.md` | Registro del patch Node-compatible | ✅ |
 | `E6B-D3-hook-export-diagnostic.md` | Registro del diagnóstico hook/export | ✅ |
+| `E6B-D4-prompts-http-contract-diagnostic.md` | Registro del diagnóstico HTTP `/prompts` | ✅ |
 
 ## DB
 
