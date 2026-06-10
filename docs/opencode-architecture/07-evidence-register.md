@@ -139,6 +139,17 @@
 
 ## 13. Correciones de evidencia previa (Fase B0/B1)
 
+## 13b. Hallazgos Fase C — Tests de flujo reproducibles
+
+| ID | Hallazgo | Estado | Archivo | Línea/sección | Evidencia | Interpretación | Próxima validación |
+|----|----------|--------|---------|---------------|-----------|----------------|-------------------|
+| E068 | T3 confirma Markdown como fuente de verdad | ✅ VALIDADO | `test-runs/C-flow-tests-2026-06-09/T3-docs-retrieval-flow.md` | Reporte completo | Manager leyó `16-memory-governance-policy.md`, `10-target-architecture.md`, `14-runtime-validation-results.md`, `ADR-004-engram-role.md`. | Document Retriever funciona correctamente para arquitectura. | Mantener docs como fuente primaria. |
+| E069 | T2 confirma recuperación de memoria útil vía `mem_context` | ✅ VALIDADO / ⚠️ PARCIAL ARQ | `T2-memory-flow.md` | Reporte completo | Engram devolvió contexto útil reciente. Sin escritura. | Memory Flow funciona operativamente, pero persistence schema sigue pendiente. | Fase E: diagnosticar persistencia real. |
+| E070 | T4 confirma Context7 bajo demanda | ✅ VALIDADO | `T4-mcp-routing-flow.md` | Reporte completo | Context7 resolve/query usado solo por intención explícita. | MCP bajo demanda viable. | Fase G: consolidar MCP sin romper demanda explícita. |
+| E071 | T5 revela bloqueo Manager ↔ gentle-orchestrator | ⚠️ PARTIAL | `T5-sdd-routing-flow.md` | Reporte completo | Ruta SDD diseñada, pero regla runtime actual prohíbe invocar gentle-orchestrator. | Fase D debe resolver contradicción entre ADR-003 y prompt runtime. | Ejecutar prueba end-to-end tras cambio controlado. |
+| E072 | T6 confirma manejo sano de request ruidoso | ✅ VALIDADO | `T6-noisy-request-flow.md` | Reporte completo | Manager separa temas, prioriza y no activa MCP/skill/SDD sin confirmación. | Buen control de sobreorquestación. | Mantener como criterio de aceptación. |
+| E073 | T7 confirma contradicción ficticia sin contaminar memoria real | ✅ VALIDADO | `T7-memory-contradiction-flow.md` | Reporte completo | No mem_save, no ADR real, no cambio Manager/gentle. | Lógica conceptual de supersedes correcta. | Fase E: implementar/testear supersedes real. |
+
 | ID | Corrección | Estado anterior | Estado actual | Detalle |
 |----|-----------|----------------|---------------|---------|
 | E018 | memories_1.sqlite tamaño | INFERIDO: 4KB sin observaciones | VALIDADO: 40KB (no 4KB), sin tabla observations | DB es de pipeline interno, no de memoria semántica |

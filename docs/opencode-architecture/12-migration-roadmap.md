@@ -224,7 +224,7 @@ gantt
     Observabilidad mínima              :done, B1, after B_SEC, 3d
     
     section Fase C
-    Tests de flujo                     :C, after B1, 3d
+    Tests de flujo                     :done, C, after B1, 3d
     
     section Fase D
     Resolver agente primario           :D, after C, 2d
@@ -250,7 +250,18 @@ gantt
 | **B0** | Corrección documental + validación read-only | Solo .md en docs/ + comandos read-only | docs/opencode-architecture/*.md | 🟢 Bajo | Contradicciones corregidas, validaciones registradas |
 | **B-Security** | Rotación y externalización de secretos | config.toml | ~/.codex/config.toml | 🟢 **Completado** | ✅ Sin secretos expuestos. Git history limpio. |
 | **B1** | Observabilidad mínima | Solo documentación + scripts read-only | docs/opencode-architecture/18-observability-design.md, baselines/ | 🟢 **Completado** | ✅ Tests 8, 1, 5 ejecutados y documentados. Sin sobreorquestación en Tiny. |
-| **C** | Tests de flujo | Solo scripts de test | tests/flows/* | 🟢 Bajo | 8 escenarios ejecutables |
+| **C** | Tests de flujo | Solo reportes Markdown + ejecución controlada | docs/opencode-architecture/test-runs/C-flow-tests-2026-06-09/ | 🟢 **Completado** | ✅ T2/T3/T4/T6/T7 PASSED; T5 PARTIAL |
+
+### Resultado Fase C (2026-06-09)
+
+| Test | Estado | Implicación |
+|---|---|---|
+| T2 | PASSED | Memory Flow operativo, persistence pendiente |
+| T3 | PASSED | Markdown docs funcionan como fuente de verdad |
+| T4 | PASSED | Context7 bajo demanda funciona |
+| T5 | PARTIAL | Fase D debe resolver conflicto Manager ↔ gentle-orchestrator |
+| T6 | PASSED | Manager maneja ruido sin sobreorquestar |
+| T7 | PASSED | Contradicción ficticia manejada sin contaminar memoria real |
 | **D** | Consolidar MCP y skills | opencode.json, MCP, skills | Config MCP, skills/ | 🟡 Medio | MCP consolidados, skills bajo demanda |
 | **E** | Reparar memoria Engram | engram.ts, AGENTS.md | plugins/engram.ts, AGENTS.md | 🟡 Medio | mem_save persiste observaciones |
 | **F** | Token optimization | AGENTS.md, skills, prompts | AGENTS.md, skills/ | 🟡 Medio | ~18.5–22k → ~8.5-9.5k tokens fijos |

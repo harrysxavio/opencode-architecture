@@ -113,7 +113,27 @@ Validar con evidencia runtime los principales supuestos de la arquitectura OpenC
 ### Para modificar configuración (opencode.json, AGENTS.md, config.toml): **NO-GO 🔴**
 
 **Razón:**
-- No se ha validado el agente primary real.
-- No se ha medido el baseline de tokens.
+- El agente primary real ya fue validado: Manager responde por defecto.
+- El baseline funcional T8 ya fue validado; tokens reales siguen NO DISPONIBLES.
+- T5 reveló un conflicto de regla runtime: Manager no puede invocar gentle-orchestrator aunque la arquitectura estratégica lo requiere para SDD.
 - No se ha resuelto la duplicación de MCP.
-- Cualquier cambio de configuración sin estas validaciones puede romper el flujo existente sin capacidad de detectarlo.
+- Cualquier cambio de configuración debe esperar a Fase D/G con test específico de regresión.
+
+---
+
+## Fase C — Tests de Flujo Reproducibles (2026-06-09)
+
+| Test | Estado | Resultado runtime | Riesgo |
+|---|---|---|---|
+| T2 — Memoria útil | PASSED | `mem_context` recuperó contexto útil reciente. Sin escritura. | Engram persistence sigue sin diagnóstico definitivo |
+| T3 — Markdown docs | PASSED | Manager leyó docs Markdown y respondió desde fuente versionada. | Bajo |
+| T4 — MCP Context7 | PASSED | Context7 activado explícitamente para Zod. Sin memoria/SDD/subagentes. | Bajo |
+| T5 — SDD read-only | PARTIAL | Manager diseñó ruta SDD, pero no puede invocar gentle-orchestrator por regla runtime actual. | Alto para Fase D |
+| T6 — Request ruidoso | PASSED | Manager separa temas, prioriza y no ejecuta todo. | Bajo |
+| T7 — Contradicción ficticia | PASSED | Manejo conceptual correcto, sin memoria real ni ADR real. | Bajo |
+
+### Go / No-Go post-Fase C
+
+- **Fase D — Resolver agente primario**: **GO condicionado**. T1/T8 validan Manager como default; T5 revela que hay que resolver explícitamente la contradicción Manager ↔ gentle-orchestrator.
+- **Fase E — Gobernanza memoria**: **GO**. T2/T7 muestran necesidad clara y camino conceptual; Engram sigue requiriendo diagnóstico de persistencia.
+- **Fase F — Optimización tokens**: **NO-GO**. Aún falta inventario de lazy-load y/o telemetría más robusta.

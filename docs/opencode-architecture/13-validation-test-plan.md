@@ -203,3 +203,20 @@
 | P3 | T3 (Documento) | ⏳ Pendiente | Fase C |
 | P3 | T6 (Ruidoso) | ⏳ Pendiente | Fase C |
 | P3 | T7 (Contradicción) | ⏳ Pendiente | Fase C |
+
+---
+
+## Resultados Fase C — 2026-06-09
+
+| Test | Estado | Resultado | Reporte |
+|---|---|---|---|
+| T2 — Memoria útil | PASSED | `mem_context` recuperó contexto útil; no hubo escritura ni sobreorquestación | `test-runs/C-flow-tests-2026-06-09/T2-memory-flow.md` |
+| T3 — Markdown docs | PASSED | Markdown versionado usado como fuente de verdad para Engram | `test-runs/C-flow-tests-2026-06-09/T3-docs-retrieval-flow.md` |
+| T4 — MCP Context7 | PASSED | Context7 se activó solo por intención explícita | `test-runs/C-flow-tests-2026-06-09/T4-mcp-routing-flow.md` |
+| T5 — SDD read-only | PARTIAL | Routing diseñado, pero invocación real a gentle-orchestrator bloqueada por regla runtime actual | `test-runs/C-flow-tests-2026-06-09/T5-sdd-routing-flow.md` |
+| T6 — Request ruidoso | PASSED | Manager separa temas, prioriza y no ejecuta todo | `test-runs/C-flow-tests-2026-06-09/T6-noisy-request-flow.md` |
+| T7 — Contradicción ficticia | PASSED | Manejo conceptual correcto sin contaminar memoria real ni ADRs | `test-runs/C-flow-tests-2026-06-09/T7-memory-contradiction-flow.md` |
+
+### Conclusión Fase C
+
+El flujo actual es sano para docs, memoria, MCP explícito, ruido y contradicción ficticia. El único bloqueo relevante antes de cambios funcionales es T5: la arquitectura estratégica quiere que Manager invoque `gentle-orchestrator` como SDD Pipeline, pero la regla runtime actual del Manager lo prohíbe.

@@ -145,7 +145,7 @@ Manager sintetiza → Quality Gate → Respuesta → Memory Save Decision
 | **Fase B0** — Corrección documental + validación | ✅ Completada |
 | **Fase B-Security** — Rotación de secretos | ✅ **Completada** |
 | **Fase B1** — Observabilidad mínima | ✅ **Completada** |
-| **Fase C** — Tests de flujo | ⏳ Pendiente (requiere B1) |
+| **Fase C** — Tests de flujo | ✅ **Completada** |
 | **Fase D** — Resolver agente primario | ⏳ Pendiente |
 | **Fase E** — Gobernanza de memoria | ⏳ Pendiente |
 | **Fase F** — Reducir contexto fijo | ⏳ Pendiente |
@@ -179,4 +179,15 @@ Manager sintetiza → Quality Gate → Respuesta → Memory Save Decision
 
 ### Próximo paso inmediato
 
-**🔵 Fase C — Tests de flujo reproducibles**: Ejecutar T2 (memoria), T3 (documento), T4 (MCP), T6 (ruidoso), T7 (contradicción) y consolidar baseline comparativo.
+**🔵 Fase D — Resolver agente primario / conflicto Manager ↔ gentle-orchestrator**: T5 reveló que la arquitectura estratégica permite invocar gentle-orchestrator como SDD Pipeline, pero la regla runtime actual del Manager lo prohíbe.
+
+### Resultados Fase C
+
+| Test | Estado | Resultado |
+|---|---|---|
+| T2 — Memoria | PASSED | `mem_context` recuperó contexto útil; persistence sigue pendiente |
+| T3 — Docs | PASSED | Markdown versionado usado correctamente |
+| T4 — MCP | PASSED | Context7 bajo demanda funciona |
+| T5 — SDD | PARTIAL | Routing diseñado; invocación gentle-orch bloqueada por regla runtime |
+| T6 — Ruido | PASSED | Manager prioriza sin sobreorquestar |
+| T7 — Contradicción | PASSED | No contaminó memoria ni ADR real |

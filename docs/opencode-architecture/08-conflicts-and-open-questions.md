@@ -88,3 +88,15 @@ graph TD
 | 🟡 P2 | Session summaries evidencia | ❌ No resuelto | Ejecutar mem_session_summary y verificar DB | — | C |
 | 🟢 P3 | C007: Graphify usado | ✅ Verificado sin graphify-out/ | No requiere acción | glob | ✔️ |
 | 🟢 P3 | C008: OpenSpec implementado | ❌ No verificado | Buscar openspec/ en todos los proyectos | glob | P3 |
+
+---
+
+## 6. Actualización Fase C — conflictos nuevos o refinados
+
+| ID | Conflicto/Pregunta | Estado Fase C | Evidencia | Próxima acción |
+|---|---|---|---|---|
+| C001 | ¿Cuál agente primario responde? | ✅ Resuelto operativamente: Manager responde por defecto | T1/T8 + Fase C ejecutada por Manager | Fase D debe formalizar config |
+| C003 | ¿Engram escribe observaciones realmente? | ⚠️ Sigue abierto | T2 recupera memoria útil, pero B0 mostró DB sin `observations` | Fase E: diagnosticar storage real |
+| C009 | ¿SDD persiste artefactos realmente? | ⚠️ Sigue abierto | T5 no invocó pipeline por regla runtime actual | Fase D/Fase C-ext: probar SDD end-to-end tras resolver regla |
+| C011 | ¿MCP bajo demanda funciona? | ✅ Parcialmente resuelto para Context7 | T4 activó Context7 solo con intención explícita | Fase G: consolidar MCP duplicados |
+| C016 | Conflicto ADR-003 vs regla runtime Manager | 🔴 NUEVO / ALTO | T5: arquitectura estratégica permite gentle-orch; prompt runtime lo prohíbe | Fase D debe corregir prompt/config de forma controlada |
