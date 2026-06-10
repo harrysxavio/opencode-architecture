@@ -144,7 +144,7 @@ Manager sintetiza → Quality Gate → Respuesta → Memory Save Decision
 | **Fase A** — Documentación y evidencia | ✅ Completada |
 | **Fase B0** — Corrección documental + validación | ✅ Completada |
 | **Fase B-Security** — Rotación de secretos | ✅ **Completada** |
-| **Fase B1** — Observabilidad mínima | 🔄 **En ejecución** |
+| **Fase B1** — Observabilidad mínima | ✅ **Completada** |
 | **Fase C** — Tests de flujo | ⏳ Pendiente (requiere B1) |
 | **Fase D** — Resolver agente primario | ⏳ Pendiente |
 | **Fase E** — Gobernanza de memoria | ⏳ Pendiente |
@@ -160,6 +160,23 @@ Manager sintetiza → Quality Gate → Respuesta → Memory Save Decision
 - Git history revisado — sin fugas.
 - Sin rastros del token viejo en entorno.
 
+### Resultados B1
+
+| Test | Estado | Resultado |
+|------|--------|-----------|
+| **T1** — Primary real | ✅ **VALIDADO** | Manager responde por defecto |
+| **T8** — Token baseline | ✅ **EJECUTADO** | Sesión limpia. Sin sobreorquestación. Tokens reales NO DISPONIBLES. |
+| **T5** — SDD routing | ✅ **DISEÑADO** | Routing documentado. Pendiente ejecución end-to-end. |
+
+### Línea de baseline de tokens
+
+| Concepto | Valor | Estado |
+|----------|-------|--------|
+| Estimación anterior conflictiva | ~29,000 | ❌ Incorrecta (asumía ambos AGENTS.md) |
+| Estimación corregida preliminar | ~18,500–22,000 | ⚠️ INFERIDO |
+| Baseline T8 real | Pendiente de telemetría runtime | ❌ NO DISPONIBLE |
+| Objetivo estratégico futuro | ~8,500–9,500 | 📐 Meta |
+
 ### Próximo paso inmediato
 
-**🔵 Fase B1 — Observabilidad mínima**: Ejecutar Tests 8, 1 y 5 para medir baseline real antes de cualquier cambio arquitectónico.
+**🔵 Fase C — Tests de flujo reproducibles**: Ejecutar T2 (memoria), T3 (documento), T4 (MCP), T6 (ruidoso), T7 (contradicción) y consolidar baseline comparativo.

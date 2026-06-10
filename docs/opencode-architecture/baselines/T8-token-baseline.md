@@ -2,42 +2,43 @@
 
 ## Input usado
 
-**Esperado:** `"Dime 1 frase."`
-**Ejecutado:** Pendiente de ejecución con input exacto. El reporte actual documenta la metodología y estimaciones basadas en la configuración conocida.
+```
+Dime 1 frase.
+```
 
 ## Fecha/hora
 
-2026-06-09 — Reporte preparado en Fase B1. Ejecución pendiente.
+2026-06-09 ~22:34 — Ejecutado en sesión limpia (nuevo chat OpenCode, sin contexto previo).
 
 ## Resultado observado
 
-⚠️ **NO EJECUTADO con input exacto.** La ejecución requiere que el usuario envíe "Dime 1 frase" como request independiente para medir el overhead mínimo del sistema sin contaminación de contexto.
+**✅ EJECUTADO en sesión limpia. Resultado funcional VALIDADO. Tokens reales NO DISPONIBLES.**
 
-## Metodología propuesta para la ejecución
-
-1. Usuario envía: `"Dime 1 frase."`
-2. Capturar timestamp de inicio.
-3. Observar comportamiento del agente: tools, MCP, memoria, skills.
-4. Capturar timestamp de respuesta completa.
-5. Documentar toda tool call observada.
-6. Si el runtime expone conteo de tokens, registrarlo. Si no, estimar con método documentado.
+| Aspecto | Detalle |
+|---------|---------|
+| Sesión limpia | ✅ Sí — nuevo chat OpenCode |
+| Input exacto | `"Dime 1 frase."` |
+| Output exacto | `"Una arquitectura limpia se defiende sola; el código no necesita comentarios cuando los nombres cuentan la historia."` |
+| Tiempo aproximado | ~3 segundos |
+| Clasificación del agente | Tiny — "one clear answer, no file changes, no ambiguity" |
 
 ## Métricas
 
 | Métrica | Valor | Estado | Evidencia |
 |---------|-------|--------|-----------|
-| agente que respondió | **Manager** (esperado) | NO VALIDADO | Pendiente de confirmación runtime |
-| tiempo de respuesta | — | NO DISPONIBLE | Pendiente de medición |
-| tokens input reales | — | NO DISPONIBLE | El runtime no expone conteo de tokens |
-| tokens output reales | — | NO DISPONIBLE | El runtime no expone conteo de tokens |
-| contexto fijo estimado | ~18,500–22,000 | INFERIDO | Basado en suma de fuentes conocidas (ver 00-executive-summary.md) |
-| tools activadas | — | NO VALIDADO | Pendiente de observación |
-| MCP activados | — | NO VALIDADO | Pendiente de observación |
-| memoria consultada | — | NO VALIDADO | Pendiente de observación |
-| memoria escrita | — | NO VALIDADO | Pendiente de observación |
-| skills cargadas | — | NO VALIDADO | Pendiente de observación |
+| agente que respondió | **Manager** | ✅ VALIDADO | Output visible del runtime. Clasificación Tiny explícita. |
+| tiempo de respuesta | ~3 segundos | ✅ VALIDADO | Medición manual |
+| tokens input reales | — | ❌ NO DISPONIBLE | El runtime no expone conteo de tokens |
+| tokens output reales | — | ❌ NO DISPONIBLE | El runtime no expone conteo de tokens |
+| contexto fijo estimado | ~18,500–22,000 | ⚠️ INFERIDO | Basado en suma de fuentes conocidas (ver 00-executive-summary.md) |
+| tools activadas | **Ninguna** | ✅ VALIDADO | Sin tool calls observables |
+| MCP activados | **Ninguno** | ✅ VALIDADO | Sin MCP visibles |
+| memoria consultada | **No** | ✅ VALIDADO | Sin acceso a memoria visible |
+| memoria escrita | **No** | ✅ VALIDADO | Sin escritura de memoria visible |
+| skills cargadas | **Ninguna** | ✅ VALIDADO | Sin skills cargadas |
+| subagentes activados | **Ninguno** | ✅ VALIDADO | Sin subagentes visibles |
 
-## Estimación de contexto fijo (INFERIDA — pendiente de medición)
+## Estimación de contexto fijo (INFERIDA)
 
 | Fuente | Tokens estimados | Nota |
 |--------|-----------------|------|
@@ -46,27 +47,57 @@
 | Available skills list | ~3,000 | Variable según proyecto |
 | Engram protocol inline | ~2,500 | Inyectado por plugin |
 | Design skills protocol | ~1,500 | En Manager prompt |
-| **Rango** | **~18,500–22,000** | **INFERIDO** — pendiente de medición real |
+| **Rango** | **~18,500–22,000** | **INFERIDO** — pendiente de telemetría runtime |
 
-> ⚠️ **No usar 29,000 como baseline.** La estimación de 29k asume ambos AGENTS.md siempre activos, lo cual es incorrecto (solo UN agente responde por sesión).
+## Línea de baseline
+
+| Concepto | Valor | Estado |
+|----------|-------|--------|
+| Estimación anterior conflictiva | ~29,000 | ❌ INCORRECTA — asumía ambos AGENTS.md simultáneos |
+| Estimación corregida preliminar | ~18,500–22,000 | ⚠️ INFERIDO |
+| Baseline T8 real | Pendiente de telemetría runtime | ❌ NO DISPONIBLE |
+| Objetivo estratégico futuro | ~8,500–9,500 | 📐 META |
 
 ## Qué se activó
 
-Pendiente de observación.
+- **Manager**: responde directo, clasifica como Tiny.
+- **Ninguna tool**, **ningún MCP**, **ninguna skill**, **ningún subagente**, **ninguna memoria**.
 
 ## Qué NO se activó
 
-Pendiente de observación.
+- ❌ gentle-orchestrator — no fue invocado.
+- ❌ Memoria (lectura o escritura) — no se consultó ni escribió.
+- ❌ MCP — ningún MCP externo activado.
+- ❌ Skills — ningún skill cargado.
+- ❌ Subagentes — ninguna delegación.
+- ❌ SDD Pipeline — no se activó.
+- ❌ Herramientas innecesarias — tool surface no se tocó.
 
 ## Conclusión
 
-El Test 8 requiere ejecución con el input exacto para establecer baseline real. Este documento prepara la metodología y el formato. La ejecución tomará < 30 segundos cuando el usuario envía "Dime 1 frase."
+**T8: VALIDADO como baseline funcional/comportamental.**
+
+Para un request Tiny en sesión limpia:
+
+1. **Manager responde directo.** ✅
+2. **No se activa gentle-orchestrator.** ✅
+3. **No se activa memoria visible.** ✅
+4. **No se activa MCP visible.** ✅
+5. **No se cargan skills visibles.** ✅
+6. **No se llaman subagentes.** ✅
+7. **No entra a SDD.** ✅
+8. **No hay sobreorquestación visible.** ✅
+
+**Limitación**: tokens reales NO DISPONIBLES. El runtime no expone conteo de tokens. Toda métrica de tokens sigue siendo INFERIDA hasta tener telemetría runtime.
 
 ## Riesgos
 
-- El contexto de la sesión actual (Fase B1) puede contaminar la medición. Ejecutar en sesión limpia o al inicio de una nueva sesión.
-- Si el runtime no expone tokens, toda métrica de tokens será INFERIDA, no VALIDADA.
+- Sin telemetría runtime, la optimización de tokens (Fase F) dependerá de estimaciones, no de mediciones.
+- El comportamiento de request Tiny está validado como limpio. Requests más complejos (Medium, Large, SDD) pueden activar más componentes.
+- No hay evidencia de que el conteo de tokens sea accesible sin instrumentación del runtime.
 
 ## Próxima acción
 
-Usuario envía: `"Dime 1 frase."` → Capturar métricas → Actualizar este reporte.
+- ✅ T8 completado como baseline funcional.
+- Usar este baseline como referencia para Fase C (tests de flujo).
+- Si en el futuro se obtiene telemetría runtime, actualizar con tokens reales.

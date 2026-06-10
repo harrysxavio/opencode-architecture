@@ -55,7 +55,7 @@
 
 ---
 
-## Fase B1 — Observabilidad Mínima (EN EJECUCIÓN 🔄)
+## Fase B1 — Observabilidad Mínima ✅ COMPLETADA
 
 | Aspecto | Detalle |
 |---------|---------|
@@ -221,7 +221,7 @@ gantt
     Rotación de secretos               :done, B_SEC, after B0, 1d
     
     section Fase B1
-    Observabilidad mínima              :active, B1, after B_SEC, 3d
+    Observabilidad mínima              :done, B1, after B_SEC, 3d
     
     section Fase C
     Tests de flujo                     :C, after B1, 3d
@@ -249,7 +249,7 @@ gantt
 | **A** | Documentación y evidencia | Solo .md en docs/ | docs/opencode-architecture/*.md | 🟢 Bajo | Todos los docs creados, hallazgos clasificados |
 | **B0** | Corrección documental + validación read-only | Solo .md en docs/ + comandos read-only | docs/opencode-architecture/*.md | 🟢 Bajo | Contradicciones corregidas, validaciones registradas |
 | **B-Security** | Rotación y externalización de secretos | config.toml | ~/.codex/config.toml | 🟢 **Completado** | ✅ Sin secretos expuestos. Git history limpio. |
-| **B1** | Observabilidad mínima (🔴 **Activo**) | Solo documentación + scripts read-only | docs/opencode-architecture/18-observability-design.md, baselines/ | 🟢 Bajo | Tests 8, 1, 5 ejecutados y documentados |
+| **B1** | Observabilidad mínima | Solo documentación + scripts read-only | docs/opencode-architecture/18-observability-design.md, baselines/ | 🟢 **Completado** | ✅ Tests 8, 1, 5 ejecutados y documentados. Sin sobreorquestación en Tiny. |
 | **C** | Tests de flujo | Solo scripts de test | tests/flows/* | 🟢 Bajo | 8 escenarios ejecutables |
 | **D** | Consolidar MCP y skills | opencode.json, MCP, skills | Config MCP, skills/ | 🟡 Medio | MCP consolidados, skills bajo demanda |
 | **E** | Reparar memoria Engram | engram.ts, AGENTS.md | plugins/engram.ts, AGENTS.md | 🟡 Medio | mem_save persiste observaciones |

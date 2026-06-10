@@ -68,8 +68,8 @@ graph TD
 |----|-----------|----------------|---------------|-----------|
 | C001 | ¿Cuál agente primario responde? | Sin resolver | **PARCIALMENTE RESUELTO** — Manager validado como primary real por observación directa durante B1. Sin validación logs runtime. | Manager ejecutó B1 completo. gentle-orch no intervino. Ver `baselines/T1-primary-baseline.md` |
 | C003 | ¿Engram escribe observaciones? | Sin resolver | **VALIDADO NO FUNCIONAL** — DB sin tabla observations | memories_1.sqlite: solo tablas _sqlx_migrations, stage1_outputs, jobs |
-| C010 | ¿Cuánto contexto fijo realmente? | ~29k estimado | **CORREGIDO** — rango revisado ~18,500–22,000 (INFERIDO). T8 preparado para medición. | Ambos AGENTS.md no se cargan simultáneamente |
-| C012 | ¿Cuánto cuesta una petición Tiny? | ~20k-30k | **CORREGIDO** — rango revisado ~18,500–22,000. Pendiente T8 para medición real. | Mismo razonamiento que C010 |
+| C010 | ¿Cuánto contexto fijo realmente? | ~29k estimado | **CORREGIDO** — rango revisado ~18,500–22,000 (INFERIDO). T8 ejecutado en sesión limpia: baseline funcional validado, tokens reales NO DISPONIBLES. | Baselines/T8-token-baseline.md |
+| C012 | ¿Cuánto cuesta una petición Tiny? | ~20k-30k | **CORREGIDO** — rango revisado ~18,500–22,000 (INFERIDO). T8: sin sobreorquestación. Tokens reales NO DISPONIBLES. | Baselines/T8-token-baseline.md |
 | C013 | ¿Cuál frontend-specialist es activo? | Sin resolver | **VALIDADO DUPLICADO** — ambos existen con contenido diferente | agent/ (22KB) y agents/ (14.9KB) confirman duplicado |
 | R11 | Secretos expuestos | 🔴 P0 — No resuelto | ✅ **RESUELTO (B-Security)** | GitHub PAT actualizado. Browserbase eliminado. Backups limpios. Git sin fugas. |
 
@@ -80,7 +80,7 @@ graph TD
 | 🔴 P1 | C001: Agente primario real | ✅ **Validado** — Manager responde | Ejecutar T1 con input exacto para reporte completo | Test manual | B1 ✅ → Cierre |
 | 🔴 P1 | C003: Engram funcional | ❌ No resuelto | Diagnosticar por qué no hay tabla observations | Revisar engram.ts MCP connection | E |
 | 🔴 P1 | C009: SDD persiste artefactos | ❌ No resuelto | Ejecutar SDD dry-run mínimo | Task a subagente SDD | C |
-| 🔴 P1 | T8: Token baseline | ⚠️ Preparado | Usuario envía "Dime 1 frase" como request independiente | Test manual | B1 → pendiente input |
+| 🔴 P1 | T8: Token baseline | ✅ **Completado** | Baseline funcional validado en sesión limpia. Sin sobreorquestación. Tokens reales NO DISPONIBLES. | Test ejecutado | B1 ✅ |
 | 🟡 P2 | C002: Merge de configs | ❌ No resuelto | Consultar runtime OpenCode | Read de docs o test | C |
 | 🟡 P2 | C005: Context index | ✅ Resuelto | CONTEXT_INDEX.md existe en otros proyectos | Ya validado | ✔️ |
 | 🟡 P2 | C006: Inventory actualizado | ❌ No resuelto | Regenerar inventory y comparar | Ejecutar script | P3 |
