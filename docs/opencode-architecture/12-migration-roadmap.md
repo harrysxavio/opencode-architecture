@@ -129,17 +129,17 @@
 - **gentle-orchestrator**: cambiar a `mode: "subagent"` o eliminar su modo primary. Mantenerlo como agente invocable explícitamente para SDD.
 - Si se elimina el primary de gentle-orch, actualizar su prompt para reflejar que es un SDD Pipeline invocable, no un orquestador general.
 
-## Fase E — Gobernanza de Memoria ✅ COMPLETADA
+## Fase E — Gobernanza de Memoria (en curso)
 
 | Aspecto | Detalle |
 |---------|---------|
 | **Objetivo** | Diagnosticar, estabilizar y gobernar Engram como memoria persistente real |
-| **Cambios permitidos** | opencode.json, opencode.jsonc (pin binario + project name), documentación |
-| **Archivos probables** | `opencode.json`, `opencode.jsonc`, docs de test-runs, README raíz |
-| **Riesgo** | 🟢 Bajo-Medio: cambios de configuración controlados con backup y rollback |
-| **Prueba de aceptación** | E4B-T1 a T7 PASSED. Doctor 4/4 OK. Binario único v1.16.1. Project name explícito. |
+| **Cambios permitidos** | opencode.json, opencode.jsonc (pin binario + project name), documentación, contratos |
+| **Archivos probables** | `opencode.json`, `opencode.jsonc`, docs de test-runs, README raíz, docs/contratos |
+| **Riesgo** | 🟢 Bajo-Medio |
+| **Prueba de aceptación (global)** | E4B-T1 a T7 PASSED. E5 contratos definidos. E6 noise gate definido |
 
-### Subfases ejecutadas
+### Subfases ejecutadas (E0–E4B)
 
 | Subfase | Estado | Resultado |
 |---------|--------|-----------|
@@ -152,11 +152,11 @@
 | **E4A-Docs-Cleanup-v2** | ✅ | README raíz enriquecido como entrada completa del proyecto |
 | **E4B** — Engram stabilization | ✅ **Completada** | Pin a v1.16.1 + `--project=opencode-architecture`. Tests T1-T7 PASSED. Doctor OK |
 
-### Subfase planificada
+### Subfases pendientes
 
 | Subfase | Estado | Objetivo |
 |---------|--------|----------|
-| **E5** | ⏳ Pendiente | Context Pack + Memory Writer/Validator contracts |
+| **E5** | **▶️ En curso** | Context Pack, Intake/Noise Cleaner, Memory Retriever/Writer/Validator, Read Escalation, Quality Metrics, Tests E5-T1 a T7 |
 | **E6** | ⏳ Pendiente | Prompt capture / noise gate
 
 ## Fase F — Reducir Contexto Fijo
@@ -278,8 +278,8 @@ gantt
 | T6 | PASSED | Manager maneja ruido sin sobreorquestar |
 | T7 | PASSED | Contradicción ficticia manejada sin contaminar memoria real |
 | **D** | Resolver agente primario | opencode.json | .config/opencode/opencode.json | 🟢 **Completado** | ✅ gentle-orchestrator.mode = subagent. D-T1, D-T3, D-T5 PASSED |
-| **E** | Gobernanza de memoria Engram | opencode.json, opencode.jsonc, docs | Config OpenCode, docs/ | 🟢 **Completado** | ✅ E0-E3 diagnóstico, E4A gap review, E4B stabilization. Tests E-T1 a E-T7 + E4B-T1 a T7 PASSED |
-| **E5** | Context Pack (pendiente) | Documentación + contratos | docs/ | 🟡 Medio | Contrato Context Pack definido, Memory Writer/Validator operacional |
+| **E** | Gobernanza de memoria Engram | opencode.json, opencode.jsonc, docs | Config OpenCode, docs/ | 🟢 **En curso** | ✅ E0-E4B completados. E5 contratos definidos. E6 noise gate pendiente |
+| **E5** | Context Pack (en curso) | Documentación + contratos | docs/ | 🟡 Medio | Contrato Context Pack definido, Memory Writer/Validator operacional |
 | **F** | Token optimization | AGENTS.md, skills, prompts | AGENTS.md, skills/ | 🟡 Medio | ~18.5–22k → ~8.5-9.5k tokens fijos |
 | **G** | Config consolidation | opencode.json, .jsonc, config.toml | Config OpenCode | 🟡 Medio | gentle-orch mode: subagent. Config única. |
 | **H** | Consolidar arquitectura | Todo | Todos | 🔴 Alto | Arquitectura objetivo implementada y testeada |

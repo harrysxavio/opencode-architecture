@@ -112,9 +112,9 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **E4A-Docs-Cleanup** | ✅ | README raíz reescrito, docs README convertido a índice mínimo |
 | **E4A-Docs-Cleanup-v2** | ✅ | README raíz enriquecido como entrada completa del proyecto |
 | **E4B** — Engram stabilization | ✅ **Completada** | Pin a v1.16.1 + `--project=opencode-architecture`. Tests T1-T7 PASSED |
-| **E5** — Context Pack | 🔮 Futuro | Contrato de contexto estructurado + Memory Writer/Validator |
-| **E6** — Noise gate | 🔮 Futuro | Control de captura de prompts en Engram |
-| **F** — Token reduction | 🔮 Futuro | Reducción de contexto con Context Pack como base |
+| **E5** — Context Pack | **▶️ En curso** | Contrato de contexto estructurado + Memory Writer/Validator |
+| **E6** — Noise gate | ⏳ Pendiente | Control de captura de prompts en Engram |
+| **F** — Token reduction | ⏳ Pendiente (post-E5) | Reducción de contexto con Context Pack como base |
 | **G** — Hybrid Retrieval | 🔮 Futuro | Búsqueda combinada keyword + semántica |
 | **H** — MCP consolidation | 🔮 Futuro | Superficie MCP optimizada, memory server avanzado |
 
@@ -141,6 +141,10 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **Estrategia de transición Manager/gentle** | [17-manager-gentle-transition-plan.md](docs/opencode-architecture/17-manager-gentle-transition-plan.md), ADR-001, ADR-003, ADR-008 |
 | **Decisiones arquitectónicas (ADRs)** | [docs/opencode-architecture/adr/](docs/opencode-architecture/adr/) |
 | **Ejecuciones reales de pruebas** | [docs/opencode-architecture/test-runs/](docs/opencode-architecture/test-runs/) |
+| **Context Pack Contract** | [19-context-pack-contract.md](docs/opencode-architecture/19-context-pack-contract.md), test-runs/E5 |
+| **Memory Writer/Validator** | [20-memory-writer-validator-contract.md](docs/opencode-architecture/20-memory-writer-validator-contract.md), test-runs/E5 |
+| **Read Escalation Policy** | [21-read-escalation-policy.md](docs/opencode-architecture/21-read-escalation-policy.md) |
+| **Memory Quality Metrics** | [22-memory-quality-metrics.md](docs/opencode-architecture/22-memory-quality-metrics.md) |
 | **Arquitectura de proyecto replicable** | [15-replicable-project-architecture.md](docs/opencode-architecture/15-replicable-project-architecture.md) |
 
 ---
@@ -199,9 +203,9 @@ Este principio recorrió todas las fases: el LLM no debe recibir conversaciones 
 
 ## Estado actual y próximo paso
 
-**Estado actual:** `E4B — Engram Stabilization` ✅ Completada.
+**Estado actual:** `E5 — Context Pack + Memory Writer/Validator contracts` ▶️ En curso.
 
-**Próximo paso:** `E5 — Context Pack + Memory Writer/Validator contracts`.
+**Estado E global:** E0-E4B ✅ completados. E5 ▶️ en curso. E6 ⏳ pendiente.
 
 ### Resultados de E4B
 
