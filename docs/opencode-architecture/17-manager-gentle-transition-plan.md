@@ -15,7 +15,7 @@
 | **Contexto fijo** | ~18,500–22,000 tokens (estimado) |
 | **Ambigüedad** | No se sabe cuál agente responde por defecto |
 | **Secretos** | 2 expuestos (GitHub PAT, Browserbase API key) |
-| **Engram** | DB sin tabla observations (memoria no funcional) |
+| **Engram** | Store real funcional en `~/.engram/engram.db`; falta gobernanza/config unificada |
 
 ## 2. Estado objetivo (post-transición)
 

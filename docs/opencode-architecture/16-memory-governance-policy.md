@@ -1,6 +1,8 @@
 # 16 — Memory Governance Policy
 
 > Creado en Fase B0 (2026-06-09). Define la política de gobernanza de memoria para la arquitectura OpenCode.
+>
+> Actualización Fase E (2026-06-10): Engram persiste en `C:\Users\harry\.engram\engram.db`. La DB `.codex\memories_1.sqlite` no es el store semántico de Engram. La política sigue vigente: memoria como biblioteca, no basurero.
 
 ---
 
@@ -168,6 +170,10 @@
 ---
 
 ## 7. Formato de memoria (Engram)
+
+### Formato estándar deseado de gobernanza
+
+> Nota E1: el `mem_save` MCP actual NO acepta todos estos campos como parámetros nativos. `title`, `type`, `content`, `project`, `scope`, `topic_key`, `session_id` sí están soportados. Campos como `valid_until`, `status`, `supersedes`, `sensitivity` deben codificarse en `content`, modelarse con relations/update, o incorporarse en una mejora futura.
 
 ### Formato estándar para mem_save
 

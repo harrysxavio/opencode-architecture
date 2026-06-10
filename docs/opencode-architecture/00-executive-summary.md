@@ -33,17 +33,18 @@ MCP = herramientas bajo demanda, no superficie siempre activa sin control
 
 **Riesgo**: El sistema puede responder con el orquestador incorrecto dependiendo de la UI o configuración adicional.
 
-### 2. Engram no produce persistencia útil — confirmado en Fase B0
+### 2. Engram persiste, pero requiere gobernanza — corregido en Fase E0/E1
 
-**VALIDADO**: El plugin `engram.ts` está activo (19,136 líneas), inyecta instrucciones de memoria al system prompt, captura prompts de usuario y tiene hooks de sesión. Sin embargo:
+**CORREGIDO / VALIDADO**: El diagnóstico B0 miró `C:\Users\harry\.codex\memories_1.sqlite`, que no es el store semántico de Engram. El store real está en `C:\Users\harry\.engram\engram.db` y contiene `observations`, `user_prompts`, `sessions`, `memory_relations` y FTS.
 
-- **Fase B0**: `memories_1.sqlite` tiene **40KB (no 4KB)** pero NO tiene tabla `observations`. Su schema es de pipeline interno (`_sqlx_migrations`, `stage1_outputs`, `jobs`), no de memoria semántica.
-- La carpeta `memories/` contiene solo archivos placeholder sin datos útiles.
-- `rollout_summaries/` está vacío.
-- `session_index.jsonl` (57 entradas) no contiene evidencia de `mem_session_summary`.
-- **8 procesos engram.exe activos** confirman duplicación por triple configuración.
+- `~\.engram\engram.db`: 292 observations, 302 user_prompts, 68 sessions, 176 relations.
+- `mem_save`, `mem_search`, `mem_get_observation`, `mem_context` y `mem_session_summary` funcionan.
+- `mem_session_summary` persiste como `observations.type=session_summary`; no llena `sessions.summary`.
+- Persisten prompts en `user_prompts`, lo que confirma riesgo de ruido/privacidad si no hay gate.
+- Post-Fase D siguen activos 3 procesos Engram: 1 `serve` + 2 `mcp --tools=agent`.
+- Hay binarios Engram duplicados: v1.15.13 en `C:\Users\harry\bin\engram.exe` y v1.16.1 en `C:\Users\harry\AppData\Local\engram\bin\engram.exe`.
 
-**Riesgo**: Toda la memoria cross-session que el sistema cree tener no está funcionando. Se requiere diagnóstico del pipeline Engram MCP en Fase E.
+**Riesgo real**: no es ausencia total de persistencia; es duplicación, drift de project names, prompts guardados y falta de política runtime mínima.
 
 ### 3. Contexto fijo — estimación no validada
 
@@ -146,8 +147,8 @@ Manager sintetiza → Quality Gate → Respuesta → Memory Save Decision
 | **Fase B-Security** — Rotación de secretos | ✅ **Completada** |
 | **Fase B1** — Observabilidad mínima | ✅ **Completada** |
 | **Fase C** — Tests de flujo | ✅ **Completada** |
-| **Fase D** — Resolver agente primario | ⏳ Pendiente |
-| **Fase E** — Gobernanza de memoria | ⏳ Pendiente |
+| **Fase D** — Resolver agente primario | ✅ **Completada** |
+| **Fase E** — Gobernanza de memoria | 🔄 **E0/E1/E2/E3 completados; E4 pendiente aprobación** |
 | **Fase F** — Reducir contexto fijo | ⏳ Pendiente |
 | **Fase G** — Optimizar MCP surface | ⏳ Pendiente |
 | **Fase H** — Consolidar arquitectura objetivo | ⏳ Pendiente |
@@ -206,6 +207,18 @@ D-T1 confirmó que Manager responde Tiny directo después de D3, sin gentle/tool
 | Loop Manager/gentle | ✅ No observado |
 | Escritura funcional en tests read-only | ✅ No ocurrió |
 | Hallazgo tokens 40k | ⚠️ Riesgo Fase F, no bloquea D/E |
+
+### Estado Fase E — Memory Governance
+
+| Paso | Estado | Resultado |
+|---|---|---|
+| E0 diagnostics | ✅ Completado | Store real identificado: `~\.engram\engram.db` |
+| E1 controlled tests | ✅ Completado | Probe ficticio guardado/recuperado/upserted; summary persistido |
+| E2 root cause | ✅ Completado | B0 miró DB equivocada; problema real = gobernanza/config duplicada |
+| E3 change plan | ✅ Completado | Propuesta mínima lista |
+| E4 implementation | ⏸️ Bloqueado | Requiere aprobación explícita |
+
+Fase E recomienda **GO condicionado** para reparación mínima: unificar binario/config Engram, consolidar instrucciones y mantener plugin sin tocar salvo aprobación específica.
 
 ### Resultados Fase C
 

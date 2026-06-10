@@ -181,7 +181,7 @@ flowchart LR
 | Manager llama a gentle-orch? | ❌ NO (prohibido) | ✅ SÍ (cuando el flujo SDD lo requiere) |
 | Contexto fijo estimado | ~18,500–22,000 tokens | ~8,500–9,500 tokens (objetivo ADR-006) |
 | Instrucciones de memoria | 3 fuentes duplicadas | 1 fuente consolidada (plugin) |
-| Memoria Engram | Sin gobernanza, DB vacía | Gobernada, ciclo de vida, filtros |
+| Memoria Engram | Persiste en `~/.engram/engram.db`, pero sin gobernanza suficiente | Gobernada, ciclo de vida, filtros |
 | Markdown versionado | Sin rol definido | Fuente de verdad arquitectónica |
 | Skill registry | Context index implícito | Context index oficial |
 | MCP | Siempre activos (9+ servers) | Bajo demanda, solo tools nativas por defecto |

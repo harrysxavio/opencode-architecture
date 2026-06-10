@@ -233,3 +233,15 @@ El flujo actual es sano para docs, memoria, MCP explícito, ruido y contradicci�
 | D-T3 docs | PASSED | Rol objetivo de gentle validado desde Markdown |
 
 D4 completado después de reiniciar OpenCode.
+
+## Fase E — Memory Governance tests
+
+| Test | Estado | Resultado |
+|---|---|---|
+| E-T1 mem_context actual | PASSED | No existía probe ficticio previo |
+| E-T2 mem_save ficticio | PASSED | id=395 guardado tras crear sesión ficticia |
+| E-T3 recuperación inmediata | PASSED | `mem_search` + `mem_get_observation` recuperaron id=395 |
+| E-T4 recuperación post nueva sesión | PARTIAL | CLI/DB independiente recuperó id=395; falta restart OpenCode real |
+| E-T5 session summary | PASSED | id=396 creado como `session_summary`; `sessions.summary` vacío |
+| E-T6 no guardar ruido | PASSED simulado | Sin `mem_save`; frase de ruido no aparece en observations/user_prompts |
+| E-T7 contradicción ficticia | PASSED | mismo topic_key actualizó id=395; `revision_count=2` |

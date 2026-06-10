@@ -141,7 +141,7 @@
 
 ### Tareas
 
-1. Diagnosticar por qué `memories_1.sqlite` está vacía (no tiene tabla observations, solo tablas internas de pipeline).
+1. Corregir diagnóstico previo: `memories_1.sqlite` es store interno Codex; Engram real vive en `~\.engram\engram.db`.
 2. Reparar pipeline de guardado (puede ser MCP, permisos o configuración).
 3. Consolidar instrucciones Engram: Markdown versionado (engram-instructions.md) como fuente de verdad; plugin engram.ts como mecanismo runtime; remover de AGENTS.md.
 4. Implementar filtro de guardado: no guardar prompts completos automáticamente.

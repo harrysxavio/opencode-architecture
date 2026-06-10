@@ -1,10 +1,12 @@
 # ADR-004: Rol de Engram
 
+> Actualización Fase E (2026-06-10): Engram sí persiste en `C:\Users\harry\.engram\engram.db`. El problema confirmado es gobernanza/configuración/ruido, no ausencia total de storage semántico.
+
 ## Estado
 
 **Aprobado** — Decisión estratégica del usuario (2026-06-09). Engram debe ser memoria gobernada, no basurero de prompts.
 
-> ⚠️ **Pendiente de diagnóstico técnico**: Fase B0 confirmó que `memories_1.sqlite` NO tiene tabla `observations`. La gobernanza no es viable hasta reparar el pipeline de persistencia. Esto NO invalida la decisión estratégica.
+> ✅ **Diagnóstico técnico Fase E**: `memories_1.sqlite` pertenece al mecanismo interno de Codex y no es el store semántico de Engram. Engram real persiste en `~\.engram\engram.db`. La gobernanza es viable; queda pendiente reparar duplicación, project drift y ruido de prompts.
 
 ---
 
@@ -15,16 +17,16 @@ Engram es el sistema de memoria persistente del ecosistema. Actualmente:
 - **Configurado** en 3 lugares: `opencode.json`, `opencode.jsonc`, `config.toml`.
 - **Plugin** `engram.ts` (19,136 líneas) que inyecta instrucciones de memoria, captura prompts, gestiona sesiones.
 - **MCP server** que expone tools: `mem_save`, `mem_search`, `mem_context`, `mem_session_summary`, etc.
-- **8 procesos engram.exe activos** simultáneamente (confirmado en Fase B0).
+- **3 procesos engram.exe activos** post-Fase D/E0: 1 `serve` + 2 MCP (`codex` y `OpenCode`).
 
-### Problemas detectados (Fase B0)
+### Problemas detectados y corregidos (Fase B0 → Fase E)
 
-1. **`memories_1.sqlite` no tiene tabla `observations`**: su schema es de pipeline interno (`_sqlx_migrations`, `stage1_outputs`, `jobs`). La DB tiene 40KB pero no contiene memoria semántica.
-2. **8 instancias de engram.exe** — duplicación por triple configuración MCP.
+1. **Diagnóstico B0 corregido**: `memories_1.sqlite` no tiene tabla `observations` porque no es Engram; Engram real es `~\.engram\engram.db` y sí tiene observations/prompts/sessions.
+2. **3 instancias de engram.exe** — duplicación por configuración/runtime Codex + OpenCode + serve.
 3. **Protocolo Engram triplicado**: AGENTS.md (.config), AGENTS.md (.codex), engram.ts MEMORY_INSTRUCTIONS.
 4. **Prompt capture sin filtro**: guarda prompts completos sin distinguir entre útiles y ruido.
-5. **Session summaries sin evidencia**: `session_index.jsonl` (57 entradas) no contiene "summary".
-6. **Memories/ vacío**: solo archivos placeholder, `rollout_summaries/` vacío.
+5. **Session summaries funcionan distinto a lo esperado**: se guardan como `observations.type=session_summary`; `session_index.jsonl` y `sessions.summary` no son evidencia suficiente.
+6. **Codex memories/ vacío**: solo archivos placeholder, no equivalente a Engram DB.
 7. **Sin política de qué guardar**: todo se captura, nada se filtra.
 
 ---
@@ -207,7 +209,7 @@ Invalidación
 
 ## Evidencia
 
-- **Fase B0**: memories_1.sqlite (40KB, sin tabla observations). 8 procesos engram.exe. session_index.jsonl sin summaries.
-- **Archivos**: `memories_1.sqlite`, `engram.ts`, `AGENTS.md (.config):72-166`, `AGENTS.md (.codex):355-449`.
+- **Fase E0/E1**: Engram real validado en `~/.engram/engram.db`; 3 procesos engram.exe; summaries como observations.
+- **Archivos**: `~/.engram/engram.db`, `engram.ts`, `AGENTS.md (.config):72-166`, `AGENTS.md (.codex):355-449`.
 - **ADR relacionados**: ADR-002 (Manager role — memory controller), ADR-006 (token budget).
 - **ID en Evidence Register**: E016, E017, E018, E019, E020, E021, E022, E023, E052, E053, E054, E060.

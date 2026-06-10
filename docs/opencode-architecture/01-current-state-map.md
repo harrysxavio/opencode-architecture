@@ -71,7 +71,7 @@ Zona F: ~/GitHub/ARQUITECTURA OPENCODE/← Proyecto documental (skill-registry, 
 | **frontend-specialist** | Implementación frontend | Manager | Tools directas, skills design | N/A | Medio: subagente especializado | ✅ Activo |
 | **engram.ts plugin** | Memoria persistente, prompt capture, system injection | Codex engine runtime | MCP Engram, SQLite | SQLite sessions + memories | Alto: ~19k líneas, inyecta contexto | ✅ Activo |
 | **background-agents.ts** | Delegación async persistida | Codex engine runtime | delegate tool, filesystem | Archivos en disco | Medio: ~49k líneas, escribe fuera de undo | ✅ Activo |
-| **Engram MCP** | MCP server de memoria | Todos los agentes | SQLite | SQLite memories_1.sqlite | Alto: 4KB sin observaciones | ⚠️ Vacío |
+| **Engram MCP** | MCP server de memoria | Todos los agentes | SQLite | `~/.engram/engram.db` | Medio: persiste, pero hay prompt capture/drift/duplicación | ⚠️ Gobernanza pendiente |
 | **Skill registry** | Índice de 48 skills | gentle-orchestrator, subagentes | Filesystem | Archivo .md | Bajo: índice, no estado | ✅ Activo |
 | **Inventory** | Catálogo técnico | Usuario (comando inventory) | Filesystem | .md + .json | Bajo: cache, puede estar stale | ⚠️ Cache |
 

@@ -97,6 +97,16 @@ graph TD
 |---|---|---|---|---|
 | C001 | ¿Cuál agente primario responde? | ✅ Resuelto operativamente: Manager responde por defecto | T1/T8 + Fase C ejecutada por Manager | Fase D debe formalizar config |
 | C003 | ¿Engram escribe observaciones realmente? | ⚠️ Sigue abierto | T2 recupera memoria útil, pero B0 mostró DB sin `observations` | Fase E: diagnosticar storage real |
+
+## Resoluciones Fase E
+
+| Conflicto | Estado | Resolución | Evidencia |
+|---|---|---|---|
+| C003 — Engram observations | RESUELTO | Engram sí escribe observations en `C:\Users\harry\.engram\engram.db`; `.codex\memories_1.sqlite` era store equivocado | E0/E1, id=395 |
+| C004 — prompts completos/ruido | ABIERTO | `user_prompts` tiene 302 rows; falta gate/política runtime | E0 DB schema/counts |
+| P3 — session summaries | RESUELTO PARCIAL | `mem_session_summary` funciona como observation `session_summary`, no como `sessions.summary` | id=396 |
+| Config duplicada Engram | ABIERTO | Siguen 3 procesos y 2 versiones de binario | E0 processes/binaries |
+| Project drift | ABIERTO | `engram doctor` detectó 14 mismatches | E0 doctor |
 | C009 | ¿SDD persiste artefactos realmente? | ⚠️ Sigue abierto | T5 no invocó pipeline por regla runtime actual | Fase D/Fase C-ext: probar SDD end-to-end tras resolver regla |
 | C011 | ¿MCP bajo demanda funciona? | ✅ Parcialmente resuelto para Context7 | T4 activó Context7 solo con intención explícita | Fase G: consolidar MCP duplicados |
 | C016 | Conflicto ADR-003 vs regla runtime Manager | 🔴 NUEVO / ALTO | T5: arquitectura estratégica permite gentle-orch; prompt runtime lo prohíbe | Fase D debe corregir prompt/config de forma controlada |

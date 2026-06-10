@@ -5,7 +5,7 @@
 | # | Riesgo | Severidad | Probabilidad | Impacto | Evidencia | Mitigación propuesta | Prioridad |
 |---|--------|-----------|-------------|---------|-----------|---------------------|-----------|
 | R01 | **Doble orquestador primario**: Manager y gentle-orchestrator ambos mode: "primary" sin regla de resolución clara | 🔴 **CRÍTICO** | Alta (80%) | El orquestador incorrecto responde, flujo incorrecto, posible loop | opencode.json:4-51 ambos primary | ADR-001: Elegir Manager como único primary por defecto; gentle como SDD pipeline explícito invocable | P1 |
-| R02 | **Memoria Engram no funcional**: memorias_1.sqlite sin observaciones a pesar de protocolo definido | 🔴 **CRÍTICO** | Alta (80%) | Pérdida total de memoria cross-session, sesiones inician sin contexto | Auditoría: 4KB DB sin tabla observations | ADR-004: Diagnosticar y reparar pipeline de guardado. Verificar que mem_save persista | P1 |
+| R02 | **Memoria Engram sin gobernanza suficiente**: store real funciona, pero hay duplicación, prompt capture y project drift | 🟡 **MEDIO** | Alta (80%) | Memoria ruidosa, recuperación inconsistente, prompts guardados sin gate | E0/E1: `~/.engram/engram.db` funciona; 302 user_prompts; 3 procesos | ADR-004: consolidar configuración/instrucciones y filtro de guardado | P1 |
 | R03 | **Contexto fijo excesivo**: ~18,500–22,000 tokens estimados por sesión antes del primer mensaje (corregido de ~29k, que asumía ambos AGENTS.md simultáneos) | 🔴 **ALTO** | Muy alta (95%) | Latencia + costo elevado, peor experiencia de usuario | Suma estimada de 6+ fuentes de contexto (corregida en B0 al validar que solo UN AGENTS.md se carga) | ADR-006: Token budget. Desduplicar. Mover a lazy-load. Reducir fixed overhead objetivo a ~8,5k-9,5k. Pendiente medición Test 8. | P1 |
 | R04 | **Duplicación de instrucciones de memoria**: Engram protocol en 3 fuentes | 🟠 **MEDIO** | Muy alta (95%) | ~2,500 tokens redundantes, posible contradicción | AGENTS.md (.config):72-166, (.codex):355-449, engram.ts:64-141 | Desduplicar: una sola fuente de instrucciones de memoria | P1 |
 | R05 | **Guardado de ruido en memoria**: Prompt capture guarda prompts completos sin filtro | 🟠 **MEDIO** | Alta (80%) | Memoria contaminada con datos transitorios, difícil retrieval semántico | engram.ts:343-381 captura todo input | Implementar filtro de guardado: solo observaciones útiles, no prompts completos | P2 |
@@ -29,7 +29,7 @@
 | # | Riesgo | Mitigación | Fase | Estado |
 |---|--------|-----------|------|--------|
 | R01 | Doble orquestador primario | ADR-001: Unificar primary | D | ⏳ Pendiente |
-| R02 | Memoria Engram no funcional | ADR-004: Reparar pipeline | E | ⏳ Pendiente |
+| R02 | Memoria Engram sin gobernanza suficiente | ADR-004: Consolidar/gobernar | E | 🔄 E0/E1/E2/E3 completado; E4 pendiente |
 | R03 | Contexto fijo excesivo | ADR-006: Token budget | F | ⏳ Pendiente |
 | R04 | Duplicación instrucciones memoria | Desduplicar | E+F | ⏳ Pendiente |
 | R06 | MCP surface grande | ADR-007: MCP bajo demanda | G | ⏳ Pendiente |
@@ -83,7 +83,7 @@ pie title Distribución por prioridad
 |-----------|-------------------|
 | Manager | R01 (doble primary), R03 (contexto), R08 (inline sin límite), R16 (loops) |
 | gentle-orchestrator | R01 (doble primary), R16 (loops) |
-| Engram / memoria | R02 (no funcional), R04 (duplicación), R05 (ruido) |
+| Engram / memoria | R02 (gobernanza), R04 (duplicación), R05 (ruido) |
 | MCP servers | R06 (surface grande), R11 (secretos expuestos) |
 | Subagentes SDD | R07 (faltantes), R14 (openspec no impl) |
 | Config general | R03 (contexto), R09 (observabilidad), R10 (tests), R12 (inventory) |

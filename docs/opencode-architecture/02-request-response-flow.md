@@ -80,7 +80,7 @@ flowchart TB
 
     subgraph "LAYER 4: Memory"
         MCP --> ENGRAM_MCP[Engram MCP:<br/>mem_save, mem_search,<br/>mem_context, mem_session_summary]
-        ENGRAM_MCP --> SQLITE[(memories_1.sqlite)]
+        ENGRAM_MCP --> SQLITE[(~/.engram/engram.db)]
         PLUGIN_ENG["engram.ts plugin<br/>prompt capture<br/>system transform<br/>compaction hooks"] -.->|hooks| CENG
     end
 
@@ -131,7 +131,7 @@ flowchart TB
 | Actor | Entrada | Decisión | Salida | Evidencia | Riesgo |
 |-------|---------|----------|--------|-----------|--------|
 | Engram plugin | Hook post-mensaje | Capturar prompt | SQLite | engram.ts líneas 349-381 | 🟡 MEDIO: guarda prompts completos |
-| Manager/Subagente | Decisión/bug/fix | mem_save | Observación SQLite | AGENTS.md líneas 78-106 | 🔴 ALTO: memoria guardada pero DB vacía |
+| Manager/Subagente | Decisión/bug/fix | mem_save | Observación SQLite | AGENTS.md líneas 78-106 | 🟡 MEDIO: memoria persiste, falta gobernanza |
 
 ### Paso 6: Cierre de sesión
 | Actor | Entrada | Decisión | Salida | Evidencia | Riesgo |
@@ -154,7 +154,7 @@ flowchart TB
 | 3 | Manager/gentle | Estrategia | ¿Subagente? ¿cuál? | Delegación | sdd-apply prompt:19-21 | 🟡 Subagentes faltantes |
 | 4 | Subagente SDD | Contexto + skill | Ejecutar inline, no delegar | Envelope | sdd-phase-common.md:3-6 | 🟢 Executor boundary |
 | 5 | Engram plugin | Post-mensaje | Capturar prompt | SQLite | engram.ts:349-381 | 🟡 Prompts completos |
-| 6 | Manager | Decisión relevante | mem_save | Observación | AGENTS.md:78-106 | 🔴 DB vacía |
+| 6 | Manager | Decisión relevante | mem_save | Observación | AGENTS.md:78-106 | 🟡 Gobernanza pendiente |
 | 7 | Manager | Fin sesión | mem_session_summary | Resumen | AGENTS.md:134-156 | 🟡 No verificado |
 | 8 | Agente activo | Resultados | Sintetizar | Respuesta | — | 🟢 |
 
