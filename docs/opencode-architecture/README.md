@@ -1,90 +1,42 @@
-# OpenCode Architecture Documentation
+# docs/opencode-architecture/
 
-> Mapa documental completo de la arquitectura actual de OpenCode y propuesta de evolución.
+Landing page de navegación para la documentación arquitectónica de OpenCode.
 
-## Propósito
+→ [README raíz del proyecto](../../README.md)
 
-Esta carpeta contiene el análisis arquitectónico más completo del ecosistema OpenCode del usuario. Su objetivo es:
+---
 
-1. **Documentar cómo funciona hoy** — basado en evidencia de archivos, configuración y código.
-2. **Clasificar hallazgos** — separar lo validado de lo inferido y lo no validado.
-3. **Identificar conflictos y riesgos** — entre componentes, agentes, orquestadores y capas de memoria.
-4. **Proponer una arquitectura objetivo** — coherente, eficiente y mantenible.
-5. **Definir un roadmap de migración** — fases incrementales sin romper el sistema.
+## Índice de documentos
 
-## Estado actual del análisis
+| Documento | Descripción |
+|-----------|-------------|
+| [Executive Summary](00-executive-summary.md) | Resumen ejecutivo para toma de decisiones |
+| [Current State Map](01-current-state-map.md) | Foto actual del ecosistema: zonas, componentes, archivos |
+| [Request/Response Flow](02-request-response-flow.md) | Flujo real de petición a respuesta con diagramas |
+| [Agent Responsibility Map](03-agent-responsibility-map.md) | Matriz de responsabilidades de cada agente |
+| [Memory Context Map](04-memory-context-map.md) | Mapa completo de fuentes de memoria y contexto |
+| [Token Cost Map](05-token-cost-map.md) | Mapa de consumo de tokens por capa |
+| [Tools, MCP & Skills Map](06-tools-mcp-skills-map.md) | Inventario de tools, MCP y skills |
+| [Evidence Register](07-evidence-register.md) | Registro central de toda la evidencia recopilada |
+| [Conflicts & Open Questions](08-conflicts-and-open-questions.md) | Conflictos entre auditorías y preguntas abiertas |
+| [Risk Register](09-risk-register.md) | Registro de riesgos con severidad y mitigación |
+| [Target Architecture](10-target-architecture.md) | Arquitectura objetivo propuesta |
+| [Memory & Token Optimization Model](11-memory-and-token-optimization-model.md) | Modelo de capas de memoria y optimización |
+| [Migration Roadmap](12-migration-roadmap.md) | Roadmap de migración por fases |
+| [Validation Test Plan](13-validation-test-plan.md) | Plan de pruebas para validar el flujo |
+| [Runtime Validation Results](14-runtime-validation-results.md) | Resultados de validación runtime |
+| [Replicable Project Architecture](15-replicable-project-architecture.md) | Arquitectura de proyecto replicable |
+| [Memory Governance Policy](16-memory-governance-policy.md) | Política de gobernanza de memoria |
+| [Manager/Gentle Transition Plan](17-manager-gentle-transition-plan.md) | Plan de transición Manager/gentle |
 
-| Dimensión | Estado |
-|-----------|--------|
-| Auditorías ejecutadas | 3 (paralelas) |
-| Archivos analizados | 25+ (config, plugins, skills, agent prompts) |
-| Hallazgos clasificados | 60+ |
-| Conflictos detectados | 12 |
-| Riesgos identificados | 15 |
-| ADRs propuestos | 9 |
-| Pruebas de validación diseñadas | 8 |
-| Documentos creados | 16 |
+### ADRs
 
-## Cómo leer esta documentación
+→ [Ver todos los ADRs](adr/)
 
-| Orden | Documento | Qué encontrarás |
-|-------|-----------|-----------------|
-| 1 | `00-executive-summary.md` | Resumen ejecutivo para toma de decisiones |
-| 2 | `01-current-state-map.md` | Foto actual del ecosistema: zonas, componentes, archivos |
-| 3 | `02-request-response-flow.md` | Flujo real de petición a respuesta con diagramas |
-| 4 | `03-agent-responsibility-map.md` | Matriz de responsabilidades de cada agente |
-| 5 | `04-memory-context-map.md` | Mapa completo de fuentes de memoria y contexto |
-| 6 | `05-token-cost-map.md` | Mapa de consumo de tokens por capa |
-| 7 | `06-tools-mcp-skills-map.md` | Inventario de tools, MCP y skills |
-| 8 | `07-evidence-register.md` | Registro central de toda la evidencia recopilada |
-| 9 | `08-conflicts-and-open-questions.md` | Conflictos entre auditorías y preguntas abiertas |
-| 10 | `09-risk-register.md` | Registro de riesgos con severidad y mitigación |
-| 11 | `10-target-architecture.md` | Arquitectura objetivo propuesta |
-| 12 | `11-memory-and-token-optimization-model.md` | Modelo de capas de memoria y optimización |
-| 13 | `12-migration-roadmap.md` | Roadmap de migración por fases |
-| 14 | `13-validation-test-plan.md` | Plan de pruebas para validar el flujo |
-| — | `adr/ADR-001` a `ADR-009` | Architectural Decision Records |
+### Test runs
 
-## Qué está validado
+→ [Ver ejecuciones de prueba](test-runs/)
 
-- **Dos orquestadores primarios**: Manager y gentle-orchestrator coexisten con `mode: "primary"`.
-- **Manager no puede llamar a gentle-orchestrator**: regla explícita en su prompt.
-- **Sistema SDD completo**: 8 subagentes SDD con skills, executor boundary y persistence contract.
-- **Plugin Engram activo**: engram.ts inyecta instrucciones de memoria y captura prompts.
-- **Plugin background-agents activo**: delegate/delegation_read/delegation_list funcionales.
-- **MCP surface extensa**: 9+ MCP servers configurados entre opencode.json y opencode.jsonc.
-- **Skill registry operativo**: 48 skills indexadas en `.atl/skill-registry.md`.
-- **Inventory generado**: inventario con agentes, MCP, skills, plugins (posiblemente desactualizado).
+---
 
-## Qué falta validar
-
-- **Engram governance**: E0/E1 confirmó que el store real `~/.engram/engram.db` escribe observaciones; queda resolver duplicación, project drift y ruido.
-- **OpenSpec implementado**: referenciado en persistence contract pero sin directorios `openspec/` visibles.
-- **Graphify en uso**: instalado como skill pero sin `graphify-out/` en ningún proyecto.
-- **Superpowers como skill físico**: referenciado en prompts del Manager pero sin SKILL.md local.
-- **GPT-5.5 review/debug subagentes**: `@review-gpt55` y `@debug-gpt55` no existen como agentes configurados.
-- **Context Index**: no existe `CONTEXT_INDEX.md` — posible confusión con `skill-registry.md`.
-- **Session Close Protocol ejecutándose**: 55 sesiones indexadas sin evidencia de `mem_session_summary`.
-- **Resolución real de agente primario**: cuál gana cuando ambos son `mode: "primary"` no está documentado por OpenCode.
-
-## Próximos pasos recomendados (roadmap actualizado)
-
-> ⚠️ **Corrección Fase B0**: El roadmap se ha reordenado. Seguridad (secretos expuestos) debe ir ANTES de observabilidad, memoria, MCP o cambios arquitectónicos.
-
-1. **Fase A**: ✅ Documentación base — completada.
-2. **Fase B0**: ✅ Corrección documental + validación read-only — completada (este documento).
-3. **Fase B-Security**: 🔴 Rotar secretos expuestos y mover a variables de entorno (R11). Antes de cualquier cambio funcional.
-4. **Fase B1**: Implementar observabilidad mínima.
-5. **Fase C**: Tests de flujo — ejecutar los 8 tests definidos.
-6. **Fase D**: Resolver agente primario (Manager único primary vía ADR-001).
-7. **Fase E**: Gobernanza de memoria Engram.
-8. **Fase F**: Reducir contexto fijo y optimizar token budget.
-9. **Fase G**: Optimizar MCP surface.
-10. **Fase H**: Consolidar arquitectura objetivo.
-
-## Reglas de calidad de esta documentación
-
-- Toda afirmación técnica clasificada como `VALIDADO`, `INFERIDO`, `CONFLICTO`, `NO VALIDADO` o `DECISIÓN PROPUESTA`.
-- No se mezclan hechos con opiniones.
-- Cada hallazgo importante incluye archivo, ruta y evidencia.
-- No se modificó código funcional, configuración, agentes ni prompts activos.
+*Este archivo es un índice de navegación. El README raíz del proyecto contiene el estado general y roadmap.*

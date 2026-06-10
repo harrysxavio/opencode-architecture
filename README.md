@@ -1,10 +1,14 @@
-# OpenCode Architecture Documentation
+# ARQUITECTURA OPENCODE
 
-> Mapa documental completo de la arquitectura actual de OpenCode y propuesta de evolución.
+> Documentación, validación y evolución del ecosistema OpenCode del usuario.
 
-## Propósito
+⚠️ **Advertencia:** Este repositorio documenta la **arquitectura, validaciones y roadmap de evolución** de la configuración OpenCode/Codex del usuario. La configuración runtime real (agentes, MCP, skills, plugins, memoria Engram) **vive en rutas locales** (`~/.config/opencode/`, `~/.codex/`, `~/.engram/`, etc.) y puede diferir de lo documentado aquí. Este repositorio es un **registro de análisis y decisiones**, no un mirror de configuración.
 
-Esta carpeta contiene el análisis arquitectónico más completo del ecosistema OpenCode del usuario. Su objetivo es:
+---
+
+## Qué es este repositorio
+
+Contiene el análisis arquitectónico más completo del ecosistema OpenCode del usuario. Sus objetivos:
 
 1. **Documentar cómo funciona hoy** — basado en evidencia de archivos, configuración y código.
 2. **Clasificar hallazgos** — separar lo validado de lo inferido y lo no validado.
@@ -12,79 +16,94 @@ Esta carpeta contiene el análisis arquitectónico más completo del ecosistema 
 4. **Proponer una arquitectura objetivo** — coherente, eficiente y mantenible.
 5. **Definir un roadmap de migración** — fases incrementales sin romper el sistema.
 
-## Estado actual del análisis
+---
 
-| Dimensión | Estado |
-|-----------|--------|
-| Auditorías ejecutadas | 3 (paralelas) |
-| Archivos analizados | 25+ (config, plugins, skills, agent prompts) |
-| Hallazgos clasificados | 60+ |
-| Conflictos detectados | 12 |
-| Riesgos identificados | 15 |
-| ADRs propuestos | 9 |
-| Pruebas de validación diseñadas | 8 |
-| Documentos creados | 16 |
+## Estado actual por fases
 
-## Cómo leer esta documentación
+| Fase | Estado | Descripción |
+|------|--------|-------------|
+| **A** — Documentación base | ✅ Completada | Análisis inicial, mapa de componentes, flujo de request/response |
+| **B0** — Corrección documental | ✅ Completada | Validación read-only, corrección de afirmaciones |
+| **B-Security** | ⏸ Postergada | Rotación de secretos expuestos — pendiente de priorización |
+| **C** — Tests de flujo | ✅ Completada | 8 tests de validación ejecutados sobre el flujo real |
+| **D** — Resolución agente primario | ✅ Completada | ADR-001: Manager como único primary; docs actualizados |
+| **E** — Gobernanza de memoria Engram | ▶️ En curso | Ver detalle abajo |
 
-| Orden | Documento | Qué encontrarás |
-|-------|-----------|-----------------|
-| 1 | `00-executive-summary.md` | Resumen ejecutivo para toma de decisiones |
-| 2 | `01-current-state-map.md` | Foto actual del ecosistema: zonas, componentes, archivos |
-| 3 | `02-request-response-flow.md` | Flujo real de petición a respuesta con diagramas |
-| 4 | `03-agent-responsibility-map.md` | Matriz de responsabilidades de cada agente |
-| 5 | `04-memory-context-map.md` | Mapa completo de fuentes de memoria y contexto |
-| 6 | `05-token-cost-map.md` | Mapa de consumo de tokens por capa |
-| 7 | `06-tools-mcp-skills-map.md` | Inventario de tools, MCP y skills |
-| 8 | `07-evidence-register.md` | Registro central de toda la evidencia recopilada |
-| 9 | `08-conflicts-and-open-questions.md` | Conflictos entre auditorías y preguntas abiertas |
-| 10 | `09-risk-register.md` | Registro de riesgos con severidad y mitigación |
-| 11 | `10-target-architecture.md` | Arquitectura objetivo propuesta |
-| 12 | `11-memory-and-token-optimization-model.md` | Modelo de capas de memoria y optimización |
-| 13 | `12-migration-roadmap.md` | Roadmap de migración por fases |
-| 14 | `13-validation-test-plan.md` | Plan de pruebas para validar el flujo |
-| — | `adr/ADR-001` a `ADR-009` | Architectural Decision Records |
+### Subfases de Fase E
 
-## Qué está validado
+| Subfase | Estado | Descripción |
+|---------|--------|-------------|
+| **E0** — Diagnóstico Engram | ✅ | Store real identificado (`~/.engram/engram.db`), procesos, binarios, project drift |
+| **E1** — Pruebas controladas | ✅ | 7 tests (E-T1 a E-T7) con scope `TEST-E-MEMORY-GOVERNANCE`: todos PASSED |
+| **E2** — Root cause analysis | ✅ | Engram **sí persiste**; problema real es gobernanza/config duplicada/ruido/drift |
+| **E3** — Change plan | ✅ | Propuesta mínima de reparación documentada |
+| **E4A** — Gap review | ✅ | Revisión read-only: brechas identificadas, recomendaciones |
+| **E4A-Docs-Cleanup** | ✅ **Ahora** | ✅ README raíz actualizado; docs README convertido a índice mínimo |
+| **E4B** — Stabilization | ⏸ Pendiente desbloqueo | Pin binario Engram, unificar project name, reducir ambigüedad config, validar |
 
-- **Dos orquestadores primarios**: Manager y gentle-orchestrator coexisten con `mode: "primary"`.
-- **Manager no puede llamar a gentle-orchestrator**: regla explícita en su prompt.
-- **Sistema SDD completo**: 8 subagentes SDD con skills, executor boundary y persistence contract.
-- **Plugin Engram activo**: engram.ts inyecta instrucciones de memoria y captura prompts.
-- **Plugin background-agents activo**: delegate/delegation_read/delegation_list funcionales.
-- **MCP surface extensa**: 9+ MCP servers configurados entre opencode.json y opencode.jsonc.
-- **Skill registry operativo**: 48 skills indexadas en `.atl/skill-registry.md`.
-- **Inventory generado**: inventario con agentes, MCP, skills, plugins (posiblemente desactualizado).
+---
 
-## Qué falta validar
+## Arquitectura objetivo resumida
 
-- **Engram governance**: E0/E1 confirmó que el store real `~/.engram/engram.db` escribe observaciones; queda resolver duplicación, project drift y ruido.
-- **OpenSpec implementado**: referenciado en persistence contract pero sin directorios `openspec/` visibles.
-- **Graphify en uso**: instalado como skill pero sin `graphify-out/` en ningún proyecto.
-- **Superpowers como skill físico**: referenciado en prompts del Manager pero sin SKILL.md local.
-- **GPT-5.5 review/debug subagentes**: `@review-gpt55` y `@debug-gpt55` no existen como agentes configurados.
-- **Context Index**: no existe `CONTEXT_INDEX.md` — posible confusión con `skill-registry.md`.
-- **Session Close Protocol ejecutándose**: 55 sesiones indexadas sin evidencia de `mem_session_summary`.
-- **Resolución real de agente primario**: cuál gana cuando ambos son `mode: "primary"` no está documentado por OpenCode.
+→ [Ver documento completo: 10-target-architecture.md](docs/opencode-architecture/10-target-architecture.md)
 
-## Próximos pasos recomendados (roadmap actualizado)
+La arquitectura objetivo propone:
 
-> ⚠️ **Corrección Fase B0**: El roadmap se ha reordenado. Seguridad (secretos expuestos) debe ir ANTES de observabilidad, memoria, MCP o cambios arquitectónicos.
+- **Manager** como único orquestador primario con control del pipeline completo (SDD + quality gates).
+- **SDD** como flujo estructurado de implementación (explore → propose → spec → design → tasks → apply → verify → archive).
+- **Engram** como sistema de memoria persistente cross-session, con gobernanza sobre captura y ruido.
+- **Context Pack** como contrato estructurado para recuperación de contexto (postergado a Fase E5).
+- **GPT-5.5 OAuth** como quality gate final (cuando esté disponible).
 
-1. **Fase A**: ✅ Documentación base — completada.
-2. **Fase B0**: ✅ Corrección documental + validación read-only — completada (este documento).
-3. **Fase B-Security**: 🔴 Rotar secretos expuestos y mover a variables de entorno (R11). Antes de cualquier cambio funcional.
-4. **Fase B1**: Implementar observabilidad mínima.
-5. **Fase C**: Tests de flujo — ejecutar los 8 tests definidos.
-6. **Fase D**: Resolver agente primario (Manager único primary vía ADR-001).
-7. **Fase E**: Gobernanza de memoria Engram.
-8. **Fase F**: Reducir contexto fijo y optimizar token budget.
-9. **Fase G**: Optimizar MCP surface.
-10. **Fase H**: Consolidar arquitectura objetivo.
+---
 
-## Reglas de calidad de esta documentación
+## Documentación principal
 
-- Toda afirmación técnica clasificada como `VALIDADO`, `INFERIDO`, `CONFLICTO`, `NO VALIDADO` o `DECISIÓN PROPUESTA`.
-- No se mezclan hechos con opiniones.
-- Cada hallazgo importante incluye archivo, ruta y evidencia.
-- No se modificó código funcional, configuración, agentes ni prompts activos.
+| Documento | Descripción |
+|-----------|-------------|
+| [Executive Summary](docs/opencode-architecture/00-executive-summary.md) | Resumen ejecutivo para toma de decisiones |
+| [Target Architecture](docs/opencode-architecture/10-target-architecture.md) | Arquitectura objetivo propuesta |
+| [Migration Roadmap](docs/opencode-architecture/12-migration-roadmap.md) | Roadmap de migración por fases |
+| [Validation Test Plan](docs/opencode-architecture/13-validation-test-plan.md) | Plan de pruebas de validación |
+| [Runtime Validation Results](docs/opencode-architecture/14-runtime-validation-results.md) | Resultados de validación runtime |
+| [Memory Governance Policy](docs/opencode-architecture/16-memory-governance-policy.md) | Política de gobernanza de memoria |
+| [Manager/Gentle Transition Plan](docs/opencode-architecture/17-manager-gentle-transition-plan.md) | Plan de transición Manager/gentle |
+| [ADR Index](docs/opencode-architecture/adr/) | Architectural Decision Records |
+| [Test Runs](docs/opencode-architecture/test-runs/) | Resultados de ejecuciones de prueba |
+
+---
+
+## Descubrimientos clave de la Fase E
+
+- **Store real de Engram**: `~/.engram/engram.db` (NO `.codex/memories_1.sqlite`)
+- **Estado**: 292 observations, 302 user_prompts, 68 sessions, 176 relations — Engram **sí persiste y escribe**
+- **Riesgo principal**: duplicación de config (dos `opencode.json`), project drift (`arquitectura opencode` vs `opencode-architecture`), 302 prompts capturados sin gate de ruido, dos binarios Engram (v1.15.13 y v1.16.1)
+- **Problema real**: no es que Engram no funcione — es que **no hay gobernanza** sobre qué se guarda, cómo se organiza y cómo se recupera
+
+---
+
+## Próximo paso
+
+Finalizado E4A-Docs-Cleanup → **E4B — Engram Stabilization** (alcance mínimo):
+
+- Pin de binario Engram único.
+- Unificar project name a `opencode-architecture`.
+- Reducir ambigüedad de configs.
+- Reiniciar OpenCode.
+- Validar procesos.
+- Repetir `mem_save`, `mem_search`, `mem_context`, `mem_session_summary`.
+- Sin tocar plugin, AGENTS.md (salvo diff mínimo aprobado), optimización de tokens ni MCP surface general.
+
+### Roadmap posterior (orden tentativo)
+
+| Fase | Objetivo |
+|------|----------|
+| **E5** | Context Pack + Memory Writer/Validator contracts |
+| **E6** | Prompt capture / noise gate |
+| **F** | Token reduction con Context Pack |
+| **G** | Hybrid Retrieval (keyword + semántico) |
+| **H** | MCP surface / memory server avanzado |
+
+---
+
+*Última actualización: 2026-06-10. Este documento se actualiza al completar cada fase.*
