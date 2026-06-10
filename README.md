@@ -114,7 +114,7 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **E4B** — Engram stabilization | ✅ **Completada** | Pin a v1.16.1 + `--project=opencode-architecture`. Tests T1-T7 PASSED |
 | **E5** — Context Pack | ✅ **Completada** | 7 contratos (Context Pack, Writer, Validator, Read Escalation, Quality Metrics, Intake Cleaner). 7 tests PASSED |
 | **E6A** — Prompt Capture Audit & Design | ✅ **Completada** | Audit de plugin engram.ts y DB, Noise Gate design (Opción B — Heurísticas). 7 tests PASSED |
-| **E6B** — Noise Gate implementation | ⏳ Pendiente de aprobación | Implementar gate con heurísticas en plugin + config |
+| **E6B** — Noise Gate implementation | **▶️ Implementado (pending restart + tests)** | `classifyPrompt()` con 6 tipos en engram.ts. Modo all/classified/never. Pendiente restart OpenCode + tests T1-T7 |
 | **F** — Token reduction | ⏳ Pendiente (post-E5) | Reducción de contexto con Context Pack como base |
 | **G** — Hybrid Retrieval | 🔮 Futuro | Búsqueda combinada keyword + semántica |
 | **H** — MCP consolidation | 🔮 Futuro | Superficie MCP optimizada, memory server avanzado |
@@ -206,9 +206,9 @@ Este principio recorrió todas las fases: el LLM no debe recibir conversaciones 
 
 ## Estado actual y próximo paso
 
-**Estado actual:** `E6A — Prompt Capture Audit & Design` ✅ Completada. Pendiente aprobación para E6B.
+**Estado actual:** `E6B — Noise Gate` ▶️ Implementado en plugin. Pendiente restart OpenCode + tests (E6B-T1 a T7).
 
-**Estado E global:** E0-E4B ✅ completados. E5 ✅ completado. E6A ✅ completado. E6B ⏳ pendiente de aprobación de diseño.
+**Estado E global:** E0-E4B ✅ completados. E5 ✅ completado. E6A ✅ completado. **E6B ▶️ implementado (pending restart + tests).**
 
 ### Resultados de E4B
 
@@ -259,12 +259,25 @@ Este principio recorrió todas las fases: el LLM no debe recibir conversaciones 
 
 **Archivos creados:** 2 documentos (23-audit, 24-design), 7 tests en `test-runs/E6/`
 
-### Pendiente: aprobación para E6B
+### E6B-safe — Implementado
 
-El diseño del Noise Gate (doc 24) está listo para implementación. Se necesita aprobación explícita para:
-1. Modificar `engram.ts` (agregar clasificador heurístico)
-2. Agregar configuración `allow_prompt_capture` + `noise_gate` en `opencode.jsonc`
-3. Opcional: migrar schema de `user_prompts` para nuevos campos
+El Noise Gate está implementado en `plugins/engram.ts` con los siguientes cambios:
+
+| Componente | Detalle |
+|------------|---------|
+| **`classifyPrompt()`** | Nueva función con 6 tipos: noise, sensitive, confirmation, navigation, question, instruction |
+| **Modo default** | `"classified"` — clasifica antes de capturar |
+| **Modo "all"** | Replica comportamiento legacy (solo length > 10) |
+| **Modo "never"** | Desactiva captura por completo |
+| **Body POST /prompts** | Sin cambios — mismo `{ session_id, content, project }` |
+| **Schema DB** | Sin alterar |
+| **Observations** | Sin tocar |
+| **Config** | Constante interna (`ALLOW_PROMPT_CAPTURE`) — sin cambios en `opencode.jsonc` |
+| **Rollback** | Cambiar constante a `"all"` o restaurar backup |
+
+**Backup creado:** `engram.ts.e6b-backup`
+
+**Pendiente:** Restart OpenCode → tests E6B-T1 a T7 → documentar resultados.
 
 ---
 

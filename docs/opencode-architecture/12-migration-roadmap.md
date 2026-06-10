@@ -137,7 +137,7 @@
 | **Cambios permitidos** | opencode.json, opencode.jsonc (pin binario + project name), documentación, contratos |
 | **Archivos probables** | `opencode.json`, `opencode.jsonc`, docs de test-runs, README raíz, docs/contratos |
 | **Riesgo** | 🟢 Bajo-Medio |
-| **Prueba de aceptación (global)** | E4B-T1 a T7 PASSED. E5 contratos definidos. E6 noise gate definido |
+| **Prueba de aceptación (global)** | E4B-T1 a T7 PASSED. E5 contratos definidos + tests PASSED. E6A audit + design completados. E6B implementado en plugin (pending tests post-restart) |
 
 ### Subfases ejecutadas (E0–E4B)
 
@@ -152,12 +152,18 @@
 | **E4A-Docs-Cleanup-v2** | ✅ | README raíz enriquecido como entrada completa del proyecto |
 | **E4B** — Engram stabilization | ✅ **Completada** | Pin a v1.16.1 + `--project=opencode-architecture`. Tests T1-T7 PASSED. Doctor OK |
 
-### Subfases pendientes
+### Subfases completadas (E5)
+
+| Subfase | Estado | Resultado |
+|---------|--------|-----------|
+| **E5** | ✅ **Completada** | 7 contratos (Context Pack, Intake/Cleaner, Retriever, Writer, Validator, Read Escalation, Quality Metrics). 7 tests E5-T1 a T7 PASSED. 4 documentos centrales (19-22) |
+
+### Subfase en curso
 
 | Subfase | Estado | Objetivo |
 |---------|--------|----------|
-| **E5** | **▶️ En curso** | Context Pack, Intake/Noise Cleaner, Memory Retriever/Writer/Validator, Read Escalation, Quality Metrics, Tests E5-T1 a T7 |
-| **E6** | ⏳ Pendiente | Prompt capture / noise gate
+| **E6A** | ✅ **Completada** | Audit de prompt capture + diseño Noise Gate (Opción B — Heurísticas). 7 tests PASSED. Docs 23-24 |
+| **E6B** | **▶️ Implementado (pending tests)** | Noise Gate implementado en `plugins/engram.ts`. Pendiente restart OpenCode + tests E6B-T1 a T7 |
 
 ## Fase F — Reducir Contexto Fijo
 
@@ -278,8 +284,10 @@ gantt
 | T6 | PASSED | Manager maneja ruido sin sobreorquestar |
 | T7 | PASSED | Contradicción ficticia manejada sin contaminar memoria real |
 | **D** | Resolver agente primario | opencode.json | .config/opencode/opencode.json | 🟢 **Completado** | ✅ gentle-orchestrator.mode = subagent. D-T1, D-T3, D-T5 PASSED |
-| **E** | Gobernanza de memoria Engram | opencode.json, opencode.jsonc, docs | Config OpenCode, docs/ | 🟢 **En curso** | ✅ E0-E4B completados. E5 contratos definidos. E6 noise gate pendiente |
-| **E5** | Context Pack (en curso) | Documentación + contratos | docs/ | 🟡 Medio | Contrato Context Pack definido, Memory Writer/Validator operacional |
+| **E** | Gobernanza de memoria Engram | opencode.json, opencode.jsonc, docs, plugins/engram.ts | Config OpenCode, docs/, plugin | 🟢 **En curso** | ✅ E0-E4B completados. ✅ E5 completado. ✅ E6A completado. ▶️ E6B implementado (pending tests) |
+| **E5** | Context Pack | Documentación + contratos | docs/ | 🟢 **Completado** | 7 contratos, 7 tests PASSED, 4 docs centrales (19-22) |
+| **E6A** | Prompt Capture Audit | Docs + tests | docs/ | 🟢 **Completado** | Audit OK, Noise Gate Design aprobado, 7 tests PASSED |
+| **E6B** | Noise Gate implementación | plugins/engram.ts | plugin | 🟡 Medio | Implementado en plugin. Pendiente restart + tests |
 | **F** | Token optimization | AGENTS.md, skills, prompts | AGENTS.md, skills/ | 🟡 Medio | ~18.5–22k → ~8.5-9.5k tokens fijos |
 | **G** | Config consolidation | opencode.json, .jsonc, config.toml | Config OpenCode | 🟡 Medio | gentle-orch mode: subagent. Config única. |
 | **H** | Consolidar arquitectura | Todo | Todos | 🔴 Alto | Arquitectura objetivo implementada y testeada |
@@ -299,7 +307,9 @@ graph LR
     F --> G[Fase G: MCP surface]
     G --> H[Fase H: Consolidar objetivo]
     
-    E5 -.->|requisito previo| F
+    E5 --> E6A[Fase E6A: Audit + Design]
+    E6A --> E6B[Fase E6B: Noise Gate Plugin]
+    E6B -.->|requisito previo| F
     F -.->|comparte cambios| G
 ```
 
@@ -316,4 +326,4 @@ graph LR
 | D3 implementación | ✅ Aplicado | `gentle-orchestrator.mode = subagent`; JSON válido |
 | D4 tests post-cambio | ✅ Completado | D-T1, D-T5-read-only, D-T5-pipeline-dry-run y D-T3 PASSED |
 
-Fase D completada. Fase E (E0-E4B) completada. Próximo paso recomendado: **Fase E5 — Context Pack**. Fase F queda NO-GO hasta completar E5 y estabilizar contrato de contexto.
+Fase D completada. Fase E global: E0-E6B en progreso. Próximo paso: **restart OpenCode + tests E6B-T1 a T7**. Fase F queda NO-GO hasta completar E6B y validar Noise Gate.
