@@ -8,6 +8,7 @@
 **Resuelto (Fase B-Security)** — P7: secretos rotados, backups eliminados, git history sin fugas.
 **Completado (Fase B1)** — T8 ejecutado en sesión limpia. T1 validado (Manager primary real). T5 diseñado.
 **Completado (Fase E4B)** — Engram estabilizado: v1.16.1 + `--project=opencode-architecture`. Tests E4B-T1 a T7 PASSED. Doctor 4/4 OK. Sin drift.
+**Bloqueado (Fase E6B-D3)** — El plugin oficial de Engram ya carga y `chat.message` entra. D3 confirmó `finalContent length=44` para una pregunta útil, pero POST `/prompts` responde HTTP 400 y `user_prompts` no aumenta.
 
 ## Objetivo
 
@@ -183,3 +184,24 @@ D-T1 confirma que Manager sigue respondiendo Tiny directo después de D3.
 
 - **GO para Fase E — Gobernanza memoria**: D completo; T2/T7 ya mostraron necesidad clara.
 - **NO-GO para Fase F**: aunque D-T1 validó 40,091 tokens reales, no optimizar todavía; diseñar fase específica.
+
+---
+
+## Fase E6B-D2 — Engram plugin Node-compatible patch
+
+| Validación | Estado | Resultado |
+|---|---|---|
+| D0 — Hook capture diagnostic | ❌ NO-GO | Pregunta útil no aumentó `user_prompts`; plugin/hook no ejecutaba |
+| D1 — Setup oficial Engram OpenCode | ❌ NO-GO | OpenCode descubrió `engram.ts`, pero falló al cargarlo: `Bun is not defined` |
+| D2 — Patch Node-compatible | ❌ NO-GO | Se removieron referencias `Bun.*` de `engram.ts` y no hay error `Bun` post-restart, pero pregunta útil no aumentó `user_prompts` |
+| D3 — Hook/export diagnostic | ❌ NO-GO | `module.loaded`, `loaded` y `chat.message entered` aparecen; `finalContent length=44`; `/prompts` responde HTTP 400 |
+
+Evidencia pre-restart D2:
+
+- Backup: `C:\Users\harry\.config\opencode\plugins\engram.ts.e6b-d2-backup`.
+- Archivo modificado: `C:\Users\harry\.config\opencode\plugins\engram.ts`.
+- `Bun.*` removido de `engram.ts`.
+- Noise Gate NO reimplementado todavía.
+- `tsc` limitado por falta de `@types/node`; no se considera validación completa.
+
+**GO/NO-GO actual:** NO ejecutar E6B-T1..T7 todavía. Próxima investigación: contrato HTTP `/prompts`, status/body sanitizado y creación de sesión previa.

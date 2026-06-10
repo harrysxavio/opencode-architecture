@@ -8,7 +8,7 @@
 | R02 | **Memoria Engram sin gobernanza suficiente**: store real funciona, pero hay duplicación, prompt capture y project drift | 🟡 **MEDIO** | Alta (80%) | Memoria ruidosa, recuperación inconsistente, prompts guardados sin gate | E0/E1: `~/.engram/engram.db` funciona; 302 user_prompts (pre-gate) | ADR-004: consolidar configuración/instrucciones y filtro de guardado. **E6B**: Noise Gate implementado en engram.ts — clasifica y filtra prompts antes de persistir | P1 |
 | R03 | **Contexto fijo excesivo**: ~18,500–22,000 tokens estimados por sesión antes del primer mensaje (corregido de ~29k, que asumía ambos AGENTS.md simultáneos) | 🔴 **ALTO** | Muy alta (95%) | Latencia + costo elevado, peor experiencia de usuario | Suma estimada de 6+ fuentes de contexto (corregida en B0 al validar que solo UN AGENTS.md se carga) | ADR-006: Token budget. Desduplicar. Mover a lazy-load. Reducir fixed overhead objetivo a ~8,5k-9,5k. Pendiente medición Test 8. | P1 |
 | R04 | **Duplicación de instrucciones de memoria**: Engram protocol en 3 fuentes | 🟠 **MEDIO** | Muy alta (95%) | ~2,500 tokens redundantes, posible contradicción | AGENTS.md (.config):72-166, (.codex):355-449, engram.ts:64-141 | Desduplicar: una sola fuente de instrucciones de memoria | P1 |
-| R05 | **Guardado de ruido en memoria**: Prompt capture guarda prompts completos sin filtro | 🟠 **MEDIO** | Alta (80%) → 🟢 **Reducida** (post-E6B) | Memoria contaminada con datos transitorios, difícil retrieval semántico | engram.ts:343-381 capturaba todo input | **E6B implementado**: Noise Gate clasifica (instruction/question → capturar; noise/confirmation/navigation → skip; sensitive → skip raw). Pendiente tests post-restart | P2 → **P3** |
+| R05 | **Guardado de ruido en memoria**: Prompt capture guarda prompts completos sin filtro | 🟠 **MEDIO** | Alta (80%) | Memoria contaminada con datos transitorios, difícil retrieval semántico | E6B-D0/D1: hook no ejecutaba; D1: plugin oficial falló por `Bun is not defined`; D2: patch Node-compatible aplicado, pendiente restart | Noise Gate aprobado pero pausado. Primero validar plugin oficial Node-compatible; luego reimplementar Noise Gate en E6B-D3 | P2 |
 | R06 | **MCP surface demasiado grande**: 9+ MCP servers configurados, varios duplicados | 🟠 **MEDIO** | Alta (80%) | ~2-8k tokens extra en schemas, superficie de error ampliada, riesgos de seguridad | opencode.json + .jsonc + config.toml tienen MCP duplicados | ADR-007: MCP bajo demanda. Activar solo los necesarios para cada request | P1 |
 | R07 | **Subagentes referenciados que no existen**: review-gpt55, debug-gpt55 | 🟠 **MEDIO** | Media (60%) | Quality gates de GPT-5.5 no disponibles | Manager prompt menciona pero no hay agentes configurados | Decidir si implementar o eliminar referencias. Usar Judgment Day como alternativa | P2 |
 | R08 | **Manager puede hacer demasiado**: Sin límite claro de inline execution | 🟡 **BAJO-MEDIO** | Media (50%) | Manager ejecuta inline tareas complejas, inflando contexto | Manager prompt permite inline cuando no hay subagente | Fortalecer regla: si 4+ archivos o lógica nueva, delegar siempre | P2 |
@@ -22,6 +22,7 @@
 | R16 | **Loops de instrucciones**: Manager prohibe llamar a gentle-orch, pero el runtime podría elegir a gentle-orch como primary | 🔴 **ALTO** | Media (60%) | Sistema en estado inconsistente, posible comportamiento impredecible | Manager prompt vs opencode.json mode config | ADR-001: resolver ambigüedad de primario | P1 |
 | R17 | **Context drift**: Diferentes fuentes de contexto pueden desviar el comportamiento del modelo | 🟡 **BAJO-MEDIO** | Media (50%) | Comportamiento inconsistente entre sesiones | Múltiples AGENTS.md + plugins + skills | Consolidar contexto en una fuente de verdad por capa | P2 |
 | R18 | **Delegación async fuera de undo**: background-agents.ts escribe a disco sin posibilidad de revertir | 🟡 **BAJO-MEDIO** | Alta (80%) | Cambios no deshacibles si la delegación es destructiva | background-agents.ts:609-612, 843-876, 1302-1303 | Documentar tradeoff. Usar con cuidado en operaciones destructivas | P3 |
+| R19 | **Plugins OpenCode incompatibles con runtime Node**: plugins globales usan `Bun.*` pero el runtime actual no expone `Bun` | 🔴 **ALTO** | Alta (80%) | Plugins no cargan; hooks críticos como `chat.message` no ejecutan; memoria automática falla | Logs post-D1: `engram.ts` y `background-agents.ts` fallan con `Bun is not defined` | D2 aplica patch Node-compatible solo a `engram.ts`. `background-agents.ts` queda como riesgo separado y no se toca sin aprobación | P1 |
 
 ## 2. Priorización de riesgos
 
@@ -33,6 +34,7 @@
 | R03 | Contexto fijo excesivo | ADR-006: Token budget | F | ⏳ Pendiente |
 | R04 | Duplicación instrucciones memoria | Desduplicar | E+F | ⏳ Pendiente |
 | R06 | MCP surface grande | ADR-007: MCP bajo demanda | G | ⏳ Pendiente |
+| R19 | Plugins OpenCode incompatibles con runtime Node | Patch Node-compatible / aislar plugins con `Bun.*` | E6B-D2 | 🔄 En ejecución |
 | R09 | Falta de observabilidad | Fase B1: logging mínimo | B1 | 🔄 En ejecución |
 | R16 | Loops de instrucciones | ADR-001: resolver primary | D | ⏳ Pendiente |
 
@@ -64,7 +66,7 @@
 ```mermaid
 pie title Distribución por severidad
     "CRÍTICO" : 2
-    "ALTO" : 3
+    "ALTO" : 4
     "MEDIO" : 6
     "BAJO-MEDIO" : 4
     "BAJO" : 3
@@ -72,7 +74,7 @@ pie title Distribución por severidad
 
 ```mermaid
 pie title Distribución por prioridad
-    "P1 - Inmediata" : 8
+    "P1 - Inmediata" : 9
     "P2 - Planificar" : 5
     "P3 - Monitorear" : 5
 ```
@@ -88,4 +90,4 @@ pie title Distribución por prioridad
 | Subagentes SDD | R07 (faltantes), R14 (openspec no impl) |
 | Config general | R03 (contexto), R09 (observabilidad), R10 (tests), R12 (inventory) |
 | Documentación | R13 (context index), R17 (context drift) |
-| Plugins | R18 (delegación fuera de undo) |
+| Plugins | R18 (delegación fuera de undo), R19 (runtime Node incompatible con `Bun.*`) |
