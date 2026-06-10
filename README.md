@@ -112,8 +112,9 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **E4A-Docs-Cleanup** | ✅ | README raíz reescrito, docs README convertido a índice mínimo |
 | **E4A-Docs-Cleanup-v2** | ✅ | README raíz enriquecido como entrada completa del proyecto |
 | **E4B** — Engram stabilization | ✅ **Completada** | Pin a v1.16.1 + `--project=opencode-architecture`. Tests T1-T7 PASSED |
-| **E5** — Context Pack | **▶️ En curso** | Contrato de contexto estructurado + Memory Writer/Validator |
-| **E6** — Noise gate | ⏳ Pendiente | Control de captura de prompts en Engram |
+| **E5** — Context Pack | ✅ **Completada** | 7 contratos (Context Pack, Writer, Validator, Read Escalation, Quality Metrics, Intake Cleaner). 7 tests PASSED |
+| **E6A** — Prompt Capture Audit & Design | ✅ **Completada** | Audit de plugin engram.ts y DB, Noise Gate design (Opción B — Heurísticas). 7 tests PASSED |
+| **E6B** — Noise Gate implementation | ⏳ Pendiente de aprobación | Implementar gate con heurísticas en plugin + config |
 | **F** — Token reduction | ⏳ Pendiente (post-E5) | Reducción de contexto con Context Pack como base |
 | **G** — Hybrid Retrieval | 🔮 Futuro | Búsqueda combinada keyword + semántica |
 | **H** — MCP consolidation | 🔮 Futuro | Superficie MCP optimizada, memory server avanzado |
@@ -145,6 +146,8 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **Memory Writer/Validator** | [20-memory-writer-validator-contract.md](docs/opencode-architecture/20-memory-writer-validator-contract.md), test-runs/E5 |
 | **Read Escalation Policy** | [21-read-escalation-policy.md](docs/opencode-architecture/21-read-escalation-policy.md) |
 | **Memory Quality Metrics** | [22-memory-quality-metrics.md](docs/opencode-architecture/22-memory-quality-metrics.md) |
+| **Prompt Capture Audit (E6A)** | [23-prompt-capture-audit.md](docs/opencode-architecture/23-prompt-capture-audit.md) |
+| **Noise Gate Design (E6A)** | [24-noise-gate-design.md](docs/opencode-architecture/24-noise-gate-design.md) |
 | **Arquitectura de proyecto replicable** | [15-replicable-project-architecture.md](docs/opencode-architecture/15-replicable-project-architecture.md) |
 
 ---
@@ -203,9 +206,9 @@ Este principio recorrió todas las fases: el LLM no debe recibir conversaciones 
 
 ## Estado actual y próximo paso
 
-**Estado actual:** `E5 — Context Pack + Memory Writer/Validator contracts` ▶️ En curso.
+**Estado actual:** `E6A — Prompt Capture Audit & Design` ✅ Completada. Pendiente aprobación para E6B.
 
-**Estado E global:** E0-E4B ✅ completados. E5 ▶️ en curso. E6 ⏳ pendiente.
+**Estado E global:** E0-E4B ✅ completados. E5 ✅ completado. E6A ✅ completado. E6B ⏳ pendiente de aprobación de diseño.
 
 ### Resultados de E4B
 
@@ -227,6 +230,41 @@ Este principio recorrió todas las fases: el LLM no debe recibir conversaciones 
 - ❌ MCP surface general
 - ❌ Hybrid Retrieval
 - ❌ Memory server avanzado
+
+### Resultados de E5 — Context Pack Contracts
+
+| Test | Resultado | Detalle |
+|------|:---------:|---------|
+| T1 — Context Pack contract | ✅ PASS | 3.000 tokens, 3 memorias, 3 secciones, 2 archivos. Sin ambigüedades |
+| T2 — Intake/Cleaner contract | ✅ PASS | 4 etapas: intake → clean → classify → store. Sin solapamiento con Writer |
+| T3 — Memory Retriever contract | ✅ PASS | 3 retrievers (recent, search, context), 2 combinadores (priority, cascade) |
+| T4 — Memory Writer contract | ✅ PASS | 8 tipos guardan, 7 tipos no guardan. Sin ambigüedad en "comando de navegación" |
+| T5 — Memory Validator contract | ✅ PASS | 4 validadores (3 obligatorios, 1 informativo). Validación pre-escritura |
+| T6 — Read Escalation Policy | ✅ PASS | 7 niveles definidos con criterio de stop en evidencia suficiente |
+| T7 — Memory Quality Metrics | ✅ PASS | 14 campos mínimos, 6 dimensiones de calidad |
+
+**Archivos creados:** 4 documentos centrales (19-22), 9 reportes de test en `test-runs/E5/`
+
+### Resultados de E6A — Prompt Capture Audit & Design
+
+| Test | Resultado | Detalle |
+|------|:---------:|---------|
+| T1 — Audit completeness | ✅ PASS | Flujo, hook, filtros actuales, diferencia user_prompts vs observations documentados |
+| T2 — DB inventory | ✅ PASS | 302 registros, min/max/avg verificados contra DB real |
+| T3 — Risk classification | ✅ PASS | R1-R5 identificados con mitigaciones en diseño |
+| T4 — Design options evaluation | ✅ PASS | 3 opciones evaluadas (A: Blacklist, B: Heurísticas, C: Híbrido). Recomendación: B |
+| T5 — Contract alignment (E5) | ✅ PASS | Noise Gate y contratos E5 son complementarios, sin conflicto |
+| T6 — Implementation spec completeness | ✅ PASS | Spec accionable: código, schema, config, migración, rollback |
+| T7 — Rollback readiness | ✅ PASS | 4 escenarios con plan de rollback. Tiempo máximo: 10s (config switch) |
+
+**Archivos creados:** 2 documentos (23-audit, 24-design), 7 tests en `test-runs/E6/`
+
+### Pendiente: aprobación para E6B
+
+El diseño del Noise Gate (doc 24) está listo para implementación. Se necesita aprobación explícita para:
+1. Modificar `engram.ts` (agregar clasificador heurístico)
+2. Agregar configuración `allow_prompt_capture` + `noise_gate` en `opencode.jsonc`
+3. Opcional: migrar schema de `user_prompts` para nuevos campos
 
 ---
 
