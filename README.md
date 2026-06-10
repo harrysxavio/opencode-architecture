@@ -58,7 +58,7 @@ Esta carpeta contiene el análisis arquitectónico más completo del ecosistema 
 
 ## Qué falta validar
 
-- **Engram realmente escribiendo observaciones**: `memories_1.sqlite` reportado con 4KB y tabla vacía.
+- **Engram governance**: E0/E1 confirmó que el store real `~/.engram/engram.db` escribe observaciones; queda resolver duplicación, project drift y ruido.
 - **OpenSpec implementado**: referenciado en persistence contract pero sin directorios `openspec/` visibles.
 - **Graphify en uso**: instalado como skill pero sin `graphify-out/` en ningún proyecto.
 - **Superpowers como skill físico**: referenciado en prompts del Manager pero sin SKILL.md local.
