@@ -1,7 +1,7 @@
 # Fase F — Reducción Inteligente de Tokens
 
-**Estado:** 📋 PLANNING → ✅ **F0 COMPLETE** → ✅ **F1 COMPLETE**  
-**Versión:** 0.2 (F0 completado, F1 completado, F2 pendiente)  
+**Estado:** 📋 PLANNING → ✅ **F0 COMPLETE** → ✅ **F1 COMPLETE** → ✅ **F2 COMPLETE**  
+**Versión:** 1.0 (F0–F2 completados. F3 pendiente de aprobación)  
 **Fecha:** 2026-06-16
 
 ---
@@ -46,6 +46,7 @@ El consumo de contexto del sistema se estima en ~40k tokens fijos por sesión t�
 | Suite F mem_context RO | ✅ COMPLETE (F-T1-F-T6 PASS) | Observation #427 en Engram |
 | F0 Token Audit Baseline | ✅ COMPLETE | baseline-tokens.md con medición real |
 | F1 Context Inventory | ✅ COMPLETE | F1-context-inventory.md + 3 sub-documentos |
+| **F2 Context Budget Contract** | ✅ **COMPLETE** | F2-context-budget-contract.md + 14 tareas ejecutadas |
 | Store real | ✅ `C:\Users\harry\.engram\engram.db` | DB intacta, 326 observations, 312 user_prompts |
 | `.codex/memories_1.sqlite` | Existe (40KB) pero **no se usa** | Engram es el store real |
 
@@ -79,31 +80,38 @@ No se trata de comprimir todo con un algoritmo único. Se trata de **mejorar la 
 |:--------:|:------:|-------------|
 | **F0** — Token Audit Baseline | ✅ **COMPLETE** | ~35k–45k tokens medido y desglosado por fuente. 6 quick wins identificados. Duplicación Manager/AGENTS.md confirmada. [Baseline](baseline-tokens.md) |
 | **F1** — Context Inventory | ✅ **COMPLETE** | 15 fuentes catalogadas, 7 duplicaciones detectadas, 5 quick wins analizados, matriz de priorización, propuesta para F2. [Inventario](F1-context-inventory.md) |
-| **F2** — Context Budget Contract | 📋 Pendiente | Convertir hallazgos de F1 en contrato formal de presupuesto por modo |
-| **F3** — mem_context Selector | 📋 Diseñado | Ranking + scoring + top-k + dedup |
-| **F4** — Context Packs | 📋 Diseñado | 8 packs lógicos de contexto |
-| **F5** — Regression Plan | 📋 Diseñado | 6 gates obligatorios |
-| **F6** — Rollout Controlado | 📋 Planificado | Feature flag + monitoreo |
+| **F2** — Context Budget Contract | ✅ **COMPLETE** | Contrato formal de presupuesto + 6 auditorías de quick wins + alineación gentle-ai. 14 tareas ejecutadas. 22 documentos totales. |
+| **F3** — mem_context Selector | 📋 Diseñado | Ranking + scoring + top-k + dedup. Pendiente aprobación F2. |
+| **F4** — Context Packs | 📋 Diseñado | 11 packs lógicos de contexto. Pendiente F3. |
+| **F5** — Regression Plan | 📋 Diseñado | 9 gates obligatorios (52 tests). Pendiente F3+F4. |
+| **F6** — Rollout Controlado | 📋 Planificado | Feature flag + monitoreo. Pendiente F5. |
 
 ## Documentos de la fase
 
 | Doc | Propósito | Estado |
 |:---:|-----------|:------:|
 | `README.md` | **Este archivo** — visión general de Fase F | ✅ Actualizado |
-| `F0-token-audit-plan.md` | Cómo se hará el baseline de ~40k y de dónde vienen | ✅ Plan |
-| `baseline-tokens.md` | **F0**: Baseline medido con desglose real por fuente | ✅ **COMPLETE** |
-| `F1-context-inventory.md` | **F1**: Inventario completo de fuentes, clasificación y análisis | ✅ **COMPLETE** |
-| `context-source-catalog.md` | **F1**: Catálogo de 15 fuentes con metadata comparable | ✅ **COMPLETE** |
-| `duplication-map.md` | **F1**: Mapa de 7 duplicaciones con impacto y recomendación | ✅ **COMPLETE** |
-| `quick-wins-analysis.md` | **F1**: 5 quick wins analizados en profundidad | ✅ **COMPLETE** |
-| `context-budget-contract.md` | Presupuesto por capa y modo, reglas de expansión | 📋 Diseñado (pre-F1) |
-| `context-layers-design.md` | Arquitectura L0 a L5: qué va en cada capa | 📋 Diseñado |
-| `mem-context-selector-design.md` | Cómo se seleccionan, rankean y filtran memorias | 📋 Diseñado |
-| `context-packs-design.md` | Packs de contexto: estructura, fuente, fallback | 📋 Diseñado |
-| `risk-register.md` | Riesgos de la reducción y sus mitigaciones | 📋 Diseñado |
-| `regression-plan.md` | Validaciones post-Fase F | 📋 Diseñado |
-| `implementation-roadmap.md` | Secuencia F0-F6 para implementar después | ✅ Actualizado |
-| `decision-log.md` | Decisiones tomadas durante la planificación | ✅ Actualizado |
+| `F0-token-audit-plan.md` | Cómo se hará el baseline | ✅ Plan |
+| `baseline-tokens.md` | **F0**: Baseline medido | ✅ **COMPLETE** |
+| `F1-context-inventory.md` | **F1**: Inventario de fuentes | ✅ **COMPLETE** |
+| `context-source-catalog.md` | **F1**: Catálogo de 15 fuentes | ✅ **COMPLETE** |
+| `duplication-map.md` | **F1**: Mapa de duplicaciones | ✅ **COMPLETE** |
+| `quick-wins-analysis.md` | **F1**: Quick wins priorizados | ✅ **COMPLETE** |
+| **`F2-context-budget-contract.md`** | **F2: Contrato formal de presupuesto por modo** | **✅ COMPLETE** |
+| `context-budget-contract.md` | Presupuesto resumido (referencia F2) | ✅ Alineado |
+| `context-layers-design.md` | Arquitectura L0–L5 con F1/F2 data | ✅ Actualizado |
+| `context-packs-design.md` | 11 packs de contexto | ✅ Actualizado |
+| `mem-context-selector-design.md` | Selector con pseudocódigo y scoring | ✅ Actualizado |
+| **`tool-schema-demand-loading-audit.md`** | **F2: Auditoría tools** | **✅ COMPLETE** |
+| **`session-history-compaction-audit.md`** | **F2: Auditoría session history** | **✅ COMPLETE** |
+| **`manager-protocol-compaction-audit.md`** | **F2: Propuesta compactación Manager** | **✅ COMPLETE** |
+| **`skills-selective-loading-audit.md`** | **F2: Auditoría skills block** | **✅ COMPLETE** |
+| **`gentle-ai-alignment.md`** | **F2: Alineación gentle-ai** | **✅ COMPLETE** |
+| **`autonomous-work-report.md`** | **F2: Reporte ejecutivo del bloque** | **✅ COMPLETE** |
+| `risk-register.md` | 20 riesgos documentados | ✅ Actualizado |
+| `regression-plan.md` | 9 gates, 52 tests | ✅ Actualizado |
+| `implementation-roadmap.md` | Secuencia F0–F6 | ✅ Actualizado |
+| `decision-log.md` | 22 decisiones registradas | ✅ Actualizado |
 
 ## Cómo leer esta fase
 
@@ -113,14 +121,20 @@ No se trata de comprimir todo con un algoritmo único. Se trata de **mejorar la 
 4. Lee **context-source-catalog.md** para los detalles de cada fuente.
 5. Lee **duplication-map.md** para entender las duplicaciones.
 6. Lee **quick-wins-analysis.md** para los quick wins priorizados.
-7. Lee **context-layers-design.md** para la arquitectura conceptual.
-8. Lee **context-budget-contract.md** para los límites por modo.
-9. Lee **mem-context-selector-design.md** para la lógica de selección.
-10. Lee **context-packs-design.md** para los packs concretos.
-11. Lee **risk-register.md** para los riesgos y mitigaciones.
-12. Lee **regression-plan.md** para las validaciones post-implementación.
-13. Lee **implementation-roadmap.md** para la secuencia de ejecución.
-14. Lee **decision-log.md** para el registro de decisiones.
+7. Lee **F2-context-budget-contract.md** para el contrato formal de presupuesto.
+8. Lee **context-layers-design.md** para la arquitectura conceptual actualizada.
+9. Lee **context-packs-design.md** para los 11 packs concretos.
+10. Lee **mem-context-selector-design.md** para la lógica de selección.
+11. Lee **tool-schema-demand-loading-audit.md** para la auditoría de tools.
+12. Lee **session-history-compaction-audit.md** para el diseño de compactación.
+13. Lee **manager-protocol-compaction-audit.md** para la propuesta de compactación.
+14. Lee **skills-selective-loading-audit.md** para la compactación de skills.
+15. Lee **gentle-ai-alignment.md** para la alineación estratégica.
+16. Lee **risk-register.md** para los riesgos y mitigaciones (20 riesgos).
+17. Lee **regression-plan.md** para las validaciones (9 gates, 52 tests).
+18. Lee **implementation-roadmap.md** para la secuencia de ejecución.
+19. Lee **decision-log.md** para el registro de decisiones (22 decisiones).
+20. Lee **autonomous-work-report.md** para el reporte ejecutivo del bloque.
 
 ---
 

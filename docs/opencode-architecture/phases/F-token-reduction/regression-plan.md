@@ -1,6 +1,9 @@
 # Regression Plan — Fase F
 
+**Estado:** ✅ EXTENDED WITH F2 TESTS  
 **Propósito:** Definir las validaciones que deben pasarse después de implementar cualquier cambio de Fase F, para garantizar que no se rompe funcionalidad existente.
+
+> Este documento fue extendido con los nuevos tests de F2 (quick wins audits). Se agregaron 3 nuevos gates: F2 Quick Wins Verification, F2 Contract Compliance, y Full Artifact Audit.
 
 ---
 
@@ -132,12 +135,81 @@ E6B Suite  →  Suite F  →  Token Budget  →  Quality  →  Security
 
 ---
 
+## Gate 2.5: F2 Quick Wins Verification
+
+**Propósito:** Verificar que los quick wins diseñados en F2 son viables y están correctamente documentados antes de pasar a F3.
+
+### Tests a ejecutar
+
+| Test | Qué valida | Método |
+|:----:|------------|--------|
+| QW2-T1 | Session history compactado: diseño completo y coherente | Revisar `session-history-compaction-audit.md` |
+| QW2-T2 | Tool schemas bajo demanda: viabilidad técnica evaluada | Revisar `tool-schema-demand-loading-audit.md` |
+| QW2-T3 | Manager Protocol compactación: propuesta clara y segura | Revisar `manager-protocol-compaction-audit.md` |
+| QW2-T4 | Skills selectivos: propuesta implementable | Revisar `skills-selective-loading-audit.md` |
+| QW2-T5 | Quick wins integrados con budgets de F2 | Verificar que cada QW mapea a capa L0-L5 |
+| QW2-T6 | Quick wins priorizados correctamente | Verificar que QW#1–QW#5 tienen prioridad, fase, y riesgo documentados |
+
+**Criterio PASS:** Todos los quick wins tienen documento de auditoría, diseño claro, riesgos documentados, y están alineados con F2 budgets.
+
+---
+
+## Gate 2.6: F2 Contract Compliance
+
+**Propósito:** Verificar que todos los documentos de F2 cumplen el contrato de presupuesto por modo.
+
+### Tests
+
+| Test | Qué valida | Método |
+|:----:|------------|--------|
+| C-T1 | Budgets por modo suman correctamente | Sumar capas vs total modo |
+| C-T2 | Source-to-layer mapping completo | Verificar que las 15 fuentes F1 están mapeadas |
+| C-T3 | L0 + L1 presentes en todos los modos | Inspeccionar cada modo |
+| C-T4 | Exclusion rules no contradicen MUST | Leer contract |
+| C-T5 | Fallback rules cubren todos los casos | Verificar 7+ situaciones |
+| C-T6 | Expansion rules tienen triggers claros | Verificar 3 categorías |
+
+**Criterio PASS:** Contract completo y consistente. Sin contradicciones.
+
+---
+
+## Gate 2.7: Full Artifact Audit
+
+**Propósito:** Verificar que todos los documentos de F2 existen, están actualizados y son consistentes entre sí.
+
+### Tests
+
+| Test | Qué valida |
+|:----:|------------|
+| A-T1 | `F2-context-budget-contract.md` existe y está completo |
+| A-T2 | `context-budget-contract.md` referencias F2 correctamente |
+| A-T3 | `context-layers-design.md` actualizado con F1+F2 data |
+| A-T4 | `context-packs-design.md` incluye 3 nuevos packs |
+| A-T5 | `mem-context-selector-design.md` incluye pseudocódigo y scoring |
+| A-T6 | `tool-schema-demand-loading-audit.md` existe y completo |
+| A-T7 | `session-history-compaction-audit.md` existe y completo |
+| A-T8 | `manager-protocol-compaction-audit.md` existe y completo |
+| A-T9 | `skills-selective-loading-audit.md` existe y completo |
+| A-T10 | `gentle-ai-alignment.md` existe y completo |
+| A-T11 | `implementation-roadmap.md` marcado F2 COMPLETED |
+| A-T12 | `decision-log.md` incluye decisiones de F2 |
+| A-T13 | `risk-register.md` actualizado con riesgos F2 |
+| A-T14 | Todos los budgets son consistentes entre documentos |
+| A-T15 | Sin cambios funcionales implementados en F2 |
+
+**Criterio PASS:** Los 14 tests PASS o están documentados como no aplicables.
+
+---
+
 ## Resumen de gates
 
 | Gate | Tests | Criterio PASS |
 |:----:|:-----:|---------------|
 | 1. E6B | T1-T7 | Idéntico a baseline |
 | 2. Suite F | F1-F6 | Idéntico a baseline |
+| 2.5. Quick Wins | QW2-T1 a QW2-T6 | Todos diseñados y alineados |
+| 2.6. Contract | C-T1 a C-T6 | Contract completo y consistente |
+| 2.7. Audit | A-T1 a A-T15 | Todos los documentos existen y son consistentes |
 | 3. Budget | B1-B6 | Budgets respetados |
 | 4. Quality | Q1-Q5 | Contexto real, sin invención |
 | 5. Security | S1-S3 | Zero secretos expuestos |

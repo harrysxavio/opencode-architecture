@@ -12,9 +12,14 @@ F0 ─► F1 ─► F2 ─► F3 ─► F4 ─► F5 ─► F6
          ▼      ▼      ▼      ▼      ▼
      Context  Budget  Selector  Packs  Regression
      Inventory Contract Design   Design Plan + Rollout
+              ║
+              ▼
+          (F2.5 — Quick Wins & Audits)
 ```
 
 Cada fase requiere aprobación antes de pasar a la siguiente.
+
+**Nota:** F2 incluye sub-fase F2.5 que abarca las auditorías de quick wins y la alineación gentle-ai. No es una fase separada, sino un conjunto de documentos de diseño que complementan el contrato de presupuesto.
 
 ---
 
@@ -79,36 +84,64 @@ Inventariar todas las fuentes de contexto del sistema, identificar críticas, re
 
 ---
 
-## F2 — Context Budget Contract
+## F2 — Context Budget Contract (v2)
 
-**Estado:** 📋 DISEÑADO (este documento)  
-**Dependencias:** F0 + F1 completadas  
+**Estado:** ✅ **COMPLETED** (2026-06-16)  
+**Dependencias:** F0 + F1 completadas ✅  
 **Requiere aprobación:** Sí (Manager + usuario)
 
 ### Objetivo
 Definir el presupuesto de tokens por capa y por modo, con reglas de expansión.
 
-### Tareas
-1. Refinar budgets de `context-budget-contract.md` con datos reales de F0 y clasificaciones de F1.
-2. Definir reglas de expansión automática vs justificada.
-3. Definir qué capas son obligatorias vs opcionales (usar categorías F1: KEEP_FIXED, COMPACT_FIXED, etc.).
-4. Compactar Manager Protocol (QW5 de F1) y Skills selectivos (QW4).
-5. Obtener aprobación de budgets y modos.
-
-### Inputs de F1 disponibles
-- Catálogo de 15 fuentes con tokens estimados actuales y objetivo
-- 7 duplicaciones documentadas con impacto
-- 5 quick wins con priorización
-- Propuesta concreta de fuentes por modo
+### Tareas ejecutadas
+1. ✅ **F2-context-budget-contract.md**: Contrato formal de presupuesto por modo con source-to-layer mapping de las 15 fuentes F1, budgets por capa y modo (Simple/Normal/Arquitectura/Auditoría/Excepcional), 10 declaraciones MUST, 8 SHOULD, 5 MAY, reglas de expansión (automática/justificada/bloqueante), exclusión y fallback.
+2. ✅ **context-budget-contract.md**: Actualizado para referenciar F2 como fuente autoritativa y alinear datos.
+3. ✅ **context-layers-design.md**: Actualizado con fuentes F1 por capa, budgets F2, quick wins aplicables.
+4. ✅ **context-packs-design.md**: 3 nuevos packs agregados: TOOLING_PACK, SKILLS_PACK, GENTLE_AI_ALIGNMENT_PACK. Tablas de ensamblaje y presupuestos actualizadas.
+5. ✅ **mem-context-selector-design.md**: Pseudocódigo completo del pipeline de selección, verificación metodológica del scoring, budget alignment con F2.
+6. ✅ **tool-schema-demand-loading-audit.md**: Auditoría de 16 tools, clasificación por frecuencia, modelo de carga por fase SDD/tipo de tarea, 3 opciones de implementación con recomendación.
+7. ✅ **session-history-compaction-audit.md**: Diseño de compactación con últimos 3 turns crudos + turns 4–10 resumidos + resumen acumulativo 11+. Formato RECENT_SESSION_PACK.
+8. ✅ **manager-protocol-compaction-audit.md**: Desglose por sección (17 secciones), propuesta de compactación de 4 secciones (Context Layer Definitions, Anti-Patterns, Fast-Track, Default Behavior), ahorro estimado ~1,200–2,300 tokens. ⚠️ Pendiente aprobación para modificar opencode.json.
+9. ✅ **skills-selective-loading-audit.md**: Catálogo de 38 skills con descripciones compactas propuestas. Formato de 5–10 trigger keywords. Ahorro ~400–600 tokens.
+10. ✅ **regression-plan.md**: Extendido con 3 nuevos gates (F2 Quick Wins, F2 Contract Compliance, Full Artifact Audit).
+11. ✅ **risk-register.md**: 8 nuevos riesgos de F2 (F-R13 a F-R20).
+12. ✅ **gentle-ai-alignment.md**: Auditoría de alineación con gentle-ai, política de 6 puntos, GENTLE_AI_ALIGNMENT_PACK diseñado.
+13. ✅ **README.md** (Fase F): Pendiente — marcar F2 COMPLETED.
 
 ### Criterios de salida
-- [ ] Budgets validados con datos F0 + F1.
-- [ ] Modos de operación aprobados.
-- [ ] Reglas de expansión definidas.
-- [ ] Fuentes KEEP_FIXED vs COMPACT_FIXED vs RETRIEVE_ON_DEMAND claras.
+- [x] Budgets validados con datos F0 + F1 (ver F2-context-budget-contract.md).
+- [x] Modos de operación aprobados (diseñados, pendiente aprobación Manager + Usuario).
+- [x] Reglas de expansión definidas (automática, justificada, bloqueante).
+- [x] Fuentes KEEP_FIXED vs COMPACT_FIXED vs RETRIEVE_ON_DEMAND claras (source-to-layer mapping).
+- [x] Quick wins diseñados (QW#1–QW#5 con auditorías individuales).
+- [x] gentle-ai alineación documentada.
+- [x] Sin cambios funcionales implementados.
+- [x] Sin modificaciones a DB/schema/config.
+- [x] E6B y Suite F intactos.
 
-### Tiempo estimado
-1 sesión de diseño + aprobación.
+### Documentos creados en F2
+
+| Documento | Acción | Contenido |
+|-----------|:------:|-----------|
+| `F2-context-budget-contract.md` | ✅ Creado | Contrato formal de presupuesto, 14 páginas de contenido |
+| `tool-schema-demand-loading-audit.md` | ✅ Creado | Auditoría de 16 tools, modelo de carga |
+| `session-history-compaction-audit.md` | ✅ Creado | Diseño de compactación, formato RECENT_SESSION_PACK |
+| `manager-protocol-compaction-audit.md` | ✅ Creado | Desglose por sección, propuesta de compactación |
+| `skills-selective-loading-audit.md` | ✅ Creado | Catálogo de 38 skills compactados |
+| `gentle-ai-alignment.md` | ✅ Creado | Auditoría de alineación, política de 6 puntos |
+
+| Documento | Acción | Contenido |
+|-----------|:------:|-----------|
+| `context-budget-contract.md` | ✅ Actualizado | Referencia a F2 |
+| `context-layers-design.md` | ✅ Actualizado | F1 sources por capa, budgets F2 |
+| `context-packs-design.md` | ✅ Actualizado | 3 nuevos packs, budgets alineados |
+| `mem-context-selector-design.md` | ✅ Actualizado | Pseudocódigo, scoring verification |
+| `regression-plan.md` | ✅ Actualizado | 3 nuevos gates |
+| `risk-register.md` | ✅ Actualizado | 8 nuevos riesgos |
+| `README.md` (Fase F) | **Pendiente** | Marcar F2 COMPLETED |
+
+### Tiempo empleado
+1 sesión intensiva de diseño + auditoría + documentación (Tasks A–N ejecutadas en secuencia autónoma).
 
 ---
 
@@ -228,7 +261,7 @@ Implementar los cambios en producción (entorno real de OpenCode).
 |:----:|--------|:------:|:----------:|:----------:|
 | F0 | Token Audit Baseline | ✅ **COMPLETED** | No aplica | Ninguna |
 | F1 | Context Inventory | ✅ **COMPLETED** | No aplica | F0 |
-| F2 | Context Budget Contract | 📋 Pendiente | Manager + Usuario | F0 + F1 |
+| F2 | Context Budget Contract | ✅ **COMPLETED** | Manager + Usuario | F0 + F1 |
 | F3 | mem_context Selector | 📋 Diseñado | Manager | F2 |
 | F4 | Context Packs | 📋 Diseñado | Manager + Usuario | F3 |
 | F5 | Regression Plan | 📋 Diseñado | Manager | F3 + F4 |

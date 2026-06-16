@@ -1,6 +1,9 @@
 # Risk Register — Fase F
 
+**Estado:** ✅ UPDATED WITH F2 RISKS  
 **Propósito:** Documentar riesgos específicos de la Fase F de reducción de tokens, su probabilidad, impacto y mitigaciones.
+
+> Este documento fue actualizado con 8 nuevos riesgos de F2 (quick wins, contract, gentle-ai alignment).
 
 ---
 
@@ -232,6 +235,137 @@
 
 ---
 
+---
+
+## F-R13: Compactación de Manager Protocol pierde regla crítica
+
+| Campo | Detalle |
+|-------|---------|
+| **Riesgo** | Al compactar el Manager Protocol (28,471 chars → ~19k), se elimina o modifica una regla de orquestación importante. |
+| **Probabilidad** | Baja |
+| **Impacto** | 🔴 Alto — Manager pierde instrucciones de orquestación |
+| **Severidad** | 🔴 Alto |
+
+**Mitigación:**
+1. Diff texto completo antes/después revisado por Manager.
+2. E6B + Suite F como gates post-cambio.
+3. Las secciones core (Global Rule, Operating Model, SDD phases) NO se tocan.
+4. Prueba P1: Manager behavior no cambia.
+
+---
+
+## F-R14: Tool loading dinámico no soportado por runtime
+
+| Campo | Detalle |
+|-------|---------|
+| **Riesgo** | OpenCode runtime no permite cargar tool schemas selectivamente, bloqueando QW#2. |
+| **Probabilidad** | Media |
+| **Impacto** | 🟡 Medio |
+| **Severidad** | 🟡 Medio |
+
+**Mitigación:**
+1. Opción C (carga por decisión del Manager) como alternativa viable.
+2. Si no es posible, mantener herramientas core 6 + cargar todo como ahora (sin ahorro).
+3. Documentar en F3.
+
+---
+
+## F-R15: Session history compactado pierde continuidad
+
+| Campo | Detalle |
+|-------|---------|
+| **Riesgo** | El resumen estructurado del session history omite detalles que el Manager necesita para mantener coherencia. |
+| **Probabilidad** | Baja |
+| **Impacto** | 🟡 Medio |
+| **Severidad** | 🟡 Medio |
+
+**Mitigación:**
+1. Últimos 3 turns siempre crudos (garantía de precisión inmediata).
+2. Template estructurado (no generación libre).
+3. Prueba QW1-T4: Manager mantiene coherencia con resumen vs history completo.
+
+---
+
+## F-R16: Skills selectivos causan falsos negativos en matching
+
+| Campo | Detalle |
+|-------|---------|
+| **Riesgo** | Descripciones cortas de skills no permiten al Manager identificar cuándo cargar un skill. |
+| **Probabilidad** | Baja |
+| **Impacto** | 🟢 Bajo |
+| **Severidad** | 🟢 Bajo |
+
+**Mitigación:**
+1. Manager puede invocar skill por nombre sin depender del bloque.
+2. Las descripciones cortas usan trigger keywords precisos.
+3. Prueba P2: No hay falsos negativos en skill matching.
+
+---
+
+## F-R17: Dependencia OpenCode ↔ gentle-ai no autorizada
+
+| Campo | Detalle |
+|-------|---------|
+| **Riesgo** | Durante la auditoría de gentle-ai alignment, se crea inadvertidamente una dependencia entre OpenCode y gentle-ai. |
+| **Probabilidad** | Baja |
+| **Impacto** | 🟡 Medio |
+| **Severidad** | 🟡 Medio |
+
+**Mitigación:**
+1. gentle-ai solo se audita, no se integra ni modifica.
+2. Política explícita: "no crear dependencia OpenCode ↔ gentle-ai sin aprobación".
+3. Documento de alineación (`gentle-ai-alignment.md`) registra la decisión.
+
+---
+
+## F-R18: F2 contract tiene budgets inconsistentes entre documentos
+
+| Campo | Detalle |
+|-------|---------|
+| **Riesgo** | Los budgets definidos en F2-context-budget-contract.md no coinciden con context-layers-design.md o context-packs-design.md. |
+| **Probabilidad** | Baja |
+| **Impacto** | 🟡 Medio |
+| **Severidad** | 🟡 Medio |
+
+**Mitigación:**
+1. Verificación cruzada: Test C-T1 a C-T6 del regression plan.
+2. Un solo documento fuente (F2-context-budget-contract.md).
+3. Los otros documentos referencian a F2 como fuente.
+
+---
+
+## F-R19: Quick wins diseñados en F2 no se implementan en F3
+
+| Campo | Detalle |
+|-------|---------|
+| **Riesgo** | Los 5 quick wins diseñados en F2 quedan como documentos sin implementar por falta de tiempo, prioridad o recursos. |
+| **Probabilidad** | Media |
+| **Impacto** | 🟡 Medio |
+| **Severidad** | 🟡 Medio |
+
+**Mitigación:**
+1. Cada quick win tiene fase de implementación asignada (F2 o F3).
+2. Implementation roadmap documenta la secuencia.
+3. Si un quick win no se implementa, registrar en decision-log y actualizar budgets.
+
+---
+
+## F-R20: Manager protocol compaction requiere cambios en opencode.json sin aprobación
+
+| Campo | Detalle |
+|-------|---------|
+| **Riesgo** | La compactación del Manager Protocol requiere modificar `opencode.json`, lo cual puede tener consecuencias imprevistas. |
+| **Probabilidad** | Baja |
+| **Impacto** | 🔴 Alto |
+| **Severidad** | 🟡 Alto |
+
+**Mitigación:**
+1. Este documento es solo la propuesta de diseño.
+2. **No implementar sin aprobación explícita del usuario.**
+3. Si se aprueba: diff antes/después, test E6B + Suite F, feature flag.
+
+---
+
 ## Matriz de severidad
 
 | # | Riesgo | P | I | S |
@@ -248,6 +382,14 @@
 | F-R10 | E6B/Suite F rotos | ●○○ | 🔴 | 🔴 |
 | F-R11 | Falsos negativos selector | ●●○ | 🟢 | 🟢 |
 | F-R12 | Packs inflados | ●●○ | 🟡 | 🟡 |
+| F-R13 | Manager Protocol compactación pierde regla | ●○○ | 🔴 | 🔴 |
+| F-R14 | Tool loading no soportado | ●●○ | 🟡 | 🟡 |
+| F-R15 | Session history pierde continuidad | ●○○ | 🟡 | 🟡 |
+| F-R16 | Skills falsos negativos | ●○○ | 🟢 | 🟢 |
+| F-R17 | Dependencia gentle-ai no autorizada | ●○○ | 🟡 | 🟡 |
+| F-R18 | Budgets inconsistentes entre docs | ●○○ | 🟡 | 🟡 |
+| F-R19 | Quick wins no implementados | ●●○ | 🟡 | 🟡 |
+| F-R20 | opencode.json cambiado sin aprobación | ●○○ | 🔴 | 🟡 |
 
 **P = Probabilidad (●○○ baja, ●●○ media, ●●● alta)**  
 **I = Impacto (🟢 bajo, 🟡 medio, 🔴 alto, 🔴 crítico)**  

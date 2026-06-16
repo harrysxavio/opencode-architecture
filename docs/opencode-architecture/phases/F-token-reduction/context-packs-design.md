@@ -1,6 +1,9 @@
 # Context Packs Design
 
+**Estado:** ✅ ENHANCED WITH F1/F2 DATA (3 new packs added)  
 **Propósito:** Definir los "context packs" como unidades intercambiables de contexto, cada una con propósito, fuente, rango de tokens, criterios de inclusión/exclusión, riesgo y fallback.
+
+> Este diseño fue actualizado con los datos de F1 y F2. Se agregaron 3 nuevos packs: `TOOLING_PACK`, `SKILLS_PACK`, y `GENTLE_AI_ALIGNMENT_PACK`. Los budgets fueron alineados con F2.
 
 ---
 
@@ -10,16 +13,19 @@ Un **context pack** es un bloque de contexto autocontenido que representa una di
 
 ## Packs propuestos
 
-| Pack | Capa | Tokens objetivo | Prioridad |
-|:----|:----:|:---------------:|:---------:|
-| `PROJECT_IDENTITY_PACK` | L1 | 300–600 | 🔴 Siempre |
-| `ACTIVE_PHASE_PACK` | L2 | 400–800 | 🟡 Casi siempre |
-| `VALIDATION_STATUS_PACK` | L2 | 300–500 | 🟡 Casi siempre |
-| `RISK_REGISTER_PACK` | L0/L2 | 400–800 | 🟡 Casi siempre |
-| `DECISION_LOG_PACK` | L3 | 500–1.000 | 🟢 Según tarea |
-| `RELEVANT_MEMORY_PACK` | L3 | 1.500–3.000 | 🟢 Según tarea |
-| `RECENT_SESSION_PACK` | L4 | 500–1.000 | 🟢 Según tarea |
-| `TASK_SPECIFIC_PACK` | L5 | 500–1.500 | 🔵 Bajo demanda |
+| Pack | Capa | Tokens objetivo | Prioridad | QW asociado |
+|:----|:----:|:---------------:|:---------:|:-----------:|
+| `PROJECT_IDENTITY_PACK` | L1 | 300–600 | 🔴 Siempre | — |
+| `ACTIVE_PHASE_PACK` | L2 | 400–800 | 🟡 Casi siempre | — |
+| `VALIDATION_STATUS_PACK` | L2 | 300–500 | 🟡 Casi siempre | — |
+| `RISK_REGISTER_PACK` | L0/L2 | 400–800 | 🟡 Casi siempre | — |
+| `DECISION_LOG_PACK` | L3 | 500–1,000 | 🟢 Según tarea | — |
+| `RELEVANT_MEMORY_PACK` | L3 | 1,500–3,000 | 🟢 Según tarea | QW#4 |
+| `RECENT_SESSION_PACK` | L4 | 500–1,000 | 🟢 Según tarea | QW#1 |
+| **`TOOLING_PACK`** | **L2/L5** | **800–1,200 (core) / 1,500–2,500 (full)** | 🟡 **Media** | **QW#2** |
+| **`SKILLS_PACK`** | **L2** | **400–600 (índice compacto)** | 🟢 **Baja** | **QW#5** |
+| **`GENTLE_AI_ALIGNMENT_PACK`** | **L5** | **300–500** | 🔵 **Baja** | — |
+| `TASK_SPECIFIC_PACK` | L5 | 500–1,500 | 🔵 Bajo demanda | — |
 
 ---
 
@@ -223,6 +229,130 @@ Decisiones: 9.5k no es límite rígido; objetivo 8.5k-12k
 
 ---
 
+## TOOLING_PACK
+
+| Campo | Valor |
+|-------|-------|
+| **Propósito** | Definir qué tool schemas se cargan según la fase SDD y el modo |
+| **Fuente** | Tool schemas runtime (16 disponibles, carga selectiva) |
+| **Tokens objetivo** | 800–1,200 (core 6) / 1,500–2,500 (expandido) |
+| **Modo mínimo** | Normal (core 6) |
+| **Prioridad** | 🟡 Media |
+| **QW asociado** | QW#2 (Tool Schemas Bajo Demanda) |
+
+**Contenido — Carga según fase SDD:**
+
+| Fase | Tools cargadas | Tokens |
+|:----:|----------------|:------:|
+| **Siempre (core)** | read, write, edit, bash, glob, grep | ~800–1,200 |
+| **SDD Explore** | core + task, delegate | ~1,200–1,600 |
+| **SDD Propose/Spec/Design** | core + task | ~1,000–1,400 |
+| **SDD Apply** | core + task, skill, todowrite | ~1,400–1,800 |
+| **SDD Verify** | core + bash, task | ~1,100–1,500 |
+| **Investigación** | core + context7_*, webfetch, websearch | ~2,000–3,000 |
+| **Auditoría** | core + delegate, delegation_list, delegation_read | ~1,500–2,500 |
+
+**Criterios de inclusión:** Siempre que haya una fase SDD activa.
+
+**Criterios de exclusión:** Modo Simple (solo tools core del runtime, sin pack específico).
+
+**Riesgo si falta:** 🟡 Manager no puede ejecutar herramientas necesarias para la fase.
+
+**Riesgo si sobra:** 🟡 ~2k–4k tokens de schemas de herramientas no utilizadas.
+
+**Fallback:** Si la tool necesaria no está cargada, cargarla lazy + reintentar.
+
+---
+
+## SKILLS_PACK
+
+| Campo | Valor |
+|-------|-------|
+| **Propósito** | Definir qué skills están disponibles según el proyecto y la tarea |
+| **Fuente** | Available Skills block (38 skills) + SKILL.md files (40 únicos) |
+| **Tokens objetivo** | 400–600 (índice compacto) |
+| **Modo mínimo** | Normal |
+| **Prioridad** | 🟢 Baja |
+| **QW asociado** | QW#5 (Skills Selectivos) |
+
+**Contenido:**
+
+```
+Índice compacto (siempre):
+<skill>
+  <name>skill-name</name>
+  <description>trigger: keywords</description>
+</skill>
+
+Skills completos (bajo demanda vía skill tool):
+- Solo cuando Manager invoca explícitamente el skill
+- Sin carga automática en contexto base
+```
+
+**Formato del índice compacto:**
+```xml
+<skill>
+  <name>bigquery-expert</name>
+  <description>BigQuery SQL, queries, datasets, analysis</description>
+</skill>
+<skill>
+  <name>frontend-design</name>
+  <description>UI components, pages, layouts, visual design</description>
+</skill>
+```
+
+En lugar de descripciones largas de 1–2 líneas (~1,040 tokens), usar ~5–10 palabras clave (~500–600 tokens).
+
+**Criterios de inclusión:** Siempre el índice compacto. Skills completos solo bajo demanda.
+
+**Criterios de exclusión:** Modo Simple (sin índice de skills).
+
+**Riesgo si falta:** 🟢 Bajo — Manager aún puede invocar skills por nombre conocido.
+
+**Riesgo si sobra:** 🟢 Bajo — el índice compacto ocupa ~500–600 tokens.
+
+**Fallback:** Invocar skill por nombre directo sin depender del bloque.
+
+---
+
+## GENTLE_AI_ALIGNMENT_PACK
+
+| Campo | Valor |
+|-------|-------|
+| **Propósito** | Documentar alineación estratégica con gentle-ai para decisiones cross-system |
+| **Fuente** | gentle-ai referencias en docs 01, 04, 06, 07, 08, 10 del proyecto + este documento |
+| **Tokens objetivo** | 300–500 |
+| **Modo mínimo** | Arquitectura |
+| **Prioridad** | 🔵 Baja — solo para decisiones que afectan ambos sistemas |
+
+**Contenido:**
+```
+Estado de alineación gentle-ai:
+● Sistema A (opencode-architecture): reduce ~40k→9.5k con Fase F
+● Sistema B (gentle-ai): auditar pero no modificar ni integrar
+● Decisión: mantener independencia; gentle-ai como referencia, no dependencia
+● Riesgo: crear dependencia OpenCode↔gentle-ai sin aprobación
+● Documentos con referencias cruzadas: docs/01, 04, 06, 07, 08, 10
+```
+
+**Criterios de inclusión:**
+- Tareas que afectan decisiones compartidas entre opencode-architecture y gentle-ai.
+- Modo Arquitectura o superior.
+- Cuando se audita o modifica un documento con referencias gentle-ai.
+
+**Criterios de exclusión:**
+- Tareas puramente internas de opencode-architecture sin impacto cross-system.
+- Modo Simple o Normal.
+- Cuando gentle-ai no está referenciado en los archivos afectados.
+
+**Riesgo si falta:** 🟢 Bajo — decisión ya documentada de no integrar. Solo riesgo de crear dependencia sin saberlo.
+
+**Riesgo si sobra:** 🟢 Mínimo — 300–500 tokens solo en modo Arquitectura+.
+
+**Fallback:** Consultar `gentle-ai-alignment.md` (documento de auditoría Fase F).
+
+---
+
 ## TASK_SPECIFIC_PACK
 
 | Campo | Valor |
@@ -258,6 +388,9 @@ Decisiones: 9.5k no es límite rígido; objetivo 8.5k-12k
 | DECISION_LOG | ❌ | ❌ | ✅ | ✅ |
 | RELEVANT_MEMORY | ❌ | ✅ | ✅ | ✅ |
 | RECENT_SESSION | ❌ | ✅ | ✅ | ✅ |
+| **TOOLING** | ❌ | ✅ (core) | ✅ (expandido) | ✅ (completo) |
+| **SKILLS** | ❌ | ✅ (índice) | ✅ (índice) | ✅ (índice) |
+| **GENTLE_AI_ALIGNMENT** | ❌ | ❌ | ✅ | ✅ |
 | TASK_SPECIFIC | ❌ | ❌ | 🔵 Demanda | 🔵 Demanda |
 
 ---
@@ -267,9 +400,9 @@ Decisiones: 9.5k no es límite rígido; objetivo 8.5k-12k
 | Modo | Packs incluidos | Tokens estimados |
 |:----:|:----------------|:----------------:|
 | Simple | PROJECT_IDENTITY | ~500 |
-| Normal | IDENTITY + PHASE + VALIDATION + RISK + MEMORY + SESSION | ~4.000–6.000 |
-| Arquitectura | Todos excepto TASK_SPECIFIC | ~5.000–8.000 |
-| Auditoría | Todos | ~6.000–10.000 |
+| Normal | IDENTITY + PHASE + VALIDATION + RISK + MEMORY + SESSION + TOOLING(core) + SKILLS(index) | ~4,500–7,000 |
+| Arquitectura | Todos excepto TASK_SPECIFIC + GENTLE_AI | ~6,000–10,000 |
+| Auditoría | Todos | ~7,000–12,000 |
 
 ---
 

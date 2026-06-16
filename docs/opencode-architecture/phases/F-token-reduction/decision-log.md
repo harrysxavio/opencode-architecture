@@ -3,6 +3,9 @@
 **Propósito:** Registrar todas las decisiones tomadas durante la planificación e implementación de Fase F, con fundamento y alternativas consideradas.
 
 ---
+## Decisiones de F2 (2026-06-16)
+
+---
 
 ## D-F-001: 9.5k no es límite rígido
 
@@ -173,6 +176,123 @@
 
 ---
 
+## D-F-014: Context Packs expandidos con TOOLING, SKILLS y GENTLE_AI
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | Agregar 3 nuevos context packs: TOOLING_PACK (tool schemas por fase), SKILLS_PACK (índice compacto de skills), GENTLE_AI_ALIGNMENT_PACK (alineación estratégica). |
+| **Contexto** | F1 identificó que tool schemas (QW#2) y skills (QW#5) son fuentes optimizables. gentle-ai tiene referencias en 6 documentos. |
+| **Alternativas** | Mantener solo los 8 packs originales → rechazado porque tool schemas y skills necesitan un diseño explícito de carga bajo demanda. |
+| **Fundamento** | Cada nuevo pack resuelve un quick win específico. TOOLING_PACK → QW#2, SKILLS_PACK → QW#5, GENTLE_AI → alineación estratégica. |
+| **Impacto** | 11 packs totales. Ensamblaje por modo actualizado con los 3 nuevos. |
+
+---
+
+## D-F-015: Tool schemas bajo demanda por fase SDD (no por runtime)
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | El modelo de carga de tool schemas será por decisión del Manager según la fase SDD (Opción C), no por plugin interceptor ni por runtime dinámico. |
+| **Contexto** | La auditoría de tool schemas determinó que la Opción A (runtime dinámico) no está verificada, y la Opción B (plugin) tiene alto riesgo. |
+| **Alternativas** | Opción A (runtime) → no verificada. Opción B (plugin) → alto riesgo. Opción C (Manager) → riesgo medio, lazy load como fallback. |
+| **Fundamento** | El Manager conoce la fase SDD y el tipo de tarea, por lo que puede determinar qué tools necesita. Lazy load como fallback si la clasificación falla. |
+| **Impacto** | Herramientas core (6) siempre cargadas. El resto según fase SDD. Lazy load si se necesita una tool no cargada. Pendiente aprobación para implementar en F3. |
+
+---
+
+## D-F-016: Session history compactado con 3+7+acumulativo
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | El session history se compacta en 3 segmentos: últimos 3 turns crudos, turns 4–10 resumidos (1–2 líneas cada uno), turns 11+ resumen acumulativo (template estructurado). |
+| **Contexto** | Session history es el quick win más impactante (~3k–5k tokens de ahorro). |
+| **Alternativas** | Últimos 5 turns crudos → más tokens pero más precisión. Últimos 1 turn crudo → menos tokens pero riesgo de pérdida de continuidad. Todo resumido → máximo ahorro pero alto riesgo. |
+| **Fundamento** | 3 turns crudos garantizan precisión inmediata para el contexto inmediato. Resumen estructurado (no generación libre) evita alucinaciones. |
+| **Impacto** | Formato RECENT_SESSION_PACK definido. Se implementará en F3. |
+
+---
+
+## D-F-017: Manager Protocol compactado sin tocar secciones core
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | Compactar solo 4 secciones del Manager Protocol: Context Layer Definitions (referencias vs inline), Anti-Patterns, Fast-Track Exceptions, Default Behavior. NO tocar las secciones core (Global Rule, Operating Model, SDD phases, fases 0-8). |
+| **Contexto** | El Manager Protocol es la fuente más grande (~7k–14k tokens). Las secciones core son críticas para la orquestación. |
+| **Alternativas** | Compactación más agresiva → mayor ahorro pero mayor riesgo de perder instrucciones críticas. No compactar → no hay ahorro en la fuente más grande. |
+| **Fundamento** | Las 4 secciones identificadas son las que tienen contenido redundante o ejemplos extensos. Las secciones core no se tocan por seguridad. |
+| **Impacto** | Ahorro estimado: ~1,200–2,300 tokens. **⚠️ Pendiente aprobación del usuario** — modificar opencode.json tiene riesgo alto. |
+
+---
+
+## D-F-018: Skills block con descripciones de 5–10 palabras
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | El bloque `<available_skills>` usará descripciones de 5–10 trigger keywords en lugar de descripciones de 1–2 líneas. |
+| **Contexto** | Las descripciones actuales (~1,040 tokens) son genéricas y no ayudan al matching del Manager. |
+| **Alternativas** | Mantener descripciones actuales → ~1,040 tokens fijos. Eliminar descripciones → Manager perdería capacidad de matching. |
+| **Fundamento** | El Manager puede invocar skills por nombre sin depender del bloque. Las trigger keywords son suficientes para identificar qué skill cargar. |
+| **Impacto** | Ahorro: ~400–600 tokens. Se implementará en F3 editando el system prompt. |
+
+---
+
+## D-F-019: gentle-ai en alineación estratégica, no integración
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | gentle-ai se considera en alineación estratégica, no en integración técnica. NO crear dependencia funcional entre OpenCode y gentle-ai sin aprobación explícita. |
+| **Contexto** | gentle-ai referenciado en 6 documentos del proyecto. No está en workspace local. Doc #17 (plan de transición) existe pero no está activo. |
+| **Alternativas** | Integrar gentle-ai en Fase F → rechazado porque no hay autorización y gentle-ai no está en el workspace. Ignorar gentle-ai completamente → rechazado porque las referencias existen y deben auditarse. |
+| **Fundamento** | La auditoría es informativa, no vinculante. Las decisiones de Fase F no deben crear dependencias. El patrón de reducción se diseñó para ser reusable. |
+| **Impacto** | GENTLE_AI_ALIGNMENT_PACK diseñado. Política de alineación de 6 puntos. Sin cambios en gentle-ai. |
+
+---
+
+## D-F-020: F2 es diseño + auditoría, no implementación
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | F2 produce contratos, diseños y auditorías. No implementa cambios funcionales. La implementación se delega a F3–F6. |
+| **Contexto** | El contrato inicial de Fase F establece que F0–F2 son diagnóstico y diseño. F3+ es implementación. |
+| **Alternativas** | Implementar quick wins en F2 → rechazado porque los cambios en runtime (tool schemas, session history) requieren más validación. |
+| **Fundamento** | Es más seguro diseñar primero y validar el diseño antes de implementar. Los 14 documentos de F2 son la especificación para F3–F6. |
+| **Impacto** | Todos los cambios funcionales se implementarán en F3–F6 con feature flags y regression gates. |
+
+---
+
+## D-F-021: Regression plan extendido con gates F2
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | Agregar 3 nuevos gates al regression plan: F2 Quick Wins Verification (QW2-T1 a QW2-T6), F2 Contract Compliance (C-T1 a C-T6), Full Artifact Audit (A-T1 a A-T15). |
+| **Contexto** | F2 produce 6 nuevos documentos y actualiza 6 existentes. Es necesario verificar que todos sean consistentes antes de pasar a F3. |
+| **Alternativas** | Confiar en revisión manual → más rápido pero menos riguroso. |
+| **Fundamento** | 14 documentos de F2 deben ser consistentes entre sí y con F0/F1. Los gates automatizan la verificación. |
+| **Impacto** | Regression plan pasa de 6 a 9 gates (52 tests total). |
+
+---
+
+## D-F-022: TOOLING_PACK como context pack separado
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | El TOOLING_PACK es un context pack separado, no parte de L2 o L5. Tiene su propio presupuesto (800–1,200 tokens core, 1,500–2,500 expandido). |
+| **Contexto** | F1 clasificó tool schemas como RETRIEVE_ON_DEMAND. La auditoría detalló 3 opciones de carga. |
+| **Alternativas** | Tool schemas como parte de L2 (siempre presente) → no ahorra tokens. Tool schemas como parte de L5 (solo bajo demanda) → riesgo de no tener tools críticas. |
+| **Fundamento** | Como pack separado, TOOLING_PACK puede ensamblarse según la fase SDD. En modo Normal incluye core 6; en Auditoría incluye todas. |
+| **Impacto** | 11 packs totales. TOOLING_PACK activo desde modo Normal. |
+
+---
+
 ## Resumen de decisiones
 
 | # | Decisión | Fecha | Estado |
@@ -188,9 +308,18 @@
 | D-F-009 | Manager Protocol como KEEP_FIXED compactable | 2026-06-16 | ✅ Aprobada (F1) |
 | D-F-010 | Session history como quick win #1 | 2026-06-16 | ✅ Aprobada (F1) |
 | D-F-011 | Design Skills Protocol a RETRIEVE_ON_DEMAND | 2026-06-16 | ✅ Aprobada (F1) |
-| D-F-012 | Tool schemas requieren investigación runtime | 2026-06-16 | 🔶 Pendiente investigación |
+| D-F-012 | Tool schemas requieren investigación runtime | 2026-06-16 | 🔶 Resuelta (F2) — Opción C |
 | D-F-013 | Session summaries: dedup en retrieval, no eliminar | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-014 | Context Packs expandidos con 3 nuevos packs | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-015 | Tool schemas bajo demanda por fase SDD (Opción C) | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-016 | Session history compactado 3+7+acumulativo | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-017 | Manager Protocol compactado sin tocar core | 2026-06-16 | 🔶 Pendiente aprobación usuario |
+| D-F-018 | Skills block con descripciones 5–10 palabras | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-019 | gentle-ai en alineación estratégica, no integración | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-020 | F2 es diseño + auditoría, no implementación | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-021 | Regression plan extendido con gates F2 | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-022 | TOOLING_PACK como context pack separado | 2026-06-16 | ✅ Aprobada (F2) |
 
 ---
 
-_Fin de decision-log.md_
+_Fin de decision-log.md — F2 COMPLETED. 22 decisiones registradas (13 de F1, 9 nuevas de F2)._

@@ -1,6 +1,9 @@
 # mem_context Selector Design
 
+**Estado:** ✅ ENHANCED WITH F2 DATA (pseudocode, scoring verification, budget alignment)  
 **Propósito:** Definir cómo se seleccionan, rankean, filtran y presentan las memorias de Engram para minimizar tokens mientras se maximiza relevancia.
+
+> Este diseño fue actualizado con los datos de F2. Incluye pseudocódigo del pipeline completo, verificación metodológica del scoring, y alineación de top-k con budgets por modo.
 
 ---
 
@@ -14,6 +17,111 @@ El selector de memorias reemplaza la inclusión de todo el contexto de Engram po
 4. **Deduplicación**: eliminar observaciones redundantes.
 5. **Top-k**: limitar a las N más relevantes.
 6. **Presentación**: formatear como contexto compacto.
+
+### Pseudocódigo del pipeline completo
+
+```
+function select_memories(task, mode):
+    # 1. Construir query
+    query = build_query(task, mode)
+    
+    # 2. Buscar en Engram
+    results = engram_search(
+        query=query,
+        project="opencode-architecture",
+        scope="project",
+        limit=20,           # siempre pedir suficientes para ranking
+        types=["architecture", "decision", "bugfix", "config", 
+               "discovery", "session_summary"]
+    )
+    
+    if results is empty:
+        return fallback_search(task)   # → L5
+    
+    # 3. Ranking / Scoring
+    scored = []
+    for obs in results:
+        score = (
+            relevance_score(obs, task) * 0.5 +
+            recency_score(obs)         * 0.3 +
+            type_score(obs.type)       * 0.2
+        )
+        scored.append((obs, score))
+    
+    # 4. Filtro
+    filtered = [
+        (obs, score) for (obs, score) in scored
+        if score >= threshold[mode]         # threshold mínimo
+        and obs.project == "opencode-architecture"
+        and not contains_sensitive(obs.content)
+        and obs.scope != "legacy"           # excluir legacy
+    ]
+    
+    if filtered is empty:
+        return fallback_search(task)
+    
+    # 5. Deduplicación semántica
+    deduped = semantic_dedup(filtered)
+    # Si contenido similar → solo el de score más alto
+    
+    # 6. Top-k
+    k = get_k_for_mode(mode)
+    top_k = deduped[:k]  # ordenado por score descendente
+    
+    # 7. Formatear
+    return format_context(top_k)
+
+
+function build_query(task, mode):
+    keywords = extract_keywords(task)  # sustantivos + verbos principales
+    if keywords is empty:
+        keywords = ["opencode-architecture", "current_state"]
+    if mode == "Simple":
+        keywords += ["decision", "architecture"]
+    return " ".join(keywords[:10])  # max 10 palabras
+
+
+function get_k_for_mode(mode):
+    match mode:
+        "Simple":       return 3
+        "Normal":       return 5
+        "Arquitectura": return 8
+        "Auditoría":    return 12
+        "Excepcional":  return 20
+
+
+function get_threshold(mode):
+    match mode:
+        "Simple":       return 0.5
+        "Normal":       return 0.3
+        "Arquitectura": return 0.2
+        "Auditoría":    return 0.1
+        "Excepcional":  return 0.0
+```
+
+### Verificación metodológica del scoring
+
+El scoring compuesto se basa en 3 dimensiones. La siguiente tabla muestra cómo se verifica cada una:
+
+| Dimensión | Peso | Método de verificación | Riesgo si incorrecto |
+|:---------:|:----:|------------------------|:--------------------:|
+| **Relevancia** | 0.5 | Extraer keywords de la tarea actual. Si hay match exacto en título → 1.0. Match parcial → 0.7. Match de fase/proyecto → 0.5. | 🟡 Si el keyword extraction es pobre, el ranking pierde precisión |
+| **Recencia** | 0.3 | Timestamp de la observación. Últimas 24h → 1.0. Última semana → 0.8. Último mes → 0.5. >1 mes → 0.3. >3 meses → 0.1. | 🟢 Bajo — la recencia se puede verificar empíricamente |
+| **Tipo** | 0.2 | Mapeo fijo de tipo → score (ver tabla tipos). | 🟢 Bajo — es un mapeo estático |
+
+**Validación cruzada:** Ejecutar el selector sobre memorias conocidas (ej. #404 "E6B Noise Gate", #427 "Suite F") y verificar que el score refleja la relevancia esperada.
+
+### Budget alignment con F2
+
+| Modo | top-k | Threshold | Tokens target (L3) | Tokens máx (L3) |
+|:----:|:-----:|:---------:|:------------------:|:----------------:|
+| Simple | 3 | 0.5 | 1,000–1,500 | 2,000 |
+| Normal | 5 | 0.3 | 2,000–3,500 | 4,000 |
+| Arquitectura | 8 | 0.2 | 3,500–4,500 | 6,000 |
+| Auditoría | 12 | 0.1 | 4,500–6,000 | 8,000 |
+| Excepcional | 20 | 0.0 | 6,000–10,000 | 12,000 |
+
+> Budgets definidos en `F2-context-budget-contract.md` y validados en `context-layers-design.md`.
 
 ---
 
@@ -186,13 +294,13 @@ Si el contenido de #419 cubre lo mismo que #420 → deduplicar, conservar #420.
 
 ## 6. Top-k limit
 
-| Modo | k máximo | Tokens estimados |
-|:----:|:--------:|:----------------:|
-| Simple | 3 | ~1.000–1.500 |
-| Normal | 5 | ~2.000–3.000 |
-| Arquitectura | 8 | ~3.000–4.000 |
-| Auditoría | 12 | ~4.000–5.000 |
-| Excepcional | 20 | ~5.000–8.000 |
+| Modo | k máximo | Threshold mínimo | Tokens estimados |
+|:----:|:--------:|:----------------:|:----------------:|
+| Simple | 3 | 0.5 | ~1,000–1,500 |
+| Normal | 5 | 0.3 | ~2,000–3,500 |
+| Arquitectura | 8 | 0.2 | ~3,500–4,500 |
+| Auditoría | 12 | 0.1 | ~4,500–6,000 |
+| Excepcional | 20 | 0.0 | ~6,000–10,000 |
 
 ### Regla de corte
 
