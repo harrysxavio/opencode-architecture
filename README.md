@@ -89,10 +89,10 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **B1 — Observabilidad** | ✅ Completado | Baseline T8 ejecutado, T1 validado, diseño de observabilidad creado (ADR-009) |
 | **Engram store real** | ✅ Validado | Store real es `~/.engram/engram.db`. NO `.codex/memories_1.sqlite` |
 | **Engram herramientas** | ✅ Validado | `mem_save`, `mem_search`, `mem_context`, `mem_session_summary`, `mem_judge` funcionan operativamente |
-| **Engram persistencia** | ✅ Validado | Engram MCP/DB funcionan; D6 reimplementó Noise Gate y smoke positivo/negativo pasó en sesión nueva canonical |
-| **Riesgo Engram** | ⚠️ Parcial | Project drift persiste en sesiones legacy; D6 evita migración automática y requiere sesiones canonical para prompt capture |
+| **Engram persistencia** | ✅ Validado | Engram MCP/DB funcionan. Noise Gate implementado (E6B) y validado T1-T7 PASS. Captura funciona en sesión canonical. |
+| **Riesgo Engram** | ⚠️ Parcial | Project drift persiste en sesiones legacy; sesión canonical `opencode-architecture` funciona sin mismatch. Suite F validó mem_context read-only (F1-F6 PASS). |
 | **MCP** | 🔶 Parcial | Context7 funciona bajo intención explícita. Playwright operativo. Duplicación entre opencode.json y .jsonc |
-| **Context Pack** | ⏳ Pendiente | Requerimiento detectado en E4A. Necesario antes de optimizar tokens |
+| **Context Pack** | ✅ Completado (E5) | 7 contratos definidos y testeados. 7 tests PASS. |
 | **Hybrid Retrieval** | 🔮 Futuro | No bloquear Engram stabilization. Se abordará como Fase G |
 
 ---
@@ -114,8 +114,9 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **E4B** — Engram stabilization | ✅ **Completada** | Pin a v1.16.1 + `--project=opencode-architecture`. Tests T1-T7 PASSED |
 | **E5** — Context Pack | ✅ **Completada** | 7 contratos (Context Pack, Writer, Validator, Read Escalation, Quality Metrics, Intake Cleaner). 7 tests PASSED |
 | **E6A** — Prompt Capture Audit & Design | ✅ **Completada** | Audit de plugin engram.ts y DB, Noise Gate design (Opción B — Heurísticas). 7 tests PASSED |
-| **E6B** — Noise Gate implementation | **✅ D6 smoke PASS** | Noise Gate reimplementado en `engram.ts` con `classified`, sin `Bun.*`, sin `/projects/migrate`, debug normal apagado. Smoke positivo/negativo pasó; faltan T1-T7 formales |
-| **F** — Token reduction | ⏳ Pendiente (post-E5) | Reducción de contexto con Context Pack como base |
+| **E6B** — Noise Gate implementation | ✅ **COMPLETE — T1-T7 all PASS** | Noise Gate reimplementado y validado formalmente. T1/T2: ruido filtrado. T3/T4: preguntas e instrucciones capturadas. T5: secretos ghp_ bloqueados. T6: navegación trivial filtrada. T7: default capture funciona. Sin session_project_mismatch en sesión canonical. |
+| **Suite F** — mem_context read-only | ✅ **COMPLETE — F1-F6 all PASS** | mem_context validado en modo read-only: happy path canonical, proyecto inexistente graceful, cross-project documentado, idempotencia sin cambios DB, timeline cotejado, solo Engram tools. |
+| **F** — Token reduction | 📋 **PLANNING** | Diseño completo documentado en `docs/opencode-architecture/phases/F-token-reduction/`. 10 documentos: audit plan, budget contract, capas L0-L5, selector de memorias, context packs, risk register, regression plan, roadmap, decision log. Objetivo: ~40k → ~9.5k modo Normal. Sin cambios funcionales implementados todavía. |
 | **G** — Hybrid Retrieval | 🔮 Futuro | Búsqueda combinada keyword + semántica |
 | **H** — MCP consolidation | 🔮 Futuro | Superficie MCP optimizada, memory server avanzado |
 
@@ -149,6 +150,7 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **Prompt Capture Audit (E6A)** | [23-prompt-capture-audit.md](docs/opencode-architecture/23-prompt-capture-audit.md) |
 | **Noise Gate Design (E6A)** | [24-noise-gate-design.md](docs/opencode-architecture/24-noise-gate-design.md) |
 | **Arquitectura de proyecto replicable** | [15-replicable-project-architecture.md](docs/opencode-architecture/15-replicable-project-architecture.md) |
+| **Fase F — Token Reduction (PLANNING)** | [docs/opencode-architecture/phases/F-token-reduction/](docs/opencode-architecture/phases/F-token-reduction/) |
 
 ---
 
@@ -206,9 +208,9 @@ Este principio recorrió todas las fases: el LLM no debe recibir conversaciones 
 
 ## Estado actual y próximo paso
 
-**Estado actual:** `E6B-D5B — clean session capture` confirmó que el plugin funciona en sesión limpia con `opencode-architecture`. **Noise Gate NO está reimplementado todavía**.
+**Estado actual:** `E6B COMPLETE — T1-T7 all PASS` + `Suite F COMPLETE — F1-F6 all PASS`. Noise Gate implementado y validado. mem_context validado en modo read-only. **Fase F en PLANNING — diseño completo, sin cambios funcionales implementados.**
 
-**Estado E global:** E0-E4B ✅ completados. E5 ✅ completado. E6A ✅ completado. **E6B 🔧 listo para D6/D5-cleanup: remover instrumentación temporal y reimplementar Noise Gate.**
+**Estado fases:** E0-E4B ✅, E5 ✅, E6A ✅, **E6B ✅**, **Suite F ✅**, **Fase F 📋 PLANNING**.
 
 ### Resultados de E4B
 
@@ -259,31 +261,37 @@ Este principio recorrió todas las fases: el LLM no debe recibir conversaciones 
 
 **Archivos creados:** 2 documentos (23-audit, 24-design), 7 tests en `test-runs/E6/`
 
-### E6B — Estado actual de reparación runtime
+### E6B — Noise Gate: COMPLETE ✅
 
-El Noise Gate fue diseñado y llegó a implementarse, pero E6B-D0/D1 demostraron que el problema previo no era la heurística: el plugin OpenCode de Engram no estaba cargando correctamente.
+El Noise Gate fue implementado (D6) sobre el plugin Node-compatible y validado formalmente con 7 tests (T1-T7) todos PASS.
 
-Estado actual:
+**Resumen de validación:**
 
-| Componente | Detalle |
-|------------|---------|
-| **D0** | NO-GO: pregunta útil no aumentó `user_prompts` |
-| **D1** | NO-GO: setup oficial reinstaló plugin, pero `engram.ts` falló por `Bun is not defined` |
-| **D2** | Patch mínimo Node-compatible aplicado: `Bun.*` removido de `engram.ts`, pero hook no captura pregunta útil |
-| **D3** | Hook/export diagnostic: plugin carga, hook entra, contenido útil extraído, POST `/prompts` devuelve HTTP 400 |
-| **D4** | HTTP diagnostic: `/sessions` OK, `/prompts` 400 por `session_project_mismatch` |
-| **D5A** | Inventario read-only: `sessions` legacy 11 vs canonical 7; `user_prompts` legacy 26 vs canonical 1; `observations` legacy 2 vs canonical 24 |
-| **D5B** | Sesión limpia validada: pregunta positiva length 44, `/prompts` 201, `user_prompts` +1 en `opencode-architecture` |
-| **Noise Gate** | Pausado; NO reimplementado todavía sobre el plugin Node-compatible |
-| **Body POST /prompts** | Sin cambios — mismo `{ session_id, content, project }` |
-| **Schema DB** | Sin alterar |
-| **Config** | `opencode.json` / `opencode.jsonc` sin cambios durante D2 |
-| **Rollback** | Restaurar `engram.ts.e6b-d2-backup` o backup D1 |
+| Test | Input | Resultado |
+|:----:|-------|:---------:|
+| T1 | `ok gracias jajaja` | ✅ Filtrado (confirmación trivial) |
+| T2 | `listo` | ✅ Filtrado (confirmación trivial) |
+| T3 | `¿Qué rol cumple Engram en esta arquitectura?` | ✅ Capturado (pregunta útil) |
+| T4 | `Diseña una prueba read-only para validar mem_context.` | ✅ Capturado (instrucción diseño) |
+| T5 | `Mi token falso es ghp_FAKE...` | ✅ Bloqueado (secreto detectado) |
+| T6 | `muéstrame el archivo README` | ✅ Filtrado (navegación trivial) |
+| T7 | `Continúa con la arquitectura OpenCode.` | ✅ Capturado (default capture) |
 
-**Backups relevantes:** `engram.ts.e6b-backup`, `engram.ts.e6b-d2-backup`, backups D1 timestamp.
+**Store real:** `C:\Users\harry\.engram\engram.db` — intacto, sin cambios de schema.
+**Plugin:** `engram.ts` con `ALLOW_PROMPT_CAPTURE="classified"`, `DEBUG_ENGRAM_PLUGIN=false`.
+**Sesión requerida:** Canonical `opencode-architecture` (legacy `arquitectura opencode` causa `session_project_mismatch`).
 
-**Pendiente:** remover/reducir instrumentación temporal D3/D4 y reimplementar Noise Gate sobre el plugin Node-compatible funcionando. No migrar DB todavía.
+### Suite F — mem_context read-only: COMPLETE ✅
+
+| Test | Qué validó | Resultado |
+|:----:|------------|:---------:|
+| F-T1 | Happy path canonical | ✅ PASS — 3 architecture memories relevantes |
+| F-T2 | Proyecto inexistente | ✅ PASS — "No memories found" graceful |
+| F-T3 | Sin --project | ✅ PASS — cross-project documentado |
+| F-T4 | Idempotencia | ✅ PASS — 0 cambios DB |
+| F-T5 | Cross-verify timeline | ✅ PASS — cotejo con sqlite3 |
+| F-T6 | Solo Engram tools | ✅ PASS — sin subagentes ni escritura |
 
 ---
 
-*Última actualización: 2026-06-10. Este README se actualiza al completar cada fase del roadmap.*
+*Última actualización: 2026-06-16. E6B COMPLETE, Suite F COMPLETE, Fase F en PLANNING.*
