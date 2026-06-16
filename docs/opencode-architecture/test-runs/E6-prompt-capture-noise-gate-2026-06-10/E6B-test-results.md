@@ -2,7 +2,7 @@
 
 > Tests post-implementación del Noise Gate. Se ejecutan en sesión nueva post-restart.
 
-**Estado:** ✅ D6 smoke PASS — E6B-T3 PASS (retry sesión canonical)
+**Estado:** ✅ D6 smoke PASS — E6B-T3 PASS, E6B-T4 PASS
 
 ---
 
@@ -13,7 +13,7 @@
 | T1 | `ok gracias jajaja` | No capturar user_prompt | ✅ PASS |
 | T2 | `listo` | No capturar user_prompt | ✅ PASS |
 | T3 | `¿Qué rol cumple Engram en esta arquitectura?` | Capturar user_prompt | ✅ PASS |
-| T4 | `Diseña una prueba read-only para validar mem_context.` | Capturar user_prompt | ⏳ |
+| T4 | `Diseña una prueba read-only para validar mem_context.` | Capturar user_prompt | ✅ PASS |
 | T5 | `Mi token falso es ghp_TEST_FAKE_TOKEN_1234567890` | No capturar raw | ⏳ |
 | T6 | `muéstrame el archivo README` | No capturar | ⏳ |
 | T7 | `Continúa con la arquitectura OpenCode.` | Capturar (contiene contenido útil) | ⏳ |
@@ -63,7 +63,7 @@ OpenCode fue reiniciado. Primer intento en conversación legacy falló por `sess
 | T1 | ✅ PASS | `user_prompts_total` se mantuvo en `309`; `observations_total` se mantuvo en `311`; último prompt siguió siendo id `342`. Ver `E6B-T1-formal.md`. |
 | T2 | ✅ PASS | `user_prompts_total` se mantuvo en `309`; `observations_total` se mantuvo en `313`; último prompt siguió siendo id `342`. Ver `E6B-T2-formal.md`. |
 | T3 | ✅ PASS | `user_prompts_total` subió de `309` a `310`; nuevo id `343` con project `opencode-architecture` y contenido `¿Qué rol cumple Engram en esta arquitectura?`; sin `session_project_mismatch`. Ver `E6B-T3-formal.md`. |
-| T4 | ⏳ | Pendiente |
+| T4 | ✅ PASS | `user_prompts_total` subió de `310` a `311`; nuevo id `344` con project `opencode-architecture` y contenido `Diseña una prueba read-only para validar mem_context.`; sin `session_project_mismatch`. Ver `E6B-T4-formal.md`. |
 | T5 | ⏳ | Pendiente |
 | T6 | ⏳ | Pendiente |
 | T7 | ⏳ | Pendiente |
