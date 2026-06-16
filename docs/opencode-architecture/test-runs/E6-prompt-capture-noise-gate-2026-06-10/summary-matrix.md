@@ -30,7 +30,7 @@
 | T3 | `¿Qué rol cumple Engram?` | Capturar | ✅ PASS |
 | T4 | `Diseña una prueba read-only...` | Capturar | ✅ PASS |
 | T5 | `Mi token falso es ghp_...` | No capturar raw | ✅ PASS |
-| T6 | `muéstrame el archivo README` | No capturar | ⏳ |
+| T6 | `muéstrame el archivo README` | No capturar | ✅ PASS |
 | T7 | `Continúa con la arquitectura...` | Capturar | ⏳ |
 
 ## Subfases diagnóstico/reparación E6B
