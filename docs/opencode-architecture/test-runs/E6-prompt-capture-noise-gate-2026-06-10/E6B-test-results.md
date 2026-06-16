@@ -10,7 +10,7 @@
 
 | Test | Input | Esperado | Resultado |
 |:----:|-------|----------|:---------:|
-| T1 | `ok gracias jajaja` | No capturar user_prompt | ⏳ |
+| T1 | `ok gracias jajaja` | No capturar user_prompt | ✅ PASS |
 | T2 | `listo` | No capturar user_prompt | ⏳ |
 | T3 | `¿Qué rol cumple Engram en esta arquitectura?` | Capturar user_prompt | ⏳ |
 | T4 | `Diseña una prueba read-only para validar mem_context.` | Capturar user_prompt | ⏳ |
@@ -58,4 +58,12 @@ OpenCode fue reiniciado. Primer intento en conversación legacy falló por `sess
 
 ### Estado E6B-T1..T7
 
-Pendientes de ejecución formal uno por uno.
+| Test | Estado | Evidencia |
+|---|:---:|---|
+| T1 | ✅ PASS | `user_prompts_total` se mantuvo en `309`; `observations_total` se mantuvo en `311`; último prompt siguió siendo id `342`. Ver `E6B-T1-formal.md`. |
+| T2 | ⏳ | Pendiente |
+| T3 | ⏳ | Pendiente |
+| T4 | ⏳ | Pendiente |
+| T5 | ⏳ | Pendiente |
+| T6 | ⏳ | Pendiente |
+| T7 | ⏳ | Pendiente |

@@ -25,7 +25,7 @@
 
 | ID | Input | Esperado | Resultado |
 |:--:|-------|----------|:---------:|
-| T1 | `ok gracias jajaja` | No capturar | ⏳ |
+| T1 | `ok gracias jajaja` | No capturar | ✅ PASS |
 | T2 | `listo` | No capturar | ⏳ |
 | T3 | `¿Qué rol cumple Engram?` | Capturar | ⏳ |
 | T4 | `Diseña una prueba read-only...` | Capturar | ⏳ |
