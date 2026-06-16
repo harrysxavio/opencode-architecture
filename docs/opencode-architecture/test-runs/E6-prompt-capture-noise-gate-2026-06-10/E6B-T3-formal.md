@@ -1,9 +1,10 @@
 # E6B-T3 — Formal Test: Useful question should be captured
 
-**Resultado:** 🔴 BLOCKED  
+**Resultado:** ✅ PASS (retry desde sesión canonical)  
 **Fecha:** 2026-06-16  
 **Store real:** `C:\Users\harry\.engram\engram.db`  
-**Proyecto activo MCP:** `opencode-architecture`
+**Proyecto activo MCP:** `opencode-architecture`  
+**Sesión:** Nueva sesión OpenCode canonical, project `opencode-architecture`
 
 ## Objetivo
 
@@ -15,9 +16,9 @@ Validar formalmente que el Noise Gate de Engram captura una pregunta útil:
 
 ## Resultado ejecutivo
 
-El test no pudo validar la captura porque el hook llegó a `/prompts`, pero Engram rechazó la escritura con `session_project_mismatch`.
+**PASS.** En la primera ejecución el test quedó BLOCKED por `session_project_mismatch` (sesión legacy `arquitectura opencode`). Reejecutado desde una sesión nueva canonical `opencode-architecture`, el input se capturó correctamente: `user_prompts` aumentó de `309` a `310`, creando el prompt id `343` con project `opencode-architecture` y el contenido exacto.
 
-Esto bloquea E6B-T3 en la sesión actual. No se modificó código, DB, schema ni config.
+Esto confirma que el Noise Gate clasifica correctamente la pregunta como `question` → `shouldCapture=true`, y que la falla previa era únicamente por sesión legacy. No se modificó código, DB, schema ni config.
 
 ## Restricciones respetadas
 
@@ -28,7 +29,8 @@ Esto bloquea E6B-T3 en la sesión actual. No se modificó código, DB, schema ni
 - No se hicieron refactors.
 - No se corrigieron temas fuera del alcance del test.
 - No se usó `.codex/memories_1.sqlite`.
-- Se mantuvo `~/.engram/engram.db` como store real.
+- Se mantuvo `C:\Users\harry\.engram\engram.db` como store real.
+- No se modificaron criterios del Noise Gate.
 
 ## Comandos ejecutados
 
@@ -49,19 +51,19 @@ project_source=process_override
 ### 2. Baseline antes del test
 
 ```powershell
-sqlite3 "C:\Users\harry\.engram\engram.db" "PRAGMA database_list; SELECT 'user_prompts_total', COUNT(*) FROM user_prompts; SELECT 'observations_total', COUNT(*) FROM observations; SELECT id, project, LENGTH(content), content, created_at FROM user_prompts ORDER BY created_at DESC LIMIT 5;"
+sqlite3 "C:\Users\harry\.engram\engram.db" "SELECT 'user_prompts_total', COUNT(*) FROM user_prompts; SELECT 'observations_total', COUNT(*) FROM observations; SELECT id, project, LENGTH(content), content, created_at FROM user_prompts ORDER BY created_at DESC LIMIT 5;"
 ```
 
 Resultado relevante:
 
 | Métrica | Valor |
-|---|---:|
+|---|---|---:|
 | DB path | `C:\Users\harry\.engram\engram.db` |
 | `user_prompts_total` | 309 |
-| `observations_total` | 315 |
+| `observations_total` | 317 |
 | Último prompt | id `342`, project `opencode-architecture`, length `44` |
 
-### 3. Input objetivo
+### 3. Input objetivo (desde sesión nueva canonical)
 
 ```text
 ¿Qué rol cumple Engram en esta arquitectura?
@@ -70,62 +72,53 @@ Resultado relevante:
 ### 4. Verificación después del test
 
 ```powershell
-sqlite3 "C:\Users\harry\.engram\engram.db" "PRAGMA database_list; SELECT 'user_prompts_total', COUNT(*) FROM user_prompts; SELECT 'observations_total', COUNT(*) FROM observations; SELECT id, project, LENGTH(content), content, created_at FROM user_prompts ORDER BY created_at DESC LIMIT 5; SELECT id, type, title, created_at FROM observations ORDER BY created_at DESC LIMIT 5;"
+sqlite3 "C:\Users\harry\.engram\engram.db" "SELECT 'user_prompts_total', COUNT(*) FROM user_prompts; SELECT 'observations_total', COUNT(*) FROM observations; SELECT id, project, LENGTH(content), content, created_at FROM user_prompts ORDER BY created_at DESC LIMIT 5;"
 ```
 
 Resultado relevante:
 
 | Métrica | Antes | Después | Esperado | Resultado |
-|---|---:|---:|---:|:---:|
-| `user_prompts_total` | 309 | 309 | 310 | 🔴 No capturó |
-| Último `user_prompt` | id `342` | id `342` | nuevo id | 🔴 Sin nuevo prompt |
-| `observations_total` | 315 | 315 | N/A | ✅ Sin cambio extra |
+|---|---|---|---|---:|---:|
+| `user_prompts_total` | 309 | 310 | 310 | ✅ PASS |
+| Último `user_prompt` | id `342` | id `343` | nuevo id | ✅ PASS |
+| Contenido id `343` | — | `¿Qué rol cumple Engram en esta arquitectura?` | coincide con input | ✅ PASS |
+| Project id `343` | — | `opencode-architecture` | `opencode-architecture` | ✅ PASS |
+| `observations_total` | 317 | 317 | N/A | ✅ Sin cambio extra |
 
-### 5. Recheck con espera
+### 5. Evidencia de log sanitizado
 
-Se esperaron 2 segundos y se volvió a consultar `user_prompts`.
-
-Resultado: `user_prompts_total_after_wait=309`.
-
-### 6. Evidencia de log sanitizado
-
-Archivo:
+El log NO muestra entradas para la captura exitosa, lo cual es **esperado** por diseño: `DEBUG_ENGRAM_PLUGIN=false` y solo errores HTTP se fuerzan al log. Las entradas de mismatch posteriores (`16:04:07`) corresponden a la sesión legacy aún abierta, no a la sesión canonical.
 
 ```text
-C:\Users\harry\.config\opencode\plugins\engram-debug.log
-```
-
-Evidencia relevante:
-
-```text
-2026-06-16T15:55:10.647Z | /prompts response | ok=false status=400 body={"code":"session_project_mismatch","error":"session project does not match requested project","project":"opencode-architecture","session_project":"arquitectura opencode"}
-2026-06-16T15:55:10.648Z | prompt capture skipped | reason=session_project_mismatch project=opencode-architecture
-2026-06-16T15:56:13.283Z | /prompts response | ok=false status=400 body={"code":"session_project_mismatch","error":"session project does not match requested project","project":"opencode-architecture","session_project":"arquitectura opencode"}
-2026-06-16T15:56:13.284Z | prompt capture skipped | reason=session_project_mismatch project=opencode-architecture
+# No hay log de 201 para la captura exitosa — comportamiento correcto con DEBUG_ENGRAM_PLUGIN=false
+# Las entradas 400 posteriores son de la sesión legacy, no de la canonical
 ```
 
 ## Criterios de aceptación
 
 | # | Criterio | Resultado |
-|---|---|:---:|
-| 1 | Registrar estado inicial | ✅ PASS |
-| 2 | Ejecutar input definido para E6B-T3 | ✅ PASS |
-| 3 | Registrar estado posterior | ✅ PASS |
-| 4 | Validar si hubo captura | 🔴 BLOCKED: escritura rechazada por `session_project_mismatch` |
-| 5 | Confirmar comportamiento esperado | 🔴 BLOCKED: no se pudo validar captura positiva |
-| 6 | Actualizar documentación | ✅ PASS |
-| 7 | Guardar memoria Engram del resultado | ✅ PASS: `Blocked E6B-T3 by session mismatch` |
-| 8 | Reportar PASS/PARCIAL/BLOCKED | 🔴 BLOCKED |
+|---|---|---|:---:|
+| 1 | Abrir sesión nueva canonical `opencode-architecture` | ✅ PASS |
+| 2 | Confirmar proyecto activo y `session_project` | ✅ PASS |
+| 3 | Registrar estado inicial (user_prompts, observations, último id) | ✅ PASS |
+| 4 | Ejecutar input definido para E6B-T3 | ✅ PASS |
+| 5 | Registrar estado posterior | ✅ PASS |
+| 6 | Confirmar nuevo prompt con contenido y project correctos | ✅ PASS |
+| 7 | Validar que no hubo `session_project_mismatch` | ✅ PASS |
+| 8 | Actualizar documentación | ✅ PASS |
+| 9 | Guardar memoria Engram del resultado | ✅ PASS |
+| 10 | Reportar PASS/BLOCKED/FAIL | ✅ PASS |
 
 ## Diagnóstico
 
-El Noise Gate no queda refutado por este test. La evidencia muestra que la escritura fue bloqueada por una sesión legacy cuyo `session_project` es `arquitectura opencode`, mientras el plugin intenta capturar bajo el proyecto canónico `opencode-architecture`.
+El Noise Gate clasificó correctamente la pregunta como `question` → `shouldCapture=true`. La falla del primer intento fue exclusivamente por sesión legacy (`session_project_mismatch`). En sesión canonical, la captura funciona sin errores.
 
-## Riesgos detectados
+## Lecciones aprendidas
 
-- El riesgo R20 de sesiones legacy sigue activo y puede bloquear pruebas positivas.
-- Tests positivos requieren una sesión canonical limpia o una política separada de manejo/migración de sesiones legacy.
+- El Noise Gate no es responsable del bloqueo previo; la causa raíz fue la sesión legacy (`arquitectura opencode`).
+- Tests positivos deben ejecutarse en sesión canonical para evitar falsos BLOCKED.
+- El log no muestra capturas exitosas con `DEBUG_ENGRAM_PLUGIN=false` — eso es correcto.
 
 ## Próximo paso
 
-Reintentar E6B-T3 desde una sesión nueva canonical `opencode-architecture`, sin migrar DB ni tocar schema/config.
+Continuar con E6B-T4..T7 desde la sesión canonical.
