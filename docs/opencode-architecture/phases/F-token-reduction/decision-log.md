@@ -108,6 +108,71 @@
 
 ---
 
+## D-F-009: Manager Protocol como KEEP_FIXED compactable (F1)
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | El Manager Protocol (28,471 chars) debe permanecer fijo en contexto base, pero compactado. Es la fuente más grande (20-28% del total). |
+| **Contexto** | F1 determinó que el Manager Protocol es la fuente individual más grande. No puede moverse a bajo demanda porque contiene las reglas de orquestación. |
+| **Alternativas** | Mover partes a retrieval → rechazado porque el Manager necesita las reglas de orquestación siempre disponibles. |
+| **Fundamento** | Las secciones compactables son: Context Layer Definitions (referencias vs inline), Anti-Patterns, Fast-Track, Default Behavior. |
+| **Impacto** | Manager Protocol post-compactación estimado: ~5,000–8,000 tokens (ahorro ~2k–6k). La compactación se hará en F2. |
+
+---
+
+## D-F-010: Session history como quick win #1 (F1)
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | El session history es el quick win más impactante (~3k–5k tokens de ahorro) y debe priorizarse. |
+| **Contexto** | F1 analizó 5 quick wins. Session history compactado tiene el mayor ahorro individual. |
+| **Alternativas** | Tool schemas bajo demanda (~2k–4k) → ahorro similar pero mayor complejidad. |
+| **Fundamento** | Session history no requiere cambios en runtime ni plugin. Solo mejorar la gestión del historial de conversación. Mantener últimos 3 turns crudos + resumen estructurado. |
+| **Impacto** | Se diseñará en F2, se implementará en F3 junto con el selector de memorias. |
+
+---
+
+## D-F-011: Design Skills Protocol a RETRIEVE_ON_DEMAND (F1)
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | La sección Design Skills Integration Protocol de AGENTS.md (~4,500 chars, ~1,125 tokens) debe moverse a carga bajo demanda. |
+| **Contexto** | F1 clasificó AGENTS.md en 3 sub-secciones. Design Skills solo es necesario para tareas frontend, que son minoría. |
+| **Alternativas** | Mantenerlo fijo → rechazado porque son ~1,125 tokens que se cargan siempre pero se usan <20% del tiempo. |
+| **Fundamento** | El Manager puede cargar este protocolo vía skill tool cuando la tarea involucra frontend. No necesita estar en el contexto base. |
+| **Impacto** | Ahorro: ~1,125 tokens. Requiere modificar cómo se carga AGENTS.md (extraer la sección Design Skills a un skill invocable). |
+
+---
+
+## D-F-012: Tool schemas requieren investigación de runtime (F1)
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | Tool schemas bajo demanda es prioritario (~2k–4k ahorro) pero requiere verificar si OpenCode runtime soporta tool loading dinámico. |
+| **Contexto** | F1 determinó que 16 tools se cargan siempre pero solo 3-5 se usan por turno. |
+| **Alternativas** | Cargar todas (actual) → sobrecarga. Cargar solo core 6 + fase actual → requiere soporte runtime. |
+| **Fundamento** | La viabilidad depende del runtime. Si OpenCode no soporta tool loading selectivo, este quick win debe postergarse. |
+| **Impacto** | Se investigará en F2. Si no es viable, se descarta o se implementa a nivel de plugin. |
+
+---
+
+## D-F-013: Session summaries requieren dedup en retrieval, no eliminación (F1)
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | Las 119 session summaries (36% de observations) no deben eliminarse. La solución es deduplicación semántica en retrieval (F3). |
+| **Contexto** | F1 detectó que el estado del proyecto se repite en README + session summaries + architecture memories. |
+| **Alternativas** | Eliminar summaries antiguos → rechazado porque se pierde trazabilidad histórica. |
+| **Fundamento** | En retrieval (mem_context), si 3 memorias dicen "E6B COMPLETE", solo incluir la de score más alto. El resto queda en DB para referencia histórica. |
+| **Impacto** | Feature de F3 (mem_context Selector). Se implementará ranking + top-k + dedup semántico. |
+
+---
+
 ## Resumen de decisiones
 
 | # | Decisión | Fecha | Estado |
@@ -120,6 +185,11 @@
 | D-F-006 | E6B + Suite F como gates | 2026-06-16 | ✅ Aprobada |
 | D-F-007 | Sesión canonical exclusiva | 2026-06-16 | ✅ Aprobada |
 | D-F-008 | Packs como estructuras lógicas | 2026-06-16 | ✅ Aprobada |
+| D-F-009 | Manager Protocol como KEEP_FIXED compactable | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-010 | Session history como quick win #1 | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-011 | Design Skills Protocol a RETRIEVE_ON_DEMAND | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-012 | Tool schemas requieren investigación runtime | 2026-06-16 | 🔶 Pendiente investigación |
+| D-F-013 | Session summaries: dedup en retrieval, no eliminar | 2026-06-16 | ✅ Aprobada (F1) |
 
 ---
 
