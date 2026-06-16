@@ -74,6 +74,25 @@ Cada fuente de F1 se asigna a una capa L0–L5. La capa determina prioridad, per
 | Buffer | 1,200–1,500 | 1,500–2,500 | 2,500–3,000 | 3,000–4,000 | 4,000+ |
 | **Total** | **~6,000–8,500** | **~8,500–12,000** | **~12,000–16,000** | **~16,000–22,000** | **>22,000** |
 
+> **Los budgets de esta tabla asumen compactación del Manager Protocol** (QW#3 implementado).
+> Si QW#3 **no se implementa**, el Manager Protocol sin compactar aporta ~2k–6k tokens adicionales al total. Ver escenario alternativo abajo.
+
+### Escenario alternativo: SIN compactación de Manager Protocol
+
+Los budgets de esta tabla asumen que QW#3 (Manager Protocol compactado de ~7k–14k a ~5k–8k) está implementado. Si QW#3 **no se implementa** (por decisión de prioridad o porque el usuario no lo aprueba), los budgets se incrementan:
+
+| Modo | Budget con QW#3 | Budget SIN QW#3 | Diferencia |
+|:-----|:---------------:|:---------------:|:----------:|
+| Simple | 6k–8.5k | 7k–10k | +1k–1.5k |
+| **Normal** | **8.5k–12k** | **10k–14k** | **+1.5k–2k** |
+| Arquitectura | 12k–16k | 14k–19k | +2k–3k |
+| Auditoría | 16k–22k | 19k–26k | +3k–4k |
+| Excepcional | >22k | >25k | +3k–6k |
+
+**Impacto en modo Normal (default):** 8.5k–12k → **10k–14k**. El límite superior sube 2k, quedando dentro del rango aceptable pero rozando el límite práctico.
+
+**Nota:** QW#3 fue reclasificado de "quick win" a "nice to have" (baja prioridad) en la F2 Critical Review (D-F-023). Los budgets sin compactación son el escenario realista hasta que el usuario apruebe su implementación.
+
 ### Desglose por fuente (Modo Normal)
 
 | Fuente | Tokens | Notas |

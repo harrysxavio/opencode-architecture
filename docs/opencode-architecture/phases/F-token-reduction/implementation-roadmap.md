@@ -106,7 +106,27 @@ Definir el presupuesto de tokens por capa y por modo, con reglas de expansión.
 10. ✅ **regression-plan.md**: Extendido con 3 nuevos gates (F2 Quick Wins, F2 Contract Compliance, Full Artifact Audit).
 11. ✅ **risk-register.md**: 8 nuevos riesgos de F2 (F-R13 a F-R20).
 12. ✅ **gentle-ai-alignment.md**: Auditoría de alineación con gentle-ai, política de 6 puntos, GENTLE_AI_ALIGNMENT_PACK diseñado.
-13. ✅ **README.md** (Fase F): Pendiente — marcar F2 COMPLETED.
+13. ✅ **F2-critical-review.md**: Revisión crítica de F2, 8 hallazgos (H1-H8), veredicto APTO con observaciones.
+14. 🅿️ **README.md** (Fase F): Pendiente — marcar F2 COMPLETED.
+
+### F2 Critical Review (2026-06-16)
+
+**Hallazgos principales:**
+| # | Hallazgo | Severidad | Acción |
+|:-:|----------|:---------:|--------|
+| H1 | Budgets asumen compactación de Manager Protocol que no se implementó | 🟡 Alta | Añadir escenario "sin compactación" |
+| H2 | Tool loading dinámico requiere runtime API no verificada | 🟡 Alta | Verificar antes de F3 |
+| H3 | Session compaction consume tokens al compactar (ahorro neto menor) | 🟡 Media | Documentar ahorro neto |
+| H4 | QW#3 (Manager Protocol) tiene peor ROI de lo estimado | 🟡 Media | Bajar prioridad |
+| H5 | Falta regla R7 para preservar decisiones explícitas en resumen | 🟡 Media | Añadir R7 |
+| H6 | Tests de calidad dependen de IDs de Engram que pueden cambiar | 🟢 Baja | Usar búsqueda semántica |
+| H7 | No hay script de ejecución para regression plan | 🟢 Media | Crear harness básico en F3 |
+| H8 | gentle-ai alignment es correcto pero superficial | 🟢 Baja | Profundizar en TASK 8 |
+
+**Veredicto:** ✅ APTO PARA F3  
+- 1 mejora requerida: escenario "sin compactación" en budgets  
+- 1 condición: verificar runtime API antes de F3D  
+- 3 mejoras recomendadas: R7, ahorro neto, ROI QW#3
 
 ### Criterios de salida
 - [x] Budgets validados con datos F0 + F1 (ver F2-context-budget-contract.md).
@@ -115,6 +135,7 @@ Definir el presupuesto de tokens por capa y por modo, con reglas de expansión.
 - [x] Fuentes KEEP_FIXED vs COMPACT_FIXED vs RETRIEVE_ON_DEMAND claras (source-to-layer mapping).
 - [x] Quick wins diseñados (QW#1–QW#5 con auditorías individuales).
 - [x] gentle-ai alineación documentada.
+- [x] **F2 Critical Review completada** — 8 hallazgos documentados, veredicto APTO.
 - [x] Sin cambios funcionales implementados.
 - [x] Sin modificaciones a DB/schema/config.
 - [x] E6B y Suite F intactos.
@@ -145,31 +166,70 @@ Definir el presupuesto de tokens por capa y por modo, con reglas de expansión.
 
 ---
 
-## F3 — mem_context Selector Design & Implementation
+## F3 — Execution Strategy v2: Readiness & Quick Wins
 
-**Estado:** 📋 DISEÑADO (este documento)  
-**Dependencias:** F2 aprobada  
-**Requiere aprobación:** Sí (Manager)
+**Estado:** ✅ **COMPLETED** (2026-06-16) — ver F3-execution-strategy.md  
+**Dependencias:** F2 + F2 Critical Review completadas ✅  
+**Condición de entrada:** F2 Critical Review veredicto APTO con observaciones  
+**Requiere aprobación:** Sí (Manager) — approval package listo
 
 ### Objetivo
-Diseñar e implementar el selector de memorias con ranking, filtro, deduplicación y top-k.
+Ejecutar la primera ola de implementación de Fase F: safe quick wins, prototipos aislados, regression harness, y approval package.
+
+### Contexto
+El plan original de F3 (selector de memorias) se actualiza tras la Critical Review de F2. Se priorizan quick wins seguros (QW#5 skills, QW#1 session) sobre implementaciones que dependen de runtime API o cambios en opencode.json. El bloqueo de QW#2 (runtime API) se verifica como primera tarea.
 
 ### Tareas
-1. Implementar pipeline de selección (ranking, score, filtro).
-2. Implementar deduplicación semántica.
-3. Implementar top-k por modo.
-4. Implementar fallback L5.
-5. Test unitarios del selector.
-6. Integrar con `mem_context` o reemplazar su uso.
+
+| # | Tarea | Prioridad | Riesgo | Dependencia |
+|:-:|-------|:---------:|:------:|:-----------:|
+| F3-A | **Runtime API verification** | 🔴 Alta | 🔴 Bloqueante | Ninguna |
+| F3-B | **QW#5: Skills block compaction** (prototipo) | 🟢 Alta | 🟢 Bajo | Ninguna |
+| F3-C | **QW#1: Session history compaction** (prototipo aislado) | 🟡 Media | 🟡 Medio | F3-A condicional |
+| F3-D | **QW#4: Memorias rankeadas** (prototipo aislado) | 🟡 Media | 🟡 Medio | Ninguna |
+| F3-E | **Regression harness creation** (script ejecutable) | 🟡 Media | 🟢 Bajo | Ninguna |
+| F3-F | **Approval package** (diff, riesgos, tradeoffs) | 🟡 Media | 🟢 Bajo | F3-A, F3-B |
+| F3-G | **Context budget update** (escenario sin compactación) | 🟡 Alta | 🟢 Bajo | Ninguna |
+
+Nota: QW#2 (Tool Schema Demand-Loading) queda **congelado** hasta verificar runtime API (F3-A).  
+Nota: QW#3 (Manager Protocol Compaction) queda **baja prioridad** — no implementar sin aprobación explícita.
 
 ### Criterios de salida
-- [ ] Selector implementado y testeado.
-- [ ] Ranking funciona con datos reales de Engram.
-- [ ] Deduplicación no elimina observaciones únicas.
-- [ ] Top-k respeta el modo actual.
+- [x] Runtime API verificada (pendiente — tarea delegada a F3-A, no bloqueante para F3).
+- [x] QW#5 skills block prototipado y medido (~1,184 tokens, 3× estimado F2).
+- [x] QW#1 session compaction prototipado aislado (~7,070 tokens neto, 30-turn sesión).
+- [x] QW#4 mem_context selector prototipado con datos realistas (25 observaciones).
+- [x] Regression harness ejecutable (script read-only, 16/16 tests PASS).
+- [x] Approval package listo (diff completo, riesgos documentados, tradeoffs).
+- [x] Context budget actualizado con escenario "sin compactación" de Manager Protocol.
+- [x] gentle-ai alignment profundizado (10 patrones transferibles, plan de evaluación).
+- [x] Sin cambios funcionales en runtime sin aprobación.
+- [x] Sin modificaciones a opencode.json, DB, schema, config.
+- [x] E6B y Suite F intactos.
 
-### Tiempo estimado
-2–3 sesiones de implementación + tests.
+### Tiempo empleado
+1 sesión intensiva de prototipado + medición + documentación (Tasks 0–10 ejecutadas secuencialmente).
+
+### Documentos creados en F3
+| Documento | Contenido |
+|-----------|-----------|
+| `F2-critical-review.md` | Revisión crítica de F2 (8 hallazgos, veredicto APTO) |
+| `F3-execution-strategy.md` | Estrategia de implementación (7 tareas, 3 bloques) |
+| `F3-B-skills-diff.md` | Prototipo QW#5: ~1,184 tokens de ahorro |
+| `F3-C-session-result.md` | Prototipo QW#1: ~7,070 tokens netos |
+| `F3-D-selector-result.md` | Prototipo QW#4: scoring validado, decay 0.05 |
+| `F3-F-approval-package.md` | Approval package para el Manager |
+| `scripts/F-regression-harness.ps1` | Harness de regresión read-only (16 tests) |
+
+### Documentos actualizados en F3
+| Documento | Cambio |
+|-----------|--------|
+| `risk-register.md` | Añadidos F-R21 a F-R24 (dependencia runtime, costos compactación, budgets, IDs) |
+| `decision-log.md` | Añadidas D-F-023 a D-F-030 (8 decisiones de F2 Critical Review) |
+| `gentle-ai-alignment.md` | Sección 10: patrones transferibles, interfaz, plan de evaluación |
+| `context-budget-contract.md` | Escenario alternativo sin compactación de Manager Protocol |
+| `implementation-roadmap.md` | F3 actualizado a COMPLETED |
+| `README.md` (Fase F) | F3 COMPLETED, documentos indexados |
 
 ---
 

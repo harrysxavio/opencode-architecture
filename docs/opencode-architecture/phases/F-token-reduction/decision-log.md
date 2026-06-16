@@ -320,6 +320,147 @@
 | D-F-021 | Regression plan extendido con gates F2 | 2026-06-16 | ✅ Aprobada (F2) |
 | D-F-022 | TOOLING_PACK como context pack separado | 2026-06-16 | ✅ Aprobada (F2) |
 
+## Decisiones de F2 Critical Review (2026-06-16)
+
 ---
 
-_Fin de decision-log.md — F2 COMPLETED. 22 decisiones registradas (13 de F1, 9 nuevas de F2)._
+## D-F-023: QW#3 (Manager Protocol compaction) baja prioridad
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | QW#3 (Manager Protocol compactado) pasa de "quick win" a "nice to have" de baja prioridad. No implementar sin aprobación explícita del usuario. |
+| **Contexto** | La revisión crítica de F2 encontró que el ahorro estimado (~1,200–2,300 tokens) es modesto comparado con el riesgo de modificar opencode.json. El mismo ahorro se puede recuperar combinando QW#1 + QW#4 + QW#5 (~4k–7.6k tokens). |
+| **Alternativas** | Implementar QW#3 igual → rechazado porque abre opencode.json a cambios no autorizados. |
+| **Fundamento** | ROI bajo. Por cada token ahorrado, se asume riesgo alto. Mejor priorizar quick wins seguros y de mayor impacto. |
+| **Impacto** | QW#3 queda como plan de contingencia. Budgets deben incluir escenario "sin compactación de Manager Protocol". |
+
+---
+
+## D-F-024: Escenario "sin compactación" añadido a budgets
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | Añadir escenario "sin compactación de Manager Protocol" a los budgets. Modo Normal sin compactación: objetivo 10k–14k en lugar de 8.5k–12k. |
+| **Contexto** | Los budgets de F2 asumían la compactación del Manager Protocol (~7k–14k → ~5k–8k). Sin ella, el modo Normal salta a ~10k–15k. Como QW#3 no se implementa sin aprobación, los budgets deben reflejar la realidad. |
+| **Alternativas** | Forzar la compactación → rechazado porque requiere aprobación del usuario. Ignorar el escenario → rechazado porque da falsa seguridad. |
+| **Fundamento** | Transparencia. Si el usuario no aprueba QW#3, los budgets deben ser realistas. |
+| **Impacto** | Budget contract actualizado con columna "Sin compactación". |
+
+---
+
+## D-F-025: Verificar runtime API antes de F3
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | Antes de iniciar F3, verificar si OpenCode runtime expone API para cargar tool schemas selectivamente (QW#2). Si no existe, QW#2 queda descartado. |
+| **Contexto** | La revisión crítica encontró que ninguna de las 3 opciones de tool loading fue verificada contra el runtime real. La Opción C (Manager decide) requiere lógica de clasificación que no existe. |
+| **Alternativas** | Asumir que la API existe → rechazado por riesgo alto de bloqueo en F3. No verificar → rechazado por falsa seguridad. |
+| **Fundamento** | Sin verificación empírica, QW#2 puede ser una inversión perdida. |
+| **Impacto** | F3 bloqueado hasta verificar. QW#2 condicional a resultado. |
+
+---
+
+## D-F-026: Regla R7 para decisiones explícitas en session compaction
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | Añadir regla R7 al session history compaction: "Si un turno contiene una decisión explícita (marcadores: 'decido', 'no hagas', 'es mejor que', 'prefiero'), esa decisión debe preservarse textualmente en el resumen, no resumirse." |
+| **Contexto** | La revisión crítica encontró que el resumen estructurado puede omitir condiciones de decisiones críticas. Por ejemplo, "No hagas X, haz Y con la condición Z" resumido como "Turno 6: User pidió Y" pierde "con la condición Z". |
+| **Alternativas** | No añadir R7 → rechazado porque decisions con condiciones son comunes y críticas. Mantener más turns crudos → rechazado porque reduce el ahorro. |
+| **Fundamento** | Preservar decisiones textualmente es más barato que mantener turns extra. Costo marginal: ~50–150 tokens por decisión preservada. |
+| **Impacto** | Session history compaction spec actualizada con R7. Ahorro neto se reduce ligeramente. |
+
+---
+
+## D-F-027: Ahorro neto de session compaction documentado
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | Documentar el ahorro neto de session history compaction como (ahorro bruto - costo de compactar). Costo estimado: ~200–500 tokens por actualización. En sesión de 20 turns con 4 compactaciones: ~800–2,000 tokens gastados. Ahorro neto: ~1k–4.2k. |
+| **Contexto** | La auditoría de F2 no consideró que el Manager consume tokens al generar y mantener los resúmenes estructurados. |
+| **Alternativas** | Ignorar el costo → rechazado porque sobreestima el beneficio. Usar template sin generación → el template mismo requiere que alguien lo llene. |
+| **Fundamento** | El ahorro neto sigue siendo positivo (~1k–4.2k), lo que justifica la implementación. Pero el equipo debe saber el número real. |
+| **Impacto** | Budget contract y spec de session compaction actualizados con ahorro neto. |
+
+---
+
+## D-F-028: Tests de calidad usan búsqueda semántica, no IDs fijos
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | Los tests de calidad del regression plan (Q-T1 a Q-T5) deben usar búsqueda semántica en Engram en lugar de IDs fijos (#404, #427) para localizar observaciones de prueba. |
+| **Contexto** | Los IDs de Engram pueden cambiar si la base se purga o reindexa, causando falsos negativos en los tests. |
+| **Alternativas** | Usar snapshots de observaciones en archivos estáticos → también válido. Mantener IDs fijos + documentar que requieren mantenimiento → aceptable pero frágil. |
+| **Fundamento** | Búsqueda semántica es más robusta a cambios de infraestructura. |
+| **Impacto** | Regression plan actualizado. Tests de calidad más mantenibles. |
+
+---
+
+## D-F-029: F2 apto para F3
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | F2 es APTO PARA F3. 1 mejora requerida (escenario sin compactación), 1 condición (verificar runtime API), 3 mejoras recomendadas (R7, ahorro neto, ROI QW#3). |
+| **Contexto** | La revisión crítica de F2 produjo 8 hallazgos (H1-H8) con 1 alta prioridad, 4 media, 3 baja. Ninguno es blocker absoluto. |
+| **Alternativas** | Bloquear F3 hasta resolver todos los hallazgos → rechazado porque 1 alta y 4 medias son gestionables en paralelo. |
+| **Fundamento** | F2 es diseño + auditoría, no implementación. Los hallazgos se resuelven en F3. F2 cumplió su objetivo. |
+| **Impacto** | F3 puede comenzar. Implementation roadmap marcado F2 CRITICAL REVIEW COMPLETED. |
+
+---
+
+## D-F-030: F2 Critical Review como entrada de F3
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | F2-critical-review.md es la entrada oficial de F3. Los hallazgos H1-H8 guían las decisiones de F3. |
+| **Contexto** | Sin esta decisión, F3 podría ignorar los hallazgos de la revisión crítica. |
+| **Alternativas** | Usar los documentos de F2 directamente como entrada → riesgo de repetir errores identificados en la review. |
+| **Fundamento** | La revisión crítica identificó gaps que F3 debe resolver. Usarla como entrada garantiza continuidad. |
+| **Impacto** | F3 roadmap prioriza resolver los hallazgos de F2. |
+
+---
+
+| # | Decisión | Fecha | Estado |
+|---|----------|:-----:|:------:|
+| D-F-001 | 9.5k no es límite rígido, es rango 8.5k–12k | 2026-06-16 | ✅ Aprobada |
+| D-F-002 | Modo Normal como default | 2026-06-16 | ✅ Aprobada |
+| D-F-003 | Fallback dinámico permitido | 2026-06-16 | ✅ Aprobada |
+| D-F-004 | No compresión agresiva inicial | 2026-06-16 | ✅ Aprobada |
+| D-F-005 | Primero token audit (F0) | 2026-06-16 | ✅ Aprobada |
+| D-F-006 | E6B + Suite F como gates | 2026-06-16 | ✅ Aprobada |
+| D-F-007 | Sesión canonical exclusiva | 2026-06-16 | ✅ Aprobada |
+| D-F-008 | Packs como estructuras lógicas | 2026-06-16 | ✅ Aprobada |
+| D-F-009 | Manager Protocol como KEEP_FIXED compactable | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-010 | Session history como quick win #1 | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-011 | Design Skills Protocol a RETRIEVE_ON_DEMAND | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-012 | Tool schemas requieren investigación runtime | 2026-06-16 | 🔶 Resuelta (F2) — Opción C |
+| D-F-013 | Session summaries: dedup en retrieval, no eliminar | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-014 | Context Packs expandidos con 3 nuevos packs | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-015 | Tool schemas bajo demanda por fase SDD (Opción C) | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-016 | Session history compactado 3+7+acumulativo | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-017 | Manager Protocol compactado sin tocar core | 2026-06-16 | 🔶 Pendiente aprobación usuario |
+| D-F-018 | Skills block con descripciones 5–10 palabras | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-019 | gentle-ai en alineación estratégica, no integración | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-020 | F2 es diseño + auditoría, no implementación | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-021 | Regression plan extendido con gates F2 | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-022 | TOOLING_PACK como context pack separado | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-023 | QW#3 (Manager Protocol compaction) baja prioridad | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-024 | Escenario "sin compactación" añadido a budgets | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-025 | Verificar runtime API antes de F3 | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-026 | Regla R7 para decisiones explícitas | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-027 | Ahorro neto de session compaction documentado | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-028 | Tests calidad usan búsqueda semántica | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-029 | F2 apto para F3 | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-030 | F2 Critical Review como entrada de F3 | 2026-06-16 | ✅ Aprobada (CR) |
+
+---
+
+_Fin de decision-log.md — F2 CRITICAL REVIEW COMPLETED. 30 decisiones registradas (13 de F1, 9 de F2, 8 de Critical Review)._

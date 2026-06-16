@@ -3,7 +3,7 @@
 **Estado:** ✅ UPDATED WITH F2 RISKS  
 **Propósito:** Documentar riesgos específicos de la Fase F de reducción de tokens, su probabilidad, impacto y mitigaciones.
 
-> Este documento fue actualizado con 8 nuevos riesgos de F2 (quick wins, contract, gentle-ai alignment).
+> Este documento fue actualizado con 8 nuevos riesgos de F2 (quick wins, contract, gentle-ai alignment) y 4 riesgos adicionales de F2 Critical Review (dependencia runtime, session compaction cost, budgets asumidos, IDs de Engram).
 
 ---
 
@@ -259,14 +259,15 @@
 | Campo | Detalle |
 |-------|---------|
 | **Riesgo** | OpenCode runtime no permite cargar tool schemas selectivamente, bloqueando QW#2. |
-| **Probabilidad** | Media |
-| **Impacto** | 🟡 Medio |
-| **Severidad** | 🟡 Medio |
+| **Probabilidad** | Alta — no se verificó la API de runtime en F2 |
+| **Impacto** | 🔴 Alto — bloquea implementación de QW#2 |
+| **Severidad** | 🔴 Alto |
 
 **Mitigación:**
-1. Opción C (carga por decisión del Manager) como alternativa viable.
-2. Si no es posible, mantener herramientas core 6 + cargar todo como ahora (sin ahorro).
-3. Documentar en F3.
+1. Verificar existencia de API con OpenCode CLI o documentación antes de F3.
+2. Si no existe: QW#2 queda como idea no implementable; no invertir tiempo.
+3. Opción C (carga por decisión del Manager) requiere lógica de clasificación que no existe aún.
+4. Si no es posible, mantener herramientas core 6 + cargar todo como ahora (sin ahorro).
 
 ---
 
@@ -274,8 +275,8 @@
 
 | Campo | Detalle |
 |-------|---------|
-| **Riesgo** | El resumen estructurado del session history omite detalles que el Manager necesita para mantener coherencia. |
-| **Probabilidad** | Baja |
+| **Riesgo** | El resumen estructurado del session history omite detalles que el Manager necesita para mantener coherencia. Además, el acto de compactar consume tokens (~200–500 por actualización), reduciendo el ahorro neto. |
+| **Probabilidad** | Media |
 | **Impacto** | 🟡 Medio |
 | **Severidad** | 🟡 Medio |
 
@@ -283,6 +284,8 @@
 1. Últimos 3 turns siempre crudos (garantía de precisión inmediata).
 2. Template estructurado (no generación libre).
 3. Prueba QW1-T4: Manager mantiene coherencia con resumen vs history completo.
+4. Añadir regla R7: decisiones explícitas (marcadores: "decido", "no hagas", "es mejor que", "prefiero") se preservan textualmente.
+5. Documentar ahorro neto (ahorro bruto - costo de compactar).
 
 ---
 
@@ -366,6 +369,70 @@
 
 ---
 
+## F-R21: Runtime OpenCode no expone API para tool loading selectivo
+
+| Campo | Detalle |
+|-------|---------|
+| **Riesgo** | OpenCode runtime no expone una API que permita cargar tool schemas selectivamente, lo cual bloquea la implementación de QW#2 (Tool Schema Demand-Loading). |
+| **Probabilidad** | Alta |
+| **Impacto** | 🔴 Alto |
+| **Severidad** | 🔴 Alto |
+
+**Mitigación:**
+1. Verificar existencia de API con OpenCode CLI (`opencode tool:load --help`) o documentación antes de invertir en QW#2.
+2. Si no existe, QW#2 queda descartado y el ahorro de 2k–4k se debe recuperar de otros quick wins.
+3. Registrar la decisión en decision-log.
+
+---
+
+## F-R22: Session compaction consume más tokens de los que ahorra al resumir
+
+| Campo | Detalle |
+|-------|---------|
+| **Riesgo** | El Manager gasta tokens en generar y mantener el resumen estructurado del session history, reduciendo el ahorro neto respecto al bruto estimado (~3k–5k bruto → potencialmente ~1k–4.2k neto). |
+| **Probabilidad** | Media |
+| **Impacto** | 🟡 Medio |
+| **Severidad** | 🟡 Medio |
+
+**Mitigación:**
+1. Documentar ahorro neto realista (bruto - costo de compactación).
+2. Si el ahorro neto es <1k, reevaluar si la complejidad vale la pena.
+3. Medir en cada iteración el costo real de compactación.
+
+---
+
+## F-R23: Budgets asumen compactación de Manager Protocol que no se implementó
+
+| Campo | Detalle |
+|-------|---------|
+| **Riesgo** | Los budgets definidos en F2-context-budget-contract.md asumen la compactación del Manager Protocol (de ~7k–14k a ~5k–8k). Sin esa compactación, especialmente el modo Normal salta de 8.5k–12k a ~10k–15k, superando el límite. |
+| **Probabilidad** | Media |
+| **Impacto** | 🟡 Medio |
+| **Severidad** | 🟡 Medio |
+
+**Mitigación:**
+1. Añadir escenario "sin compactación de Manager Protocol" a los budgets.
+2. Modo Normal sin compactación: objetivo 10k–14k en lugar de 8.5k–12k.
+3. Ajustar expectativas en la implementación roadmap.
+
+---
+
+## F-R24: Tests de calidad dependen de IDs de Engram que pueden cambiar
+
+| Campo | Detalle |
+|-------|---------|
+| **Riesgo** | Los tests Q-T1 a Q-T5 del regression plan dependen de IDs específicos de Engram (#404, #427). Si se purgan o renumeran, los tests fallan sin degradación real. |
+| **Probabilidad** | Media |
+| **Impacto** | 🟡 Medio |
+| **Severidad** | 🟡 Medio |
+
+**Mitigación:**
+1. Usar búsqueda semántica en lugar de IDs fijos para localizar observaciones de prueba.
+2. O mantener snapshots de las observaciones de prueba en archivos estáticos.
+3. Documentar que estos tests requieren mantenimiento si Engram se purga.
+
+---
+
 ## Matriz de severidad
 
 | # | Riesgo | P | I | S |
@@ -390,6 +457,10 @@
 | F-R18 | Budgets inconsistentes entre docs | ●○○ | 🟡 | 🟡 |
 | F-R19 | Quick wins no implementados | ●●○ | 🟡 | 🟡 |
 | F-R20 | opencode.json cambiado sin aprobación | ●○○ | 🔴 | 🟡 |
+| F-R21 | Runtime OpenCode no expone API para tool loading selectivo | ●●● | 🔴 | 🔴 |
+| F-R22 | Session compaction consume más tokens de los que ahorra al resumir | ●●○ | 🟡 | 🟡 |
+| F-R23 | Budgets asumen compactación de Manager Protocol que no se implementó | ●●○ | 🟡 | 🟡 |
+| F-R24 | Tests de calidad dependen de IDs de Engram que pueden cambiar | ●●○ | 🟡 | 🟡 |
 
 **P = Probabilidad (●○○ baja, ●●○ media, ●●● alta)**  
 **I = Impacto (🟢 bajo, 🟡 medio, 🔴 alto, 🔴 crítico)**  

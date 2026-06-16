@@ -151,4 +151,82 @@ Estado de alineación gentle-ai:
 
 ---
 
-*Fin de gentle-ai-alignment.md — F2 COMPLETED. Auditoría de alineación con gentle-ai completada. Sin cambios funcionales implementados.*
+## 10. Deepening: patrones transferibles y plan de evaluación futura
+
+*Añadido en F3 (2026-06-16) por recomendación de F2 Critical Review (H8).*
+
+### 10.1 Patrones transferibles a gentle-ai
+
+La arquitectura de Fase F (capas, packs, modos, selector) fue diseñada como solución reusable para ambos sistemas. A continuación se documentan qué patrones son transferibles y bajo qué condiciones:
+
+| Patrón | ¿Transferible? | Condiciones | Prioridad |
+|:-------|:-------------:|:------------|:---------:|
+| **Context Packs** (TOOLING, SKILLS, GENTLE_AI) | ✅ Sí | gentle-ai debe tener estructura de contexto similar (fuentes clasificables en capas) | Alta |
+| **Source-to-Layer Mapping** (L0-L5) | ✅ Sí | gentle-ai debe inventariar sus propias fuentes de contexto primero | Alta |
+| **mem_context selector scoring** (0.5/0.3/0.2) | ✅ Sí | gentle-ai debe tener sistema de retrieval de memorias con metadatos (tipo, fecha) | Media |
+| **Modos de operación** (Simple/Normal/Arquitectura/Auditoría) | ✅ Sí | Los thresholds (6k-22k) son específicos de OpenCode; gentle-ai necesitaría calibrar los suyos | Media |
+| **Reglas de expansión** (auto +5%/justificada +15%/bloqueante +30%) | ✅ Sí | Las reglas son universales; gentle-ai necesitaría adaptar los porcentajes | Baja |
+| **Session history compaction** (3+7+acumulativo) | ⚠️ Parcial | Depende de cómo gentle-ai maneje el historial de conversación (¿turns? ¿archivos?) | Media |
+| **Skills block compaction** | ⚠️ Parcial | Depende de si gentle-ai tiene un bloque de skills similar en su system prompt | Baja |
+| **Tool schema demand-loading** | ❌ No | Específico de OpenCode runtime | N/A |
+| **Manager Protocol compaction** | ❌ No | Específico del system prompt de OpenCode | N/A |
+| **Regression plan** (9 gates) | ✅ Sí | Los gates son conceptuales; cada sistema necesita sus propios tests | Alta |
+| **Approval package** (diff + riesgos + tradeoffs) | ✅ Sí | El formato es universal para cualquier cambio controlado | Alta |
+
+### 10.2 Interfaz futura para integración
+
+Si en el futuro se decide integrar gentle-ai con OpenCode en el contexto de reducción de tokens, la interfaz debe ser:
+
+```
+// Contrato de alineación
+interface AlignmentContract {
+  sourceSystem: "opencode-architecture" | "gentle-ai"
+  phaseVersion: string          // e.g., "F3" para Fase F v3
+  contextPacks: Pack[]          // Packs compartidos
+  budgetRanges: BudgetRange[]   // Por modo
+  scoringWeights: {             // Para selector de memorias
+    relevance: number           // 0.0 - 1.0
+    recency: number             // 0.0 - 1.0
+    type: number                // 0.0 - 1.0
+    decayRate: number           // e.g., 0.05 por día
+  }
+  commonDecisionIds: string[]   // Decisiones que afectan ambos sistemas
+  lastAlignmentDate: string     // ISO date
+}
+```
+
+### 10.3 Plan de evaluación futura
+
+| # | Paso | Quién | Cuándo | Criterio de éxito |
+|:-:|------|:-----|:-------|:------------------|
+| E1 | Inventariar fuentes de contexto de gentle-ai | gentle-ai manager | Cuando se inicie reducción de tokens | Catálogo de 10+ fuentes con clasificación |
+| E2 | Mapear fuentes a capas L0-L5 | gentle-ai manager | Después de E1 | Source-to-layer mapping completo |
+| E3 | Medir baseline de tokens de gentle-ai | gentle-ai manager | Después de E1 | Baseline medido con tiktoken |
+| E4 | Comparar budgets gentle-ai vs OpenCode | Ambos | Después de E2-E3 | Tabla comparativa de budgets por modo |
+| E5 | Evaluar compatibilidad de scoring | Ambos | Después de E4 | Selector scoring produce resultados coherentes en ambos sistemas |
+| E6 | Prueba de concepto: alineación real | Ambos | Después de E5 | Una decisión compartida se maneja coherentemente en ambos sistemas |
+| E7 | Documentar divergencias y resolverlas | Ambos | Continuo | Alignment contract actualizado |
+
+### 10.4 Riesgos de profundización
+
+| Riesgo | Probabilidad | Impacto | Mitigación |
+|--------|:-----------:|:-------:|------------|
+| Invertir tiempo en patrones que gentle-ai nunca usará | Media | Bajo | Priorizar solo patrones de alta transferibilidad |
+| Crear interfaz demasiado específica que luego cambie | Baja | Bajo | Mantener contrato mínimo (AlignmentContract) |
+| Evaluación futura descubre incompatibilidades | Media | Medio | Documentar divergencias; no forzar alineación artificial |
+| gentle-ai no tiene estructura de contexto comparable | Media | Alto | Si gentle-ai no tiene capas/packs, evaluar si el patrón es aplicable |
+
+### 10.5 Estado de profundización
+
+| Aspecto | Estado |
+|---------|:------:|
+| Patrones transferibles documentados | ✅ Sí (10 patrones, 3 categorías) |
+| Interfaz futura propuesta | ✅ Sí (AlignmentContract) |
+| Plan de evaluación (7 pasos) | ✅ Sí |
+| Riesgos de profundización | ✅ Sí (4 riesgos documentados) |
+| Dependencia OpenCode ↔ gentle-ai creada | ❌ No — se mantiene independencia |
+| Modificaciones a gentle-ai configuration | ❌ No |
+
+---
+
+*Fin de gentle-ai-alignment.md — F2 COMPLETED, F3 DEEPENED. Auditoría de alineación con gentle-ai completada. Sin cambios funcionales implementados. 10 patrones transferibles documentados con plan de evaluación futura.*
