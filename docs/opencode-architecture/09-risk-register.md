@@ -23,6 +23,7 @@
 | R17 | **Context drift**: Diferentes fuentes de contexto pueden desviar el comportamiento del modelo | 🟡 **BAJO-MEDIO** | Media (50%) | Comportamiento inconsistente entre sesiones | Múltiples AGENTS.md + plugins + skills | Consolidar contexto en una fuente de verdad por capa | P2 |
 | R18 | **Delegación async fuera de undo**: background-agents.ts escribe a disco sin posibilidad de revertir | 🟡 **BAJO-MEDIO** | Alta (80%) | Cambios no deshacibles si la delegación es destructiva | background-agents.ts:609-612, 843-876, 1302-1303 | Documentar tradeoff. Usar con cuidado en operaciones destructivas | P3 |
 | R19 | **Plugins OpenCode incompatibles con runtime Node**: plugins globales usan `Bun.*` pero el runtime actual no expone `Bun` | 🔴 **ALTO** | Alta (80%) | Plugins no cargan; hooks críticos como `chat.message` no ejecutan; memoria automática falla | Logs post-D1: `engram.ts` y `background-agents.ts` fallan con `Bun is not defined` | D2 aplica patch Node-compatible solo a `engram.ts`. `background-agents.ts` queda como riesgo separado y no se toca sin aprobación | P1 |
+| R20 | **Drift de project en sesiones Engram legacy**: sesiones existentes en `arquitectura opencode` chocan con project canónico `opencode-architecture` | 🟡 **MEDIO** | Alta (80%) | `/prompts` rechaza captura con `session_project_mismatch` en sesiones legacy | E6B-D4/D5A: `/prompts` 400, sessions legacy=11, canonical=7. E6B-D5B: sesión limpia canonical funciona | Continuar en sesión limpia; migración/consolidación solo en D6 con backup y aprobación explícita | P2 |
 
 ## 2. Priorización de riesgos
 
@@ -35,6 +36,7 @@
 | R04 | Duplicación instrucciones memoria | Desduplicar | E+F | ⏳ Pendiente |
 | R06 | MCP surface grande | ADR-007: MCP bajo demanda | G | ⏳ Pendiente |
 | R19 | Plugins OpenCode incompatibles con runtime Node | Patch Node-compatible / aislar plugins con `Bun.*` | E6B-D2 | 🔄 En ejecución |
+| R20 | Drift de project en sesiones Engram legacy | Validar sesión limpia; migración separada D6 si se aprueba | E6B-D5 | 🔄 En ejecución |
 | R09 | Falta de observabilidad | Fase B1: logging mínimo | B1 | 🔄 En ejecución |
 | R16 | Loops de instrucciones | ADR-001: resolver primary | D | ⏳ Pendiente |
 
@@ -66,7 +68,7 @@
 ```mermaid
 pie title Distribución por severidad
     "CRÍTICO" : 2
-    "ALTO" : 4
+    "ALTO" : 5
     "MEDIO" : 6
     "BAJO-MEDIO" : 4
     "BAJO" : 3
@@ -74,7 +76,7 @@ pie title Distribución por severidad
 
 ```mermaid
 pie title Distribución por prioridad
-    "P1 - Inmediata" : 9
+    "P1 - Inmediata" : 10
     "P2 - Planificar" : 5
     "P3 - Monitorear" : 5
 ```
@@ -85,7 +87,7 @@ pie title Distribución por prioridad
 |-----------|-------------------|
 | Manager | R01 (doble primary), R03 (contexto), R08 (inline sin límite), R16 (loops) |
 | gentle-orchestrator | R01 (doble primary), R16 (loops) |
-| Engram / memoria | R02 (gobernanza), R04 (duplicación), R05 (ruido) |
+| Engram / memoria | R02 (gobernanza), R04 (duplicación), R05 (ruido), R20 (project drift en sesiones legacy) |
 | MCP servers | R06 (surface grande), R11 (secretos expuestos) |
 | Subagentes SDD | R07 (faltantes), R14 (openspec no impl) |
 | Config general | R03 (contexto), R09 (observabilidad), R10 (tests), R12 (inventory) |
