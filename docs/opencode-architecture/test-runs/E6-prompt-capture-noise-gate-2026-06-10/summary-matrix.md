@@ -31,7 +31,7 @@
 | T4 | `Diseña una prueba read-only...` | Capturar | ✅ PASS |
 | T5 | `Mi token falso es ghp_...` | No capturar raw | ✅ PASS |
 | T6 | `muéstrame el archivo README` | No capturar | ✅ PASS |
-| T7 | `Continúa con la arquitectura...` | Capturar | ⏳ |
+| T7 | `Continúa con la arquitectura...` | Capturar | ✅ PASS |
 
 ## Subfases diagnóstico/reparación E6B
 
@@ -76,14 +76,14 @@
 
 | Riesgo | Severidad | Estado |
 |--------|:---------:|:------:|
-| Falsos negativos (gate muy agresivo) | 🟡 Media | Mitigado: default conservador + rollback a "all" |
+| Falsos negativos (gate muy agresivo) | 🟡 Media | Mitigado: tests T4/T7 confirman captura de instrucciones útiles |
 | Falsos positivos (gate deja pasar ruido) | 🟢 Baja | Aceptable: mejor que perder contexto |
-| Secretos pasan el gate | 🔴 Alta | Mitigado: patrones específicos. No 100% coverage |
+| Secretos pasan el gate | 🔴 Alta | Mitigado: T5 PASS con ghp_; patrones específicos. No 100% coverage |
 | Datos históricos no limpiados | 🟡 Media | Aceptado: no borrar prompts existentes |
-| Plugin runtime incompatible (`Bun` no disponible) | 🔴 Alta | Mitigado para `engram.ts`; persiste en `background-agents.ts` |
-| Hook `chat.message` no captura tras D2 | 🔴 Alta | Bloquea E6B-T1..T7; requiere diagnóstico de export/API/hook |
-| Contrato HTTP `/prompts` falla | 🔴 Alta | D3 aisló la falla en POST `/prompts` → HTTP 400; requiere D4 |
-| Session/project mismatch | 🔴 Alta | D4 confirmó `/prompts` 400: sesión en `arquitectura opencode`, prompt en `opencode-architecture` |
+| Plugin runtime incompatible (`Bun` no disponible) | 🔴 Alta | Mitigado para `engram.ts` (T1..T7 PASS); persiste en `background-agents.ts` |
+| Hook `chat.message` no captura | 🔴 Alta → 🟢 **RESUELTO** | D6 + T1..T7 PASS: captura funciona en sesión canonical |
+| Contrato HTTP `/prompts` falla | 🔴 Alta → 🟢 **RESUELTO** | D6 implementado: funciona en sesión canonical; sesión legacy sigue fallando |
+| Session/project mismatch | 🔴 Alta → 🟡 **MITIGADO** | D5B + D6 + T3..T7 PASS en canonical; sesión legacy sigue siendo un problema conocido sin migración posible |
 | Instrumentación temporal D3/D4 activa | 🟢 Baja | Mitigado: `DEBUG_ENGRAM_PLUGIN=false`; solo errores HTTP sanitizados se fuerzan |
 
 ## Smoke D6 post-restart

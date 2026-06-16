@@ -2,7 +2,7 @@
 
 > Tests post-implementación del Noise Gate. Se ejecutan en sesión nueva post-restart.
 
-**Estado:** ✅ D6 smoke PASS — E6B-T3..T6 PASS
+**Estado:** ✅ **E6B COMPLETE — T1..T7 all PASS**
 
 ---
 
@@ -16,7 +16,7 @@
 | T4 | `Diseña una prueba read-only para validar mem_context.` | Capturar user_prompt | ✅ PASS |
 | T5 | `Mi token falso es ghp_TEST_FAKE_TOKEN_1234567890` | No capturar raw | ✅ PASS |
 | T6 | `muéstrame el archivo README` | No capturar | ✅ PASS |
-| T7 | `Continúa con la arquitectura OpenCode.` | Capturar (contiene contenido útil) | ⏳ |
+| T7 | `Continúa con la arquitectura OpenCode.` | Capturar (contiene contenido útil) | ✅ PASS |
 
 ## Método de verificación
 
@@ -66,4 +66,4 @@ OpenCode fue reiniciado. Primer intento en conversación legacy falló por `sess
 | T4 | ✅ PASS | `user_prompts_total` subió de `310` a `311`; nuevo id `344` con project `opencode-architecture` y contenido `Diseña una prueba read-only para validar mem_context.`; sin `session_project_mismatch`. Ver `E6B-T4-formal.md`. |
 | T5 | ✅ PASS | `user_prompts_total` se mantuvo en `311`; `observations_total` se mantuvo en `320`; zero registros con `ghp_` en DB. Respuesta del AI confirmó filtro: "No se guarda en Engram — el Noise Gate clasifica esto como credential". Ver `E6B-T5-formal.md`. |
 | T6 | ✅ PASS | `user_prompts_total` se mantuvo en `311`; `observations_total` se mantuvo en `321`; zero registros con "muéstrame" en DB; sin `session_project_mismatch`. Ver `E6B-T6-formal.md`. |
-| T7 | ⏳ | Pendiente |
+| T7 | ✅ PASS | `user_prompts_total` subió de `311` a `312`; nuevo id `345` con project `opencode-architecture` y contenido `Continúa con la arquitectura OpenCode.`; sin `session_project_mismatch`. Ver `E6B-T7-formal.md`. |
