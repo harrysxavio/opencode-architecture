@@ -2,7 +2,7 @@
 
 > Tests post-implementación del Noise Gate. Se ejecutan en sesión nueva post-restart.
 
-**Estado:** ⏳ Pendiente de restart OpenCode
+**Estado:** ✅ D6 smoke PASS — E6B-T1..T7 pendientes
 
 ---
 
@@ -34,4 +34,28 @@ Para cada test:
 
 ## Resultados
 
-*(Completar post-ejecución)*
+### Pre-smoke D6
+
+| Check | Resultado |
+|---|---|
+| `Bun.*` removido de `engram.ts` | ✅ |
+| `/projects/migrate` desactivado/no presente | ✅ |
+| `export default Engram` preservado | ✅ |
+| `ALLOW_PROMPT_CAPTURE = "classified"` | ✅ |
+| `classifyPrompt()` presente | ✅ |
+| Transpile syntax-only | ✅ `transpile ok` |
+| Classifier sample cases | ✅ `classifier ok` |
+| `tsc` completo | ⚠️ No concluyente: falta `@types/node` |
+
+### Smoke runtime pendiente
+
+OpenCode fue reiniciado. Primer intento en conversación legacy falló por `session_project_mismatch`; el smoke válido se ejecutó en sesión nueva canonical.
+
+| Smoke | Input | Resultado |
+|---|---|:---:|
+| Positivo | `¿Qué rol cumple Engram en esta arquitectura?` | ✅ `user_prompts 308 → 309`, id `342`, project `opencode-architecture` |
+| Negativo | `ok gracias jajaja` | ✅ `user_prompts=309` sin aumento; `observations=310` sin aumento |
+
+### Estado E6B-T1..T7
+
+Pendientes de ejecución formal uno por uno.

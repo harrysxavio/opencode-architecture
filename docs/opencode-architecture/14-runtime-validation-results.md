@@ -9,6 +9,7 @@
 **Completado (Fase B1)** — T8 ejecutado en sesión limpia. T1 validado (Manager primary real). T5 diseñado.
 **Completado (Fase E4B)** — Engram estabilizado: v1.16.1 + `--project=opencode-architecture`. Tests E4B-T1 a T7 PASSED. Doctor 4/4 OK. Sin drift.
 **Validado (Fase E6B-D5B)** — D5A confirmó que la sesión anterior era legacy (`arquitectura opencode`). D5B validó una sesión limpia con `opencode-architecture`: `/sessions` 201, `/prompts` 201 y `user_prompts` aumentó +1 para la pregunta positiva.
+**Validado (Fase E6B-D6)** — Noise Gate reimplementado en `engram.ts` con `ALLOW_PROMPT_CAPTURE="classified"`, debug normal apagado, sin `Bun.*` y sin `/projects/migrate`. Smoke positivo/negativo PASS en sesión nueva canonical.
 
 ## Objetivo
 
@@ -198,13 +199,14 @@ D-T1 confirma que Manager sigue respondiendo Tiny directo después de D3.
 | D4 — `/prompts` HTTP contract diagnostic | ❌ NO-GO | `/sessions` 201 OK; `/prompts` 400 `session_project_mismatch` (`opencode-architecture` vs `arquitectura opencode`) |
 | D5A — Project/session mismatch inventory | ✅ PASS | `sessions`: legacy 11 vs canonical 7; `user_prompts`: legacy 26 vs canonical 1; `observations`: legacy 2 vs canonical 24 |
 | D5B — Clean session capture | ✅ PASS | Nueva sesión `opencode-architecture`; pregunta positiva length 44; `/prompts` 201; `user_prompts` +1 |
+| D6 — Noise Gate reimplementation | ✅ PASS | `classifyPrompt()` aplicado; `DEBUG_ENGRAM_PLUGIN=false`; no `Bun.*`; no `/projects/migrate`; smoke positivo `308→309`; smoke negativo sin aumento |
 
-Evidencia pre-restart D2:
+Evidencia acumulada E6B:
 
 - Backup: `C:\Users\harry\.config\opencode\plugins\engram.ts.e6b-d2-backup`.
 - Archivo modificado: `C:\Users\harry\.config\opencode\plugins\engram.ts`.
 - `Bun.*` removido de `engram.ts`.
-- Noise Gate NO reimplementado todavía.
+- Noise Gate D6 reimplementado y validado con smoke post-restart en sesión nueva canonical.
 - `tsc` limitado por falta de `@types/node`; no se considera validación completa.
 
-**GO/NO-GO actual:** GO para preparar reimplementación de Noise Gate sobre plugin funcionando, pero primero limpiar/reducir instrumentación temporal D3/D4. NO migrar DB todavía. NO ejecutar E6B-T1..T7 hasta que Noise Gate esté reimplementado.
+**GO/NO-GO actual:** GO para ejecutar E6B-T1..T7 formal uno por uno. NO migrar DB ni consolidar proyectos legacy.

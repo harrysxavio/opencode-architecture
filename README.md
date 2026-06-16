@@ -89,8 +89,8 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **B1 — Observabilidad** | ✅ Completado | Baseline T8 ejecutado, T1 validado, diseño de observabilidad creado (ADR-009) |
 | **Engram store real** | ✅ Validado | Store real es `~/.engram/engram.db`. NO `.codex/memories_1.sqlite` |
 | **Engram herramientas** | ✅ Validado | `mem_save`, `mem_search`, `mem_context`, `mem_session_summary`, `mem_judge` funcionan operativamente |
-| **Engram persistencia** | ✅ Validado | Engram MCP/DB funcionan; prompt capture automático está en reparación runtime E6B-D2 |
-| **Riesgo Engram** | ⚠️ Parcial | Project drift persiste en sesiones legacy, pero D5B confirmó que una sesión limpia con `opencode-architecture` captura prompts correctamente |
+| **Engram persistencia** | ✅ Validado | Engram MCP/DB funcionan; D6 reimplementó Noise Gate y smoke positivo/negativo pasó en sesión nueva canonical |
+| **Riesgo Engram** | ⚠️ Parcial | Project drift persiste en sesiones legacy; D6 evita migración automática y requiere sesiones canonical para prompt capture |
 | **MCP** | 🔶 Parcial | Context7 funciona bajo intención explícita. Playwright operativo. Duplicación entre opencode.json y .jsonc |
 | **Context Pack** | ⏳ Pendiente | Requerimiento detectado en E4A. Necesario antes de optimizar tokens |
 | **Hybrid Retrieval** | 🔮 Futuro | No bloquear Engram stabilization. Se abordará como Fase G |
@@ -114,7 +114,7 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **E4B** — Engram stabilization | ✅ **Completada** | Pin a v1.16.1 + `--project=opencode-architecture`. Tests T1-T7 PASSED |
 | **E5** — Context Pack | ✅ **Completada** | 7 contratos (Context Pack, Writer, Validator, Read Escalation, Quality Metrics, Intake Cleaner). 7 tests PASSED |
 | **E6A** — Prompt Capture Audit & Design | ✅ **Completada** | Audit de plugin engram.ts y DB, Noise Gate design (Opción B — Heurísticas). 7 tests PASSED |
-| **E6B** — Noise Gate implementation | **🔧 Listo para reimplementar** | D5B validó plugin funcionando en sesión limpia: `/prompts` 201 y `user_prompts` +1. Falta remover/reducir instrumentación temporal y reimplementar Noise Gate antes de T1-T7 |
+| **E6B** — Noise Gate implementation | **✅ D6 smoke PASS** | Noise Gate reimplementado en `engram.ts` con `classified`, sin `Bun.*`, sin `/projects/migrate`, debug normal apagado. Smoke positivo/negativo pasó; faltan T1-T7 formales |
 | **F** — Token reduction | ⏳ Pendiente (post-E5) | Reducción de contexto con Context Pack como base |
 | **G** — Hybrid Retrieval | 🔮 Futuro | Búsqueda combinada keyword + semántica |
 | **H** — MCP consolidation | 🔮 Futuro | Superficie MCP optimizada, memory server avanzado |

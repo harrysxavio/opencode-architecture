@@ -44,22 +44,25 @@
 | D4 | Diagnóstico contrato HTTP `/sessions` + `/prompts` | ❌ NO-GO: `/prompts` falla por `session_project_mismatch` (`opencode-architecture` vs `arquitectura opencode`) |
 | D5A | Diagnóstico read-only de projects y sesión legacy | ✅ PASS: sesión actual legacy en `arquitectura opencode` |
 | D5B | Test de sesión limpia con project canónico | ✅ PASS: `/prompts` 201 y `user_prompts` +1 en `opencode-architecture` |
+| D6 | Reimplementación Noise Gate sobre plugin Node-compatible | ✅ PASS: gate `classified`, sin `Bun.*`, sin `/projects/migrate`; smoke positivo/negativo pasó en sesión nueva canonical |
 
 ## Archivos modificados
 
 | Archivo | Cambio | Estado |
 |---------|--------|:------:|
-| `plugins/engram.ts` | Plugin oficial Node-compatible + instrumentación D3 temporal; Noise Gate aún no reimplementado | ❌ Hook entra pero `/prompts` responde HTTP 400 |
+| `plugins/engram.ts` | Plugin Node-compatible + Noise Gate D6 (`classified`) + debug normal apagado | ✅ Smoke PASS |
 | `plugins/engram.ts.e6b-backup` | Backup pre-cambio | ✅ |
 | `plugins/engram.ts.e6b-d2-backup` | Backup pre-D2 del plugin oficial reinstalado | ✅ |
 | `plugins/engram.ts.e6b-d3-backup` | Backup pre-D3 del plugin Node-compatible | ✅ |
 | `plugins/engram.ts.e6b-d4-backup` | Backup pre-D4 del plugin instrumentado | ✅ |
+| `plugins/engram.ts.e6b-d6-backup` | Backup pre-D6 del plugin instrumentado antes de Noise Gate | ✅ |
 | `opencode.jsonc` | Sin cambios | ✅ No necesario |
 | `E6B-D1-plugin-load-repair.md` | Registro de reparación controlada + setup oficial | ✅ |
 | `E6B-D2-node-compatible-plugin-patch.md` | Registro del patch Node-compatible | ✅ |
 | `E6B-D3-hook-export-diagnostic.md` | Registro del diagnóstico hook/export | ✅ |
 | `E6B-D4-prompts-http-contract-diagnostic.md` | Registro del diagnóstico HTTP `/prompts` | ✅ |
 | `E6B-D5-session-project-mismatch.md` | Registro del diagnóstico project/session mismatch | ✅ |
+| `E6B-D6-noise-gate-reimplementation.md` | Registro de reimplementación Noise Gate D6 | ✅ |
 
 ## DB
 
@@ -81,4 +84,11 @@
 | Hook `chat.message` no captura tras D2 | 🔴 Alta | Bloquea E6B-T1..T7; requiere diagnóstico de export/API/hook |
 | Contrato HTTP `/prompts` falla | 🔴 Alta | D3 aisló la falla en POST `/prompts` → HTTP 400; requiere D4 |
 | Session/project mismatch | 🔴 Alta | D4 confirmó `/prompts` 400: sesión en `arquitectura opencode`, prompt en `opencode-architecture` |
-| Instrumentación temporal D3/D4 activa | 🟡 Media | Debe removerse o reducirse antes de reimplementar Noise Gate |
+| Instrumentación temporal D3/D4 activa | 🟢 Baja | Mitigado: `DEBUG_ENGRAM_PLUGIN=false`; solo errores HTTP sanitizados se fuerzan |
+
+## Smoke D6 post-restart
+
+| Smoke | Conteo previo | Conteo posterior | Resultado |
+|---|---:|---:|:---:|
+| Positivo `¿Qué rol cumple Engram en esta arquitectura?` | `user_prompts=308` | `user_prompts=309` | ✅ PASS |
+| Negativo `ok gracias jajaja` | `user_prompts=309`, `observations=310` | `user_prompts=309`, `observations=310` | ✅ PASS |

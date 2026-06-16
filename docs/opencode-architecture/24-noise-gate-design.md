@@ -3,7 +3,7 @@
 > Diseño del Noise Gate para la captura automática de `user_prompts` en Engram.
 
 **Creado en:** Fase E6A (2026-06-10)
-**Estado:** Propuesta de diseño — pendiente de aprobación para E6B
+**Estado:** Diseño aprobado; D6 aplicado pre-smoke — pendiente restart/runtime smoke
 **Prerrequisito:** Doc 23 — Prompt Capture Audit
 
 ---
@@ -251,6 +251,8 @@ ALTER TABLE user_prompts ADD COLUMN char_count INTEGER DEFAULT 0;
 
 ### 5.3 Modelo de Configuración
 
+> Nota D6: para minimizar riesgo y no tocar `opencode.json`/`opencode.jsonc`, el primer despliegue usa constante interna `ALLOW_PROMPT_CAPTURE = "classified"` en `engram.ts`. La configuración externa queda como mejora posterior.
+
 En `opencode.json` / `opencode.jsonc`:
 
 ```jsonc
@@ -285,9 +287,9 @@ En `opencode.json` / `opencode.jsonc`:
 ## 6. Plan de Migración E6B
 
 ### Fase 1: Gate Mínimo (~30 min)
-1. Agregar `classifyPrompt()` con heurísticas básicas en `engram.ts`.
-2. Agregar `allow_prompt_capture: "classified"` en `opencode.jsonc`.
-3. Validar con tests manuales que `mem_context` sigue funcionando.
+1. ✅ Agregar `classifyPrompt()` con heurísticas básicas en `engram.ts`.
+2. ⏸️ No tocar `opencode.jsonc` en D6; usar constante interna `ALLOW_PROMPT_CAPTURE = "classified"`.
+3. ⏳ Validar con smoke runtime post-restart que `user_prompts` captura útil y filtra ruido.
 
 ### Fase 2: Metadata (~30 min, opcional)
 4. Migrar DB para agregar columnas `type`, `sensitivity`.
@@ -335,12 +337,13 @@ En `opencode.json` / `opencode.jsonc`:
 
 ## 9. Decisión
 
-**Estado:** Pendiente de aprobación.
+**Estado:** Aprobado e implementado en D6 pre-smoke.
 
-Para aprobar E6B, se necesita:
-1. Revisar este diseño.
-2. Decidir si implementar Fase 1 solamente o Fase 1 + 2.
-3. Dar `?Apruebas este diseño para pasar a E6B (implementación)?`.
+Decisión D6:
+1. Implementar Fase 1 solamente.
+2. No migrar DB ni agregar metadata al body `/prompts`.
+3. Mantener body `/prompts` como `{ session_id, content, project }`.
+4. Desactivar migración automática `/projects/migrate` en plugin para evitar consolidación accidental de proyectos legacy.
 
 ---
-*Fin del documento E6A — Design Proposal. Ningún archivo runtime fue modificado.*
+*Documento E6A actualizado con estado D6. E6A no modificó runtime; D6 sí modificó `engram.ts` y queda pendiente de smoke post-restart.*
