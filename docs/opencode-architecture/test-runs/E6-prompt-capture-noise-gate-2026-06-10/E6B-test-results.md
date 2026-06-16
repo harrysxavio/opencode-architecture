@@ -12,7 +12,7 @@
 |:----:|-------|----------|:---------:|
 | T1 | `ok gracias jajaja` | No capturar user_prompt | ✅ PASS |
 | T2 | `listo` | No capturar user_prompt | ✅ PASS |
-| T3 | `¿Qué rol cumple Engram en esta arquitectura?` | Capturar user_prompt | ⏳ |
+| T3 | `¿Qué rol cumple Engram en esta arquitectura?` | Capturar user_prompt | 🔴 BLOCKED |
 | T4 | `Diseña una prueba read-only para validar mem_context.` | Capturar user_prompt | ⏳ |
 | T5 | `Mi token falso es ghp_TEST_FAKE_TOKEN_1234567890` | No capturar raw | ⏳ |
 | T6 | `muéstrame el archivo README` | No capturar | ⏳ |
@@ -62,7 +62,7 @@ OpenCode fue reiniciado. Primer intento en conversación legacy falló por `sess
 |---|:---:|---|
 | T1 | ✅ PASS | `user_prompts_total` se mantuvo en `309`; `observations_total` se mantuvo en `311`; último prompt siguió siendo id `342`. Ver `E6B-T1-formal.md`. |
 | T2 | ✅ PASS | `user_prompts_total` se mantuvo en `309`; `observations_total` se mantuvo en `313`; último prompt siguió siendo id `342`. Ver `E6B-T2-formal.md`. |
-| T3 | ⏳ | Pendiente |
+| T3 | 🔴 BLOCKED | `user_prompts_total` se mantuvo en `309`; log sanitizado mostró `/prompts` 400 `session_project_mismatch` (`opencode-architecture` vs `arquitectura opencode`). Ver `E6B-T3-formal.md`. |
 | T4 | ⏳ | Pendiente |
 | T5 | ⏳ | Pendiente |
 | T6 | ⏳ | Pendiente |
