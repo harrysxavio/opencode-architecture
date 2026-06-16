@@ -26,7 +26,7 @@
 | ID | Input | Esperado | Resultado |
 |:--:|-------|----------|:---------:|
 | T1 | `ok gracias jajaja` | No capturar | ✅ PASS |
-| T2 | `listo` | No capturar | ⏳ |
+| T2 | `listo` | No capturar | ✅ PASS |
 | T3 | `¿Qué rol cumple Engram?` | Capturar | ⏳ |
 | T4 | `Diseña una prueba read-only...` | Capturar | ⏳ |
 | T5 | `Mi token falso es ghp_...` | No capturar raw | ⏳ |
