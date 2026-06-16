@@ -90,7 +90,7 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **Engram store real** | ✅ Validado | Store real es `~/.engram/engram.db`. NO `.codex/memories_1.sqlite` |
 | **Engram herramientas** | ✅ Validado | `mem_save`, `mem_search`, `mem_context`, `mem_session_summary`, `mem_judge` funcionan operativamente |
 | **Engram persistencia** | ✅ Validado | Engram MCP/DB funcionan; prompt capture automático está en reparación runtime E6B-D2 |
-| **Riesgo Engram** | ⚠️ Parcial | Project drift resuelto (E4B). E6B-D3 confirmó que el plugin carga y `chat.message` entra, pero POST `/prompts` devuelve HTTP 400 |
+| **Riesgo Engram** | ⚠️ Parcial | Project drift no está completamente resuelto en sesiones existentes. D4 confirmó `/prompts` 400 por `session_project_mismatch`: `opencode-architecture` vs `arquitectura opencode` |
 | **MCP** | 🔶 Parcial | Context7 funciona bajo intención explícita. Playwright operativo. Duplicación entre opencode.json y .jsonc |
 | **Context Pack** | ⏳ Pendiente | Requerimiento detectado en E4A. Necesario antes de optimizar tokens |
 | **Hybrid Retrieval** | 🔮 Futuro | No bloquear Engram stabilization. Se abordará como Fase G |
@@ -114,7 +114,7 @@ Cada línea que inyectamos al modelo tiene un costo: ocupa espacio en la ventana
 | **E4B** — Engram stabilization | ✅ **Completada** | Pin a v1.16.1 + `--project=opencode-architecture`. Tests T1-T7 PASSED |
 | **E5** — Context Pack | ✅ **Completada** | 7 contratos (Context Pack, Writer, Validator, Read Escalation, Quality Metrics, Intake Cleaner). 7 tests PASSED |
 | **E6A** — Prompt Capture Audit & Design | ✅ **Completada** | Audit de plugin engram.ts y DB, Noise Gate design (Opción B — Heurísticas). 7 tests PASSED |
-| **E6B** — Noise Gate implementation | **🔴 Bloqueado** | D3 confirmó hook activo y contenido útil (`length=44`), pero `/prompts` responde HTTP 400. NO ejecutar T1-T7 todavía |
+| **E6B** — Noise Gate implementation | **🔴 Bloqueado** | D4 confirmó hook activo y `/sessions` OK, pero `/prompts` falla por `session_project_mismatch`. NO ejecutar T1-T7 todavía |
 | **F** — Token reduction | ⏳ Pendiente (post-E5) | Reducción de contexto con Context Pack como base |
 | **G** — Hybrid Retrieval | 🔮 Futuro | Búsqueda combinada keyword + semántica |
 | **H** — MCP consolidation | 🔮 Futuro | Superficie MCP optimizada, memory server avanzado |
@@ -206,9 +206,9 @@ Este principio recorrió todas las fases: el LLM no debe recibir conversaciones 
 
 ## Estado actual y próximo paso
 
-**Estado actual:** `E6B-D3 — Hook/export diagnostic` aplicado en `plugins/engram.ts`. Post-restart confirma plugin cargado y hook activo, pero `/prompts` responde HTTP 400. **Noise Gate NO está reimplementado todavía**.
+**Estado actual:** `E6B-D4 — /prompts HTTP Contract Diagnostic` confirmó causa: sesión existente en `arquitectura opencode`, prompt intentando `opencode-architecture`. **Noise Gate NO está reimplementado todavía**.
 
-**Estado E global:** E0-E4B ✅ completados. E5 ✅ completado. E6A ✅ completado. **E6B 🔴 bloqueado en D3: POST `/prompts` devuelve HTTP 400.**
+**Estado E global:** E0-E4B ✅ completados. E5 ✅ completado. E6A ✅ completado. **E6B 🔴 bloqueado en D4: project/session mismatch.**
 
 ### Resultados de E4B
 
@@ -271,6 +271,7 @@ Estado actual:
 | **D1** | NO-GO: setup oficial reinstaló plugin, pero `engram.ts` falló por `Bun is not defined` |
 | **D2** | Patch mínimo Node-compatible aplicado: `Bun.*` removido de `engram.ts`, pero hook no captura pregunta útil |
 | **D3** | Hook/export diagnostic: plugin carga, hook entra, contenido útil extraído, POST `/prompts` devuelve HTTP 400 |
+| **D4** | HTTP diagnostic: `/sessions` OK, `/prompts` 400 por `session_project_mismatch` |
 | **Noise Gate** | Pausado; NO reimplementado todavía sobre el plugin Node-compatible |
 | **Body POST /prompts** | Sin cambios — mismo `{ session_id, content, project }` |
 | **Schema DB** | Sin alterar |
@@ -279,7 +280,7 @@ Estado actual:
 
 **Backups relevantes:** `engram.ts.e6b-backup`, `engram.ts.e6b-d2-backup`, backups D1 timestamp.
 
-**Pendiente:** Diagnosticar contrato HTTP `/prompts` y creación de sesión previa. Recién después, si captura, reimplementar Noise Gate.
+**Pendiente:** D5 para resolver drift `arquitectura opencode` ↔ `opencode-architecture` en sesiones existentes o validar en sesión limpia. Recién después, si captura, reimplementar Noise Gate.
 
 ---
 

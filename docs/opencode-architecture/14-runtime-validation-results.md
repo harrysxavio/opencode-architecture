@@ -8,7 +8,7 @@
 **Resuelto (Fase B-Security)** — P7: secretos rotados, backups eliminados, git history sin fugas.
 **Completado (Fase B1)** — T8 ejecutado en sesión limpia. T1 validado (Manager primary real). T5 diseñado.
 **Completado (Fase E4B)** — Engram estabilizado: v1.16.1 + `--project=opencode-architecture`. Tests E4B-T1 a T7 PASSED. Doctor 4/4 OK. Sin drift.
-**Bloqueado (Fase E6B-D3)** — El plugin oficial de Engram ya carga y `chat.message` entra. D3 confirmó `finalContent length=44` para una pregunta útil, pero POST `/prompts` responde HTTP 400 y `user_prompts` no aumenta.
+**Bloqueado (Fase E6B-D4)** — El plugin oficial de Engram ya carga y `chat.message` entra. D4 confirmó que `/sessions` responde 201, pero `/prompts` responde HTTP 400 por `session_project_mismatch`: prompt con `opencode-architecture`, sesión existente con `arquitectura opencode`.
 
 ## Objetivo
 
@@ -195,6 +195,7 @@ D-T1 confirma que Manager sigue respondiendo Tiny directo después de D3.
 | D1 — Setup oficial Engram OpenCode | ❌ NO-GO | OpenCode descubrió `engram.ts`, pero falló al cargarlo: `Bun is not defined` |
 | D2 — Patch Node-compatible | ❌ NO-GO | Se removieron referencias `Bun.*` de `engram.ts` y no hay error `Bun` post-restart, pero pregunta útil no aumentó `user_prompts` |
 | D3 — Hook/export diagnostic | ❌ NO-GO | `module.loaded`, `loaded` y `chat.message entered` aparecen; `finalContent length=44`; `/prompts` responde HTTP 400 |
+| D4 — `/prompts` HTTP contract diagnostic | ❌ NO-GO | `/sessions` 201 OK; `/prompts` 400 `session_project_mismatch` (`opencode-architecture` vs `arquitectura opencode`) |
 
 Evidencia pre-restart D2:
 
@@ -204,4 +205,4 @@ Evidencia pre-restart D2:
 - Noise Gate NO reimplementado todavía.
 - `tsc` limitado por falta de `@types/node`; no se considera validación completa.
 
-**GO/NO-GO actual:** NO ejecutar E6B-T1..T7 todavía. Próxima investigación: contrato HTTP `/prompts`, status/body sanitizado y creación de sesión previa.
+**GO/NO-GO actual:** NO ejecutar E6B-T1..T7 todavía. Próxima fase: D5 para resolver project drift/session mismatch de forma controlada.

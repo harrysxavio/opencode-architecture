@@ -41,7 +41,7 @@
 | D1 | Reinstalación controlada con setup oficial Engram OpenCode | ❌ NO-GO: plugin oficial descubierto pero falla por `Bun is not defined` |
 | D2 | Patch mínimo Node-compatible del plugin oficial Engram | ❌ NO-GO: `Bun.*` removido y sin error `engram.ts`, pero pregunta útil no aumentó `user_prompts` |
 | D3 | Hook/export diagnostic con `export default` + logs seguros temporales | ❌ NO-GO: hook entra, `finalContent=44`, POST `/prompts` responde HTTP 400 |
-| D4 | Diagnóstico contrato HTTP `/sessions` + `/prompts` | ⏳ Instrumentación aplicada; pendiente restart + test positivo |
+| D4 | Diagnóstico contrato HTTP `/sessions` + `/prompts` | ❌ NO-GO: `/prompts` falla por `session_project_mismatch` (`opencode-architecture` vs `arquitectura opencode`) |
 
 ## Archivos modificados
 
@@ -77,3 +77,4 @@
 | Plugin runtime incompatible (`Bun` no disponible) | 🔴 Alta | Mitigado para `engram.ts`; persiste en `background-agents.ts` |
 | Hook `chat.message` no captura tras D2 | 🔴 Alta | Bloquea E6B-T1..T7; requiere diagnóstico de export/API/hook |
 | Contrato HTTP `/prompts` falla | 🔴 Alta | D3 aisló la falla en POST `/prompts` → HTTP 400; requiere D4 |
+| Session/project mismatch | 🔴 Alta | D4 confirmó `/prompts` 400: sesión en `arquitectura opencode`, prompt en `opencode-architecture` |
