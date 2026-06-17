@@ -19,17 +19,17 @@ Con una arquitectura de 4 pilares:
 |---|---|---|
 | **Manager Agent** | Un agente "jefe" que decide qué hacer, cuándo y cómo | Orquestador primario: intake, diseño, SDD, QA, síntesis final |
 | **Engram** | Una memoria que guarda solo lo útil entre sesiones | Memoria persistente cross-session con estructura, no historial de chat |
-| **Noise Gate** | Un filtro que evita guardar basura o secretos | Clasifica prompts antes de persistir: útil/ruido/secreto |
+| **Noise Gate** | Un filtro que evita guardar basura o secretos | Clasifica prompts antes de persistir: útil / ruido / secreto |
 | **Fase F** | Una estrategia para que el contexto no se descontrole | Reducción inteligente de tokens seleccionando mejor, no recortando a ciegas |
 
-**¿Qué valor entrega?**  
+**¿Qué valor entrega?**
 - **Contexto limpio**: el modelo recibe solo lo que necesita, no todo lo que existe.
 - **Memoria útil**: decisiones, bugs y aprendizajes persisten entre sesiones.
 - **Sin secretos**: el Noise Gate bloquea tokens, claves y datos sensibles.
 - **Validación continua**: cada cambio pasa por 34 gates de regresión.
 - **Exportable**: ~90% del contenido puede compartirse como kit reutilizable.
 
-**Estado actual:** Fase F cerrada operativamente. F4A-lite activo en runtime. F4C activo como guidance. F4B preparado para cuando ocurra compactación natural. Export Readiness completo para crear un repositorio público.
+**Estado actual:** Fase F cerrada operativamente. F4A-lite activo en runtime. F4C activo como guidance. F4B preparado para cuando ocurra compactación natural. Export Readiness completo para crear un repositorio público sanitizado.
 
 ---
 
@@ -70,12 +70,13 @@ Imaginá un asistente que trabaja con vos en varios días distintos:
 | **engram.ts plugin** | Plugin que inyecta reglas de memoria | Plugin OpenCode via `experimental.chat.system.transform` y `experimental.session.compacting` | ✅ Instalado |
 | **Noise Gate** | Filtro de prompts antes de persistir | Clasifica cada prompt como útil/ruido/secreto; E6B T1-T7 PASS | ✅ Validado |
 | **mem_context** | Recuperación de memoria útil | Tool read-only que busca memorias relevantes sin modificar DB | ✅ Suite F PASS |
-| **F4A-lite** | Descripciones de skills compactas | 36 SKILL.md con `description:` compactada. Ahorro: 3,532 chars | ✅ RUNTIME PASS |
+| **F4A-lite** | Descripciones de skills compactas | 36 SKILL.md con `description:` compactada. Ahorro real: 3,532 chars | ✅ **RUNTIME PASS** |
+| **F4A-full** | Carga selectiva dinámica de skills | Modificaría `opencode.json` o rutas de skills. No implementado | ⏸️ Decision-only |
 | **F4B Compaction Contract** | Contrato para compactación de sesión | RECENT_SESSION_PACK con version/active markers en hook de compactación | ⚠️ PARTIAL |
-| **F4C Memory Selector** | Guidance para seleccionar memorias | Ranking 0.5+0.3+0.2, decay 0.05, top-k, dedup, secret exclusion | ✅ RUNTIME PASS |
+| **F4C Memory Selector** | Guidance para seleccionar memorias | Ranking relevance 0.5 + recency 0.3 + type 0.2, top-k, dedup, secret exclusion | ✅ **RUNTIME PASS** |
 | **Context Packs** | Diseño de paquetes de contexto lógico | L0-L5 layers con budget y propósito definido | ✅ Diseñado |
 | **Regression Harness** | Suite de validación read-only | 34 gates: artifacts, runtime hooks, security, docs, DB invariance | ✅ 34/34 PASS |
-| **Export Readiness** | Preparación para repo público | Inventario, sanitización, blueprint, test strategy, migration plan | ✅ COMPLETE |
+| **Export Readiness** | Preparación para repo público | Inventario, sanitización, blueprint, test strategy, migration plan | ✅ **COMPLETE** |
 
 ---
 
@@ -102,7 +103,7 @@ Imaginá un asistente que trabaja con vos en varios días distintos:
 | **Fase F** | **CLOSED — PASS WITH WARNINGS** | Cerrada operativamente. F4B sigue PARTIAL hasta compactación natural |
 
 > **¿Qué significa "PASS WITH WARNINGS"?**  
-> No es una falla. Significa que Fase F está cerrada operativamente, pero hay un ítem (F4B) que no puede promoverse a PASS completo hasta que ocurra un evento natural: que OpenCode haga una compactación de sesión real y produzca un `RECENT_SESSION_PACK`. Forzar ese evento no es seguro ni necesario.
+> No es una falla. Significa que Fase F está cerrada operativamente, pero hay un ítem (F4B) que no puede promoverse a PASS completo hasta que ocurra un evento natural: que OpenCode haga una compactación de sesión real y produzca un `RECENT_SESSION_PACK`. Forzar ese evento no es seguro ni necesario. F4B está instalado, endurecido y observable — solo falta el evento real.
 
 ---
 
@@ -112,18 +113,23 @@ Imaginá un asistente que trabaja con vos en varios días distintos:
 flowchart TD
     U[Usuario] --> OC[OpenCode Runtime]
     OC --> M[Manager Agent]
+
     M -->|delega fases| SDD[Subagentes SDD]
-    M -->|usa tools| MCP[MCP / Tools]
-    M -->|skills| SK[Skills reutilizables]
-    M -->|memoria| EG[Engram MCP]
-    EG --> DB[(engram.db)]
-    OC --> PL[Plugins]
-    PL --> NG[Noise Gate]
-    PL --> F4C[F4C Selector Guidance]
-    PL --> F4B[F4B Compaction Contract]
+    M -->|usa herramientas| MCP[MCP / Tools]
+    M -->|carga skills| SK[Skills reutilizables]
+    M -->|consulta memoria| EG[Engram MCP]
+
+    EG --> DB[(engram.db persistente)]
+
+    OC --> PL[Plugins del sistema]
+    PL --> NG[Noise Gate: filtra prompts]
+    PL --> F4C[F4C Selector: rankea memorias]
+    PL --> F4B[F4B Compaction: compacta sesiones]
+
     NG --> DB
-    DOCS[Documentación versionada] --> M
-    TESTS[Regression Harness] --> DOCS
+
+    DOCS[Documentación versionada en repo] --> M
+    TESTS[Regression Harness: 34 gates] --> DOCS
 ```
 
 **El flujo en lenguaje simple:**
@@ -133,7 +139,7 @@ flowchart TD
 3. El Manager decide qué hacer: puede usar **skills** (instrucciones especializadas), delegar a **subagentes SDD**, ejecutar **tools** (MCP), o consultar **memoria** en Engram.
 4. Engram guarda y recupera memoria útil. El **Noise Gate** filtra ruido y secretos antes de guardar.
 5. Los **plugins** inyectan reglas adicionales: cómo seleccionar memoria (F4C), cómo manejar compactación (F4B).
-6. El **regression harness** verifica que todo sigue funcionando después de cada cambio.
+6. Todo cambio se valida con el **regression harness** (34 tests) antes de considerarse completo.
 
 ---
 
@@ -147,31 +153,31 @@ sequenceDiagram
     participant S as Skills
     participant E as Engram
     participant NG as Noise Gate
-    participant T as Tests/Docs
+    participant T as Tests / Docs
 
     U->>OC: Escribe una solicitud
     OC->>M: Envía contexto activo + historial
-    
+
     M->>M: Clasifica la solicitud (tiny/small/medium/large)
-    
+
     alt Necesita memoria previa
         M->>E: Consulta memoria (mem_context)
         E-->>M: Memorias relevantes rankeadas por F4C
     end
-    
+
     alt Necesita skill específico
         M->>S: Carga skill (F4A-lite compacto)
         S-->>M: Instrucciones del skill
     end
-    
+
     M->>M: Decide, ejecuta o delega
     M-->>U: Responde con resultado
-    
+
     alt La respuesta genera aprendizaje útil
         M->>NG: Clasifica para guardar
         NG->>E: Guarda memoria (si es útil, no ruido, no secreto)
     end
-    
+
     T-->>M: Regression harness valida estado del proyecto
 ```
 
@@ -191,7 +197,7 @@ Engram **no** es un historial de chat. Es una **memoria estructurada** que guard
 
 - Decisiones de arquitectura
 - Bugs con causa raíz
-- Descubrimientos técnicos
+- Descubrimientos técnicos no obvios
 - Patrones establecidos
 - Preferencias del usuario
 - Resúmenes de sesión
@@ -227,6 +233,15 @@ flowchart LR
 **Para no técnicos:** Es un filtro que revisa cada mensaje antes de guardarlo en la memoria. Si el mensaje es útil (una decisión, un bug), lo guarda. Si es ruido (un saludo, una navegación), lo descarta. Si es un secreto (una clave, un token), lo bloquea.
 
 **Para técnicos:** Noise Gate es un clasificador de prompts integrado en el plugin `engram.ts` via hook `chat.message`. Clasifica cada prompt en tres categorías:
+
+```mermaid
+flowchart LR
+    P[Prompt del usuario] --> NG[Noise Gate]
+    NG -->|Útil| SAVE[Guardar en Engram]
+    NG -->|Ruido| DROP[No guardar]
+    NG -->|Secreto| BLOCK[Bloquear o sanitizar]
+    SAVE --> DB[(engram.db)]
+```
 
 | Categoría | Acción | Ejemplos |
 |---|---|---|
@@ -301,27 +316,27 @@ flowchart TD
 
 | Iniciativa | Ahorro | Estado |
 |---|---|---|
-| **F4A-lite** — Descripciones compactas | **3,532 chars (~883-1,177 tokens)** | ✅ RUNTIME PASS |
+| **F4A-lite** — Descripciones compactas | **3,532 chars (~883-1,177 tokens)** | ✅ **RUNTIME PASS** |
 | **F4B** — Session compaction | ~7,070 tokens/sesión potencial | ⚠️ PARTIAL (instalado, sin evento real) |
-| **F4C** — Memory selector guidance | ~500-2,000 tokens/turno potencial | ✅ RUNTIME PASS |
-| **QW#2** — Tool schema loading | ~2,000-4,000 tokens | 🧪 Prototype-only |
-| **QW#3** — Manager protocol compaction | ~1,200-2,300 tokens | ⏸️ Proposal-only |
+| **F4C** — Memory selector guidance | ~500-2,000 tokens/turno potencial | ✅ **RUNTIME PASS** |
+| **QW#2** — Tool schema loading | ~2,000-4,000 tokens | 🧪 Prototype-only, sin runtime |
+| **QW#3** — Manager protocol compaction | ~1,200-2,300 tokens | ⏸️ Proposal-only, sin runtime |
 
 ---
 
 ## 11. Estado detallado F4A / F4B / F4C
 
-Este es el corazón de la Fase F. Es importante entender que **F4A tiene dos versiones**:
+Este es el corazón de la Fase F. Es importante entender que **F4A tiene dos versiones** que NO deben confundirse:
 
 | Workstream | Estado | ¿Qué significa? | Riesgo pendiente |
 |---|---|---|---|
 | **F4A-lite** | ✅ **RUNTIME PASS** | Se compactaron solo las `description:` de 36 skills. No se tocaron cuerpos, rutas ni `opencode.json`. Ahorro real: 3,532 chars activo en runtime. | 🟢 Bajo — solo cambia descripción visible |
-| **F4A-full** | ⏸️ **Decision-only** | Carga selectiva dinámica de bloques de skills. Requeriría modificar `opencode.json`. No implementado. Ahorro adicional potencial: ~400-1,184 tokens. | 🟡 Medio — puede causar falsos negativos |
+| **F4A-full** | ⏸️ **Decision-only** | Carga selectiva dinámica de bloques de skills. Requeriría modificar `opencode.json`. **No implementado.** Ahorro adicional potencial: ~400-1,184 tokens. | 🟡 Medio — puede causar falsos negativos en skill matching |
 | **F4B** | ⚠️ **PARTIAL** | Contrato RECENT_SESSION_PACK instalado en `engram.ts` con version/active markers. Endurecido y observable. Falta que OpenCode haga una compactación natural real para validar. | 🟡 Medio — evento natural pendiente |
 | **F4C** | ✅ **RUNTIME PASS** | Guidance de selección de memoria (relevance 0.5 + recency 0.3 + type 0.2, decay 0.05, top-k, dedup, secret exclusion, explainability) activo en contexto del Manager. 9/9 checks PASS. | 🟢 Bajo — es guidance, no enforcement hard |
 
 **¿Por qué F4A-lite vs F4A-full?**  
-F4A-lite fue la versión segura y aprobada: solo editar la línea `description:` en el frontmatter de cada SKILL.md, sin tocar las instrucciones internas ni la configuración. F4A-full requeriría cambiar cómo OpenCode carga los skills (modificando `opencode.json` o rutas), lo cual tiene más riesgo y no está aprobado.
+F4A-lite fue la versión segura y aprobada: solo editar la línea `description:` en el frontmatter de cada SKILL.md, sin tocar las instrucciones internas ni la configuración. F4A-full requeriría cambiar cómo OpenCode carga los skills (modificando `opencode.json` o rutas), lo cual tiene más riesgo y no está aprobado. **No confundir: F4A-lite está implementado y activo. F4A-full no.**
 
 **Detalle del ahorro F4A-lite:**
 
@@ -331,6 +346,11 @@ F4A-lite fue la versión segura y aprobada: solo editar la línea `description:`
 | `hatch-pet` description | ~572 chars | 71 chars | ~501 chars |
 | Skills modificadas | — | 36 | — |
 
+**¿Qué significan los estados?**
+- **RUNTIME PASS**: Implementado, validado post-restart de OpenCode, activo en runtime real. No es solo documentación.
+- **PARTIAL**: Instalado y configurado, pero no puede validarse completamente hasta que ocurra un evento natural (compactación de OpenCode).
+- **Decision-only / Prototype-only / Proposal-only**: Documentado como posible mejora futura, pero sin implementación runtime. Requieren aprobación explícita para avanzar.
+
 ---
 
 ## 12. Context layers
@@ -339,7 +359,7 @@ El contexto se organiza en capas. No todo merece estar siempre cargado.
 
 ```mermaid
 flowchart TB
-    L0[L0: Reglas críticas / Safety] 
+    L0[L0: Reglas críticas / Safety]
     L1[L1: Identidad del proyecto]
     L2[L2: Fase activa y estado]
     L3[L3: Memorias relevantes]
@@ -357,29 +377,31 @@ flowchart TB
 | **L4** | Resumen de sesión reciente (RECENT_SESSION_PACK) | ~1-2k tokens | ❌ Solo post-compactación |
 | **L5** | Skills, tool schemas, contexto de tarea específica | ~2-5k tokens | ❌ Bajo demanda |
 
+> **Para principiantes:** Imaginá capas como un cajón con compartimentos. Lo que más se usa (reglas, identidad del proyecto) está siempre visible. Lo que se necesita de vez en cuando (una decisión vieja, una skill específica) se busca solo cuando hace falta.
+
 ---
 
 ## 13. Runtime local vs repositorio
 
-Este repositorio **no contiene toda la configuración runtime**. Vive en dos lugares:
+Este repositorio **no contiene toda la configuración runtime**. Es importante entender qué vive dónde:
 
 ```mermaid
 flowchart LR
-    subgraph LOCAL[Runtime local]
-        CONF[~/.config/opencode/]
-        PLUGINS[plugins/engram.ts]
-        MEM[~/.engram/engram.db]
-        SKILLS_L[skills en .codex/ y .config/opencode/skills/]
+    subgraph LOCAL[Runtime local — en tu PC]
+        CONF[~/.config/opencode/ plugins, configs]
+        MEM[~/.engram/engram.db — memoria real]
+        CODEX[~/.codex/skills/ — skills runtime]
     end
-    
-    subgraph REPO[Este repositorio]
+
+    subgraph REPO[Este repositorio — documentación]
         DOCS[Decisiones, reportes, riesgos]
         TESTS_H[Regression Harness]
         BLUEPRINT[Export Readiness Blueprint]
         TEMPLATES[Templates sanitizados]
     end
-    
-    LOCAL -. evidencia .-> REPO
+
+    CONF -. evidencia / documentación .-> REPO
+    MEM -. no exportar DB real .-> REPO
     REPO -. guía .-> LOCAL
 ```
 
@@ -388,9 +410,11 @@ flowchart LR
 | Documentación de decisiones | `~/.config/opencode/plugins/engram.ts` | `~/.engram/engram.db` |
 | Reportes de validación | Skills en `~/.codex/skills/` | `~/.codex/memories_1.sqlite` |
 | Risk register | Skills en `~/.config/opencode/skills/` | `~/.config/opencode/opencode.json` (personal) |
-| Decision log | Skills en `Tools/.agents/skills/` | Backups locales en `~/.config/opencode/backups/` |
+| Decision log | Skills en `Tools/.agents/skills/` | Backups locales con paths absolutos |
 | Regression harness | Skills en `~/.agents/skills/` | Logs de sesiones con prompts |
 | Blueprint para repo nuevo | `opencode.json` (config runtime) | Tokens, claves, emails personales |
+
+> **Para principiantes:** Este repo es como el manual de instrucciones y el registro de lo que se hizo. El asistente en sí vive en tu computadora con su configuración y memoria. El manual explica cómo funciona, pero no contiene tu información personal.
 
 ---
 
@@ -417,6 +441,8 @@ powershell -ExecutionPolicy Bypass -File scripts\F-regression-harness.ps1
 
 **Resultado actual: 34/34 PASS — 0 FAIL — Read-only**
 
+> **Para principiantes:** Es como una lista de verificación que el asistente revisa antes de decir "está listo". Cada check confirma que una parte importante del sistema sigue funcionando como debe. Si algo falla, se detecta antes de causar problemas.
+
 ---
 
 ## 15. Cómo continuar trabajando en este repositorio
@@ -425,11 +451,11 @@ powershell -ExecutionPolicy Bypass -File scripts\F-regression-harness.ps1
 
 2. **No tocar runtime sin decisión documentada** — cualquier cambio en `opencode.json`, plugins runtime, skills reales o DB requiere documentación previa y aprobación.
 
-3. **Si ocurre compactación natural** — ejecutar `F4B-natural-compaction-checklist.md` para validar que RECENT_SESSION_PACK funciona correctamente. Si pasa, promover F4B a RUNTIME PASS.
+3. **Si ocurre compactación natural de OpenCode** — ejecutar `F4B-natural-compaction-checklist.md` para validar que RECENT_SESSION_PACK funciona correctamente. Si pasa, promover F4B a RUNTIME PASS.
 
 4. **Para decisiones pendientes** — revisar el backlog en `docs/opencode-architecture/phases/F-token-reduction/F-phase-backlog.md` y la matriz ejecutiva en `F-next-decisions-matrix.md`.
 
-5. **No implementar F4A-full, QW#2 ni QW#3 sin aprobación explícita.** Están documentados como propuestas, no como trabajo en curso.
+5. **No implementar F4A-full, QW#2 ni QW#3 sin aprobación explícita.** Están documentados como propuestas, no como trabajo en curso. F4A-lite (el que sí está implementado) está completo y no requiere cambios.
 
 6. **Para compartir el contenido** — seguir los documentos de export readiness (sección 16).
 
@@ -465,10 +491,10 @@ flowchart TD
 - **Documentada** — README para técnicos y no técnicos, ejemplos, quickstart.
 
 Documentos clave para la migración:
-- `docs/opencode-architecture/export-readiness/SHAREABLE-REPO-BLUEPRINT.md`
-- `docs/opencode-architecture/export-readiness/SANITIZATION-CHECKLIST.md`
-- `docs/opencode-architecture/export-readiness/NEW-REPO-MIGRATION-PLAN.md`
-- `docs/opencode-architecture/export-readiness/SHAREABLE-TEST-STRATEGY.md`
+- `docs/opencode-architecture/export-readiness/SHAREABLE-REPO-BLUEPRINT.md` — estructura completa del repo destino
+- `docs/opencode-architecture/export-readiness/SANITIZATION-CHECKLIST.md` — checklist para sanitizar antes de publicar
+- `docs/opencode-architecture/export-readiness/NEW-REPO-MIGRATION-PLAN.md` — plan de migración en 10 fases
+- `docs/opencode-architecture/export-readiness/SHAREABLE-TEST-STRATEGY.md` — 19 tests para el nuevo repo
 
 ---
 
@@ -486,6 +512,8 @@ Documentos clave para la migración:
 | Logs de sesiones | 🔴 Alto — prompts y decisiones | No incluir nunca |
 | Archivos `.env`, `.db`, `.sqlite`, `.bak`, `.log` | 🟡 Medio — datos sensibles misceláneos | Excluir en `.gitignore` |
 
+**Regla de oro:** Si un archivo contiene tu nombre de usuario, paths de tu PC, tokens, claves, emails, o registros de conversaciones, **no debe estar en el repo público**. Usar templates y placeholders.
+
 ---
 
 ## 18. Roadmap
@@ -494,7 +522,7 @@ Documentos clave para la migración:
 stateDiagram-v2
     [*] --> Audit: Fases A-B (base, seguridad)
     Audit --> Memory: Fases C-D-E (tests, Engram, Noise Gate)
-    Memory --> TokenReduction: Fase F (skills compactas, selector, session)
+    Memory --> TokenReduction: Fase F (skills compactas, selector, session pack)
     TokenReduction --> ExportReadiness: Export Readiness (inventario, sanitización)
     ExportReadiness --> RuntimeKit: opencode-agent-runtime-kit (repo público)
     RuntimeKit --> PublicTemplate: Release v0.1
@@ -517,9 +545,11 @@ stateDiagram-v2
 | **F6** | ✅ COMPLETE | Rollout plan + executive package |
 | **F7** | ✅ COMPLETE | README/documentación alineada |
 | **Export Readiness** | ✅ **COMPLETE** | Inventario, blueprint, tests, migration plan |
-| **Fase F** | **CLOSED — PASS WITH WARNINGS** | Cerrada operativamente |
+| **Fase F** | **CLOSED — PASS WITH WARNINGS** | Cerrada operativamente. F4B sigue PARTIAL |
 | **G** | 🔮 Futuro | Hybrid Retrieval |
 | **H** | 🔮 Futuro | MCP Consolidation |
+
+**Nota importante:** La Fase F está "PASS WITH WARNINGS", no "FULL PASS". La diferencia es que F4B sigue PARTIAL. No promover a FULL PASS hasta que ocurra compactación natural real de OpenCode y se valide con el checklist.
 
 ---
 
@@ -528,7 +558,7 @@ stateDiagram-v2
 | Término | Explicación simple | Explicación técnica |
 |---|---|---|
 | **OpenCode** | El asistente de IA que ayuda a programar | Runtime de IA con sistema de plugins, skills, agents y MCP |
-| **Runtime** | El entorno donde "corre" el asistente | El proceso de OpenCode ejecutándose |
+| **Runtime** | El entorno donde "corre" el asistente | El proceso de OpenCode ejecutándose con su configuración |
 | **Manager** | El agente "jefe" que decide qué hacer | Agente primario que orquesta intake, diseño, SDD, QA, síntesis final |
 | **Skill** | Una instrucción especializada para una tarea | Archivo SKILL.md con frontmatter + instrucciones que OpenCode carga |
 | **Agent / Subagente** | Un tipo especial de skill que puede actuar autónomamente | Agente con tools, skills y capacidad de delegación |
@@ -541,12 +571,15 @@ stateDiagram-v2
 | **Context Pack** | Un grupo lógico de información que se carga junto | L0-L5 layers con propósito y presupuesto definidos |
 | **Regression Harness** | Una batería de tests que verifican que nada se rompió | Script PowerShell que ejecuta 34 gates read-only |
 | **Sesión Canonical** | La sesión "oficial" alineada al proyecto correcto | Sesión con `project=opencode-architecture` sin mismatch |
+| **Sesión Legacy** | Sesión de proyecto anterior que puede causar conflictos en memoria | Proyecto sin alinear a canonical, puede generar `session_project_mismatch` |
 | **Guidance-only** | Un cambio que funciona por instrucciones, no por modificar el sistema | Se le "dice" al modelo qué hacer, no se modifica código interno |
-| **Runtime PASS** | Algo que fue validado como activo en el runtime real | No es solo documentación — está funcionando y verificado |
+| **Runtime PASS** | Algo que fue validado como activo en el runtime real | No es solo documentación — está funcionando y verificado post-restart |
 | **PARTIAL** | Algo que está instalado pero no pudo validarse completamente | F4B: instalado y endurecido, pero falta evento natural para validar |
 | **PASS WITH WARNINGS** | Una fase cerrada operativamente con un ítem pendiente no bloqueante | Fase F: cerrada, F4B sigue PARTIAL pero no impide el cierre |
 | **Sanitización** | Proceso de remover datos personales antes de publicar | Reemplazar paths, tokens, emails por placeholders genéricos |
 | **Template** | Una versión reutilizable y sanitizada de un archivo de configuración | `opencode.example.json` en vez de `opencode.json` real |
+| **Compactación** | Proceso de resumir una sesión larga para ahorrar tokens | OpenCode comprime el historial en un RECENT_SESSION_PACK |
+| **Enforcement** | Una regla que no puede ser ignorada porque está en el sistema | A diferencia de guidance, que es una instrucción que el modelo puede ignorar |
 
 ---
 
@@ -560,6 +593,7 @@ stateDiagram-v2
 | Fase F en detalle | `docs/opencode-architecture/phases/F-token-reduction/README.md` |
 | Export Readiness: qué es compartible | `docs/opencode-architecture/export-readiness/EXPORT-READINESS-REPORT.md` |
 | Todas las fases del proyecto | `DOCUMENTATION-INDEX.md` |
+| Índice de Fase F | `docs/opencode-architecture/phases/F-token-reduction/DOCUMENTATION-INDEX.md` |
 
 ### Para validar que funciona
 
@@ -593,4 +627,4 @@ stateDiagram-v2
 
 > **OpenCode Architecture** — Documentación, validación y arquitectura para que OpenCode funcione con memoria, agentes, skills y control inteligente de contexto.  
 > Repositorio: [github.com/harrysxavio/opencode-architecture](https://github.com/harrysxavio/opencode-architecture)  
-> Estado: **Fase F — CLOSED — PASS WITH WARNINGS** · Export Readiness — COMPLETE
+> Estado: **Fase F — CLOSED — PASS WITH WARNINGS** · Export Readiness — COMPLETE · F4A-lite — RUNTIME PASS · F4B — PARTIAL · F4C — RUNTIME PASS

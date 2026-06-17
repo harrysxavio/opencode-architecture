@@ -36,7 +36,7 @@ Reducir el consumo de contexto de OpenCode/Engram sin degradar calidad: seleccio
 
 - **F4A-full** (selective loading funcional vía `opencode.json` o cambio de rutas): no implementado, requiere aprobación.
 - **F4A-lite** (compactación solo de `description:` en frontmatter): ✅ **SÍ implementado** — RUNTIME PASS, 36 skills compactas activas.
-- QW#2 tool schema loading en runtime activo.
+- QW#2 tool schema loading: sin runtime activo (prototype-only).
 - QW#3 Manager Protocol compaction.
 - Cualquier cambio de `opencode.json`.
 - Cualquier modificación de gentle-ai.
