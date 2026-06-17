@@ -1,6 +1,6 @@
 # Fase F — Reducción Inteligente de Tokens
 
-**Estado:** ✅ F0-F3 complete · ⚠️ F4B partial + hardened + observable · ✅ F4C RUNTIME PASS · ✅ F5/F6/F7 docs/gates · ✅ Cierre operacional
+**Estado:** ✅ F0-F3 complete · ✅ F4A-lite PASS WITH WARNINGS · ⚠️ F4B partial + hardened + observable · ✅ F4C RUNTIME PASS · ✅ F5/F6/F7 docs/gates · CLOSED — PASS WITH WARNINGS
 **Fecha:** 2026-06-17
 
 ## Objetivo
@@ -26,7 +26,7 @@ Reducir el consumo de contexto de OpenCode/Engram sin degradar calidad: seleccio
 | F4B Session History Compaction | ⚠️ PARTIAL | Instalado en `engram.ts`; contrato endurecido; validación final no disparó compaction natural |
 | F4C mem_context Selector | ✅ Runtime-validado | `MEMORY_SELECTOR_INSTRUCTIONS` activo en contexto Manager |
 | F5A Harness Upgrade | ✅ Implementado | Gates F4-F6/docs/security/DB invariance |
-| F5B Regression Run | ✅ Ejecutado | Harness ampliado a 27 checks tras hardening |
+| F5B Regression Run | ✅ Ejecutado | Harness final 34/34 PASS con gates F4A-lite |
 | F5C Rebaseline | ✅ Creado | Ahorro real/potencial separado |
 | F6A Rollout Plan | ✅ Creado | Plan + rollback |
 | F6B Executive Package | ✅ Creado | Decisiones y aprobaciones pendientes |
@@ -34,7 +34,7 @@ Reducir el consumo de contexto de OpenCode/Engram sin degradar calidad: seleccio
 
 ## No implementado por seguridad/aprobación
 
-- F4A skills selective loading funcional.
+- F4A full selective loading funcional (F4A-lite si fue implementado solo sobre `description:`).
 - QW#2 tool schema loading en runtime activo.
 - QW#3 Manager Protocol compaction.
 - Cualquier cambio de `opencode.json`.
@@ -64,7 +64,7 @@ Reducir el consumo de contexto de OpenCode/Engram sin degradar calidad: seleccio
 |---|---:|---|
 | F4B session compaction | ~7,070 tokens / sesión 30-turn | Implementado guidance-only; medición real pendiente compaction |
 | F4C selector | ~500-2,000 tokens / turno potencial | Implementado guidance-only |
-| F4A skills | ~400-1,184 tokens | Pendiente aprobación |
+| F4A-lite skills | 3,532 chars (~883-1,177 tokens) | Implementado; requiere restart para observar runtime |
 | QW#2 tool schemas | ~2,000-4,000 tokens | Prototype-only |
 | QW#3 Manager Protocol | ~1,200-2,300 tokens | Proposal-only |
 
@@ -78,7 +78,7 @@ Reiniciar OpenCode después.
 
 ## Próximo paso
 
-Fase F está operativamente cerrada. No forzar compactación. Si ocurre compactación natural, ejecutar `F4B-natural-compaction-checklist.md`. Decisiones pendientes en `F-phase-backlog.md` y `F-next-decisions-matrix.md`.
+Fase F está cerrada como `CLOSED — PASS WITH WARNINGS`. No forzar compactación. Si ocurre compactación natural, ejecutar `F4B-natural-compaction-checklist.md`. Decisiones pendientes en `F-phase-backlog.md` y `F-next-decisions-matrix.md`.
 
 Documentos de cierre:
 

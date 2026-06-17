@@ -1,6 +1,6 @@
 # Implementation Roadmap — Fase F
 
-**Estado:** ✅ F0-F3 complete · ⚠️ F4B partial + hardened · ✅ F4C RUNTIME PASS · ✅ F5/F6/F7 docs/gates · ✅ Cierre operacional
+**Estado:** ✅ F0-F3 complete · ✅ F4A-lite PASS WITH WARNINGS · ⚠️ F4B partial + hardened · ✅ F4C RUNTIME PASS · ✅ F5/F6/F7 docs/gates · CLOSED — PASS WITH WARNINGS
 **Fecha:** 2026-06-17
 
 ## Principio
@@ -18,7 +18,7 @@ Fase F reduce tokens seleccionando mejor el contexto, no recortando a ciegas. To
 | F4D Runtime API Verification | ✅ COMPLETE | Hooks confirmados: `session.compacting`, `system.transform`, `tool.definition`. |
 | F4B Session History Compaction | ⚠️ PARTIAL | Instalado + hardened v1 + observable; pendiente compactación real. |
 | F4C mem_context Selector | ✅ IMPLEMENTED | `MEMORY_SELECTOR_INSTRUCTIONS` inyectado al Manager. |
-| F4A Skills Selective Loading | ⏸️ DECISION ONLY | No runtime/config change; requiere aprobación. |
+| F4A-lite Skills Compact Descriptions | ✅ PASS WITH WARNINGS | 36 visible skill descriptions compacted; restart required to observe runtime prompt. |
 | QW#2 Tool Schema Loading | 🧪 PROTOTYPE ONLY | Plan/proposal sin rollout. |
 | QW#3 Manager Protocol Compaction | ⏸️ PROPOSAL ONLY | No `opencode.json` change. |
 | F5 Regression/Rebaseline | ✅ COMPLETE | Harness ampliado; rebaseline creado; run report generado. |
@@ -32,18 +32,20 @@ Fase F reduce tokens seleccionando mejor el contexto, no recortando a ciegas. To
 2. ✅ F4C — mem_context Selector vía instrucciones al Manager.
 3. ✅ F5A/F5B/F5C — harness, regression run, token savings rebaseline.
 4. ✅ F6 — rollout plan + executive decision package.
-5. ✅ F7 — README principal y documentación central.
+5. ✅ F4A-lite — compact descriptions in `SKILL.md` frontmatter only.
+6. ✅ F7 — README principal y documentación central.
 
 ## Cambios funcionales aplicados
 
 | Archivo | Cambio | Rollback |
 |---|---|---|
 | `~/.config/opencode/plugins/engram.ts` | Añade F4B/F4C guidance en hooks existentes | Restaurar `engram.ts.f4b-f4c-backup-20260617` |
+| `SKILL.md` frontmatter descriptions | F4A-lite compacta índice visible de 36 skills | Restaurar desde `~/.config/opencode/backups/f4a-lite-skills-20260617/manifest-full.json` |
 
 ## Cambios explícitamente NO aplicados
 
 - No edición funcional de `opencode.json`.
-- No modificación de skills reales.
+- No modificación del cuerpo/instrucciones de skills reales; solo `description:` frontmatter en F4A-lite aprobado.
 - No Manager Protocol compaction.
 - No tool schema loading en runtime activo.
 - No gentle-ai changes.
@@ -53,7 +55,7 @@ Fase F reduce tokens seleccionando mejor el contexto, no recortando a ciegas. To
 
 ## Verification plan
 
-1. Ejecutar `scripts/F-regression-harness.ps1` — 27/27 PASS verificado.
+1. Ejecutar `scripts/F-regression-harness.ps1` — 34/34 PASS verificado tras F4A-lite.
 2. Si ocurre compactación natural, ejecutar `F4B-natural-compaction-checklist.md`.
 3. Si F4B pasa, promover a RUNTIME PASS.
 4. Si falla, restaurar backup y reiniciar.

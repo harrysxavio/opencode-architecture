@@ -96,6 +96,49 @@ Test-Check -id "QW2-T1" -name "Tool schema loading remains prototype-only" -ok (
 Test-Check -id "QW3-T1" -name "Manager protocol compaction remains proposal-only" -ok (Test-Path $q3Path) -detail $q3Path
 
 Write-Host ""
+Write-Host "=== GATE 4B: F4A-lite Skills Compact Descriptions ==="
+Write-Host ""
+
+$f4aBackupRoot = "$env:USERPROFILE\.config\opencode\backups\f4a-lite-skills-20260617"
+$f4aManifest = "$f4aBackupRoot\manifest-full.json"
+$f4aEntries = @()
+if (Test-Path $f4aManifest) {
+    $rawManifest = Get-Content $f4aManifest -Raw | ConvertFrom-Json
+    if ($rawManifest -is [array]) { $f4aEntries = $rawManifest } else { $f4aEntries = @($rawManifest) }
+}
+Test-Check -id "F4A-L1" -name "F4A-lite backup manifest exists" -ok (Test-Path $f4aManifest) -detail $f4aManifest
+Test-Check -id "F4A-L2" -name "F4A-lite modified expected 36 visible skills" -ok ($f4aEntries.Count -eq 36) -detail "Found $($f4aEntries.Count) manifest entries"
+
+$f4aMissingBackups = @()
+$f4aEmptyDescriptions = @()
+$f4aMissingTriggers = @()
+$f4aSystemTouches = @()
+$f4aBodyDrift = @()
+foreach ($entry in $f4aEntries) {
+    if (-not (Test-Path $entry.backupPath)) { $f4aMissingBackups += $entry.name }
+    if ([string]::IsNullOrWhiteSpace($entry.descriptionAfter)) { $f4aEmptyDescriptions += $entry.name }
+    if (($entry.descriptionAfter -notmatch 'Trigger:') -and ($entry.descriptionAfter -notmatch '^Trigger')) { $f4aMissingTriggers += $entry.name }
+    if ($entry.originalPath -match '\\.codex\\skills\\\.system\\') { $f4aSystemTouches += $entry.originalPath }
+    if ($entry.bodySha256Before -ne $entry.bodySha256After) { $f4aBodyDrift += $entry.name }
+}
+Test-Check -id "F4A-L3" -name "F4A-lite backups exist for each modified skill" -ok ($f4aMissingBackups.Count -eq 0) -detail $(if ($f4aMissingBackups.Count -eq 0){"All backups present"}else{"Missing: $($f4aMissingBackups -join ', ')"})
+Test-Check -id "F4A-L4" -name "F4A-lite descriptions are non-empty and trigger-bearing" -ok ($f4aEmptyDescriptions.Count -eq 0 -and $f4aMissingTriggers.Count -eq 0) -detail $(if ($f4aEmptyDescriptions.Count -eq 0 -and $f4aMissingTriggers.Count -eq 0){"All compact descriptions have Trigger"}else{"Empty: $($f4aEmptyDescriptions -join ', '); Missing trigger: $($f4aMissingTriggers -join ', ')"})
+Test-Check -id "F4A-L5" -name "F4A-lite did not modify .system skills" -ok ($f4aSystemTouches.Count -eq 0) -detail $(if ($f4aSystemTouches.Count -eq 0){"No .system paths"}else{$f4aSystemTouches -join ', '})
+Test-Check -id "F4A-L6" -name "F4A-lite skill bodies stayed unchanged" -ok ($f4aBodyDrift.Count -eq 0) -detail $(if ($f4aBodyDrift.Count -eq 0){"All body hashes unchanged"}else{"Drift: $($f4aBodyDrift -join ', ')"})
+
+$f4aCriticalSkills = @(
+    "$env:USERPROFILE\.codex\skills\hatch-pet\SKILL.md",
+    "$env:USERPROFILE\OneDrive\Documentos\GitHub\Tools\.agents\skills\frontend-design\SKILL.md",
+    "$env:USERPROFILE\OneDrive\Documentos\GitHub\Tools\.agents\skills\bigquery-expert\SKILL.md",
+    "$env:USERPROFILE\.config\opencode\skills\sandbox-data-loader\SKILL.md",
+    "$env:USERPROFILE\OneDrive\Documentos\GitHub\Tools\.agents\skills\find-skills\SKILL.md",
+    "$env:USERPROFILE\.config\opencode\opencode.json"
+)
+$f4aMissingCritical = @()
+foreach ($p in $f4aCriticalSkills) { if (-not (Test-Path $p)) { $f4aMissingCritical += $p } }
+Test-Check -id "F4A-L7" -name "F4A-lite critical files still exist" -ok ($f4aMissingCritical.Count -eq 0) -detail $(if ($f4aMissingCritical.Count -eq 0){"Critical files present; opencode.json still present"}else{"Missing: $($f4aMissingCritical -join ', ')"})
+
+Write-Host ""
 Write-Host "=== GATE 5: Security and DB Invariance ==="
 Write-Host ""
 
@@ -129,6 +172,10 @@ $newDocs = @(
     "F4B-session-history-compaction-implementation-report.md",
     "F4B-contract-hardening.md",
     "F4C-mem-context-selector-implementation-report.md",
+    "F4A-lite-skills-audit.md",
+    "F4A-lite-skills-compact-format.md",
+    "F4A-lite-skills-selective-loading-implementation-report.md",
+    "F4A-lite-backup-manifest.md",
     "F4A-skills-selective-loading-decision.md",
     "F4A-skills-trigger-matrix.md",
     "F4D-tool-schema-loading-prototype-plan.md",
@@ -136,6 +183,7 @@ $newDocs = @(
     "F5A-regression-harness-upgrade.md",
     "F5B-regression-run-report.md",
     "F5C-token-savings-rebaseline.md",
+    "F-phase-final-closure-report.md",
     "F6A-controlled-rollout-plan.md",
     "F6B-executive-decision-package.md",
     "README-main-update-report.md",

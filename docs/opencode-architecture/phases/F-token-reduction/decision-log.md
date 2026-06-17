@@ -746,3 +746,41 @@
 ---
 
 _Fin de decision-log.md — 44 decisiones registradas. Fase F cerrada operativamente._
+
+---
+
+## D-F-045: F4A-lite compacta solo description: visible
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-17 |
+| **Decisión** | Se aprueba e implementa F4A-lite modificando únicamente el campo description: del frontmatter de los SKILL.md que alimentan <available_skills>. |
+| **Contexto** | <available_skills> no vive en opencode.json; OpenCode lo genera desde SKILL.md. |
+| **Alternativas** | No tocar skills → rechazado por menor ahorro; tocar cuerpos → rechazado por riesgo funcional. |
+| **Fundamento** | description: es el índice visible usado para discovery; las instrucciones completas permanecen intactas. |
+| **Impacto** | 36 descriptions compactadas; ahorro real 3,532 chars; restart requerido para observar runtime. |
+
+---
+
+## D-F-046: Backup centralizado fuera de carpetas escaneadas
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-17 |
+| **Decisión** | Los backups F4A-lite se guardan en ~/.config/opencode/backups/f4a-lite-skills-20260617/, no junto a los SKILL.md. |
+| **Contexto** | Backups dentro de carpetas activas de skills podrían ser escaneados accidentalmente. |
+| **Fundamento** | Backup centralizado preserva rollback sin contaminar discovery de skills. |
+| **Impacto** | Manifest JSON y markdown documentan path original, backup, hashes y descriptions antes/después. |
+
+---
+
+## D-F-047: Fase F cierra como PASS WITH WARNINGS
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-17 |
+| **Decisión** | Si el harness final pasa, Fase F puede cerrarse como CLOSED — PASS WITH WARNINGS. |
+| **Contexto** | F4A-lite y F4C están activos/validados; F4B sigue PARTIAL por falta de compactación natural real. |
+| **Warning** | No promover F4B a PASS hasta evidencia real de RECENT_SESSION_PACK. |
+| **Impacto** | Cierre permite avanzar sin bloquear por una compactación natural que aún no ocurrió. |
+

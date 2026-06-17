@@ -35,3 +35,22 @@
 - `F-phase-backlog.md` — backlog controlado de decisiones pendientes
 - `F-next-decisions-matrix.md` — matriz ejecutiva de decisiones
 - `F-phase-operational-closure-report.md` — reporte de cierre operacional
+
+## F4A-lite implementation
+
+- `F4A-lite-skills-audit.md` — auditoría de fuentes reales de `<available_skills>`.
+- `F4A-lite-skills-compact-format.md` — formato compacto aplicado.
+- `proposals/F4A-lite-opencode-skills-compact.proposal.md` — proposal aprobado.
+- `F4A-lite-skills-selective-loading-implementation-report.md` — implementación y validaciones.
+- `F4A-lite-backup-manifest.md` — manifest de backups centralizados.
+- `F-phase-final-closure-report.md` — cierre final propuesto.
+
+## F4A-lite implementation
+
+- F4A-lite-skills-audit.md — auditoría de fuentes reales de <available_skills>.
+- F4A-lite-skills-compact-format.md — formato compacto aplicado.
+- proposals/F4A-lite-opencode-skills-compact.proposal.md — proposal aprobado.
+- F4A-lite-skills-selective-loading-implementation-report.md — implementación y validaciones.
+- F4A-lite-backup-manifest.md — manifest de backups centralizados.
+- F-phase-final-closure-report.md — cierre final propuesto.
+

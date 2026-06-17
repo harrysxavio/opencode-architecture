@@ -31,6 +31,8 @@
 | F-R30 | README/docs contradicen estado real | Media | 🟡 Medio | 🟡 Alto | DOCUMENTATION-INDEX + harness docs gate |
 | F-R31 | F4B nunca experimenta compactación natural | Media | 🟡 Medio | 🟡 Medio | Checklist lista; contrato endurecido y observable |
 | F-R32 | Decisiones backlog (F4A, QW#2, QW#3) no se revisan | Media | 🟡 Medio | 🟡 Medio | Backlog + matriz documentados en closure |
+| F-R33 | Descripciones compactas reducen discoverability de skills | Media | 🟡 Medio | 🟡 Medio | Keywords `Trigger:` preservadas + canary + harness |
+| F-R34 | Backups de SKILL.md contaminan scan de skills | Baja | 🟡 Medio | 🟡 Medio | Backup centralizado fuera de rutas escaneadas |
 
 ---
 
@@ -67,6 +69,14 @@ Mitigación: el contrato está endurecido y observable; checklist lista para cua
 ### F-R32: Decisiones backlog (F4A, QW#2, QW#3) no se revisan
 
 Mitigación: backlog y matriz documentados en `F-phase-backlog.md` y `F-next-decisions-matrix.md`; el cierre operacional incluye estos documentos como referencia para futuras sesiones.
+
+### F-R33: Descripciones compactas reducen discoverability
+
+Mitigación: formato `Trigger: <keywords>. <purpose>.`, canary representativo, validación de triggers y confirmación post-restart pendiente.
+
+### F-R34: Backups contaminan discovery de skills
+
+Mitigación: backup centralizado en `~/.config/opencode/backups/f4a-lite-skills-20260617/`, fuera de carpetas escaneadas como skills.
 
 ---
 

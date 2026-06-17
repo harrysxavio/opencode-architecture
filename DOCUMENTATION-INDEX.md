@@ -37,3 +37,9 @@
 - `F-phase-backlog.md`
 - `F-next-decisions-matrix.md`
 - `F-phase-operational-closure-report.md`
+
+## F4A-lite current implementation
+
+- `docs/opencode-architecture/phases/F-token-reduction/F4A-lite-skills-selective-loading-implementation-report.md`
+- `docs/opencode-architecture/phases/F-token-reduction/F4A-lite-backup-manifest.md`
+- `docs/opencode-architecture/phases/F-token-reduction/F-phase-final-closure-report.md`
