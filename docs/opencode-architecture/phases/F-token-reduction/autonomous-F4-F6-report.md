@@ -1,23 +1,25 @@
 # Autonomous F4-F6 Report
 
-**Estado final:** ✅ PASS WITH WARNINGS  
+**Estado final:** ⚠️ PARTIAL post-restart · F4B contract hardened · ✅ Cierre operacional  
+**Última actualización:** 2026-06-17 — Fase F cerrada operativamente. Backlog controlado en `F-phase-backlog.md`.
 **Fecha:** 2026-06-17
 
 ## Resumen ejecutivo
 
-Se ejecutó el bloque autónomo extendido de Fase F. F4B y F4C fueron implementados de forma segura y reversible en `engram.ts` usando hooks existentes. F4A, QW#2 y QW#3 quedaron correctamente limitados a decisión/propuesta/prototipo. Se amplió el harness, se ejecutó regresión completa, se recalculó el ahorro y se actualizó la documentación central.
+Se ejecutó el bloque autónomo extendido de Fase F. F4B y F4C fueron implementados de forma segura y reversible en `engram.ts` usando hooks existentes. En la validación post-restart, F4C quedó runtime-validado por evidencia directa del contexto del Manager; F4B quedó instalado, contract-hardened y listo, pero pendiente de compaction real.
 
 ## Cambios funcionales realizados
 
 | Área | Archivo | Cambio |
 |---|---|---|
-| F4B | `~/.config/opencode/plugins/engram.ts` | Agrega `RECENT_SESSION_PACK_COMPACTION_CONTEXT` al hook `experimental.session.compacting` |
+| F4B | `~/.config/opencode/plugins/engram.ts` | Agrega `RECENT_SESSION_PACK_COMPACTION_CONTEXT` endurecido al hook `experimental.session.compacting` |
 | F4C | `~/.config/opencode/plugins/engram.ts` | Agrega `MEMORY_SELECTOR_INSTRUCTIONS` al hook `experimental.chat.system.transform` |
 
 Backup runtime:
 
 ```text
 C:\Users\harry\.config\opencode\plugins\engram.ts.f4b-f4c-backup-20260617
+C:\Users\harry\.config\opencode\plugins\engram.ts.f4b-hardening-backup-20260617
 ```
 
 ## Qué solo se propuso/documentó
@@ -37,8 +39,10 @@ powershell -ExecutionPolicy Bypass -File scripts\F-regression-harness.ps1
 Resultado:
 
 ```text
-Total: 23 | PASS: 23 | FAIL: 0
+Total: 27 | PASS: 27 | FAIL: 0
 ```
+
+Post-restart: `23/23 PASS`, DB counters invariantes. Tras F4B hardening: `27/27 PASS`.
 
 ## Ahorro real/potencial
 
@@ -52,8 +56,9 @@ Total: 23 | PASS: 23 | FAIL: 0
 
 ## Riesgos críticos restantes
 
-- OpenCode debe reiniciarse para cargar `engram.ts` actualizado.
 - F4B requiere una compactación real para validar output final.
+- La validación final intentó una sesión útil larga pero no disparó compactación natural; F4B permanece PARTIAL.
+- El contrato instalado ya fuerza explícitamente `RECENT_IDS_OR_ARTIFACTS` y `ROLLBACK_NOTE`; el riesgo restante es no haber observado todavía una compactación real.
 - F4C es guidance, no enforcement dentro de Engram core.
 - Hooks `experimental.*` podrían cambiar en versiones futuras.
 
@@ -74,6 +79,7 @@ Total: 23 | PASS: 23 | FAIL: 0
 - `DOCUMENTATION-INDEX.md`
 - `scripts/F-regression-harness.ps1`
 - `F4B-session-history-compaction-implementation-report.md`
+- `F4B-contract-hardening.md`
 - `F4C-mem-context-selector-implementation-report.md`
 - `F4A-skills-selective-loading-decision.md`
 - `F4A-skills-trigger-matrix.md`
@@ -92,4 +98,11 @@ Total: 23 | PASS: 23 | FAIL: 0
 
 ## Próximo paso recomendado
 
-Reiniciar OpenCode, abrir una sesión canonical `opencode-architecture`, ejecutar una tarea suficientemente larga para disparar compaction y validar manualmente que el resumen siga el formato `RECENT_SESSION_PACK`.
+Fase F está operativamente cerrada. No forzar compactación. Si ocurre compactación natural, ejecutar `F4B-natural-compaction-checklist.md`. Decisiones pendientes documentadas en `F-phase-backlog.md` y `F-next-decisions-matrix.md`.
+
+Documentos de cierre:
+
+- `F4B-natural-compaction-checklist.md` — checklist para validar compactación real
+- `F-phase-backlog.md` — backlog controlado de decisiones pendientes
+- `F-next-decisions-matrix.md` — matriz ejecutiva para aprobaciones
+- `F-phase-operational-closure-report.md` — reporte de cierre operacional

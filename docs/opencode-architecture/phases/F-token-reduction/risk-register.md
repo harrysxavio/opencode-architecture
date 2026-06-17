@@ -29,6 +29,8 @@
 | F-R28 | F4A aplicado sin aprobación de config/skills | Baja | 🔴 Alto | 🔴 Crítico | Decision-only; harness boundary |
 | F-R29 | QW#2 tool schema loading reduce tool-call accuracy | Media | 🔴 Alto | 🔴 Crítico | Prototype-only antes de rollout |
 | F-R30 | README/docs contradicen estado real | Media | 🟡 Medio | 🟡 Alto | DOCUMENTATION-INDEX + harness docs gate |
+| F-R31 | F4B nunca experimenta compactación natural | Media | 🟡 Medio | 🟡 Medio | Checklist lista; contrato endurecido y observable |
+| F-R32 | Decisiones backlog (F4A, QW#2, QW#3) no se revisan | Media | 🟡 Medio | 🟡 Medio | Backlog + matriz documentados en closure |
 
 ---
 
@@ -57,6 +59,14 @@ Mitigación: mantener prototype-only y medir accuracy antes de rollout.
 ### F-R30: README/docs contradicen estado real
 
 Mitigación: README principal, README Fase F y DOCUMENTATION-INDEX actualizados; harness verifica Mermaid/status básico.
+
+### F-R31: F4B nunca experimenta compactación natural
+
+Mitigación: el contrato está endurecido y observable; checklist lista para cuando ocurra; si nunca ocurre, F4B permanece PARTIAL indefinidamente sin riesgo funcional.
+
+### F-R32: Decisiones backlog (F4A, QW#2, QW#3) no se revisan
+
+Mitigación: backlog y matriz documentados en `F-phase-backlog.md` y `F-next-decisions-matrix.md`; el cierre operacional incluye estos documentos como referencia para futuras sesiones.
 
 ---
 
@@ -495,6 +505,14 @@ Mitigación: README principal, README Fase F y DOCUMENTATION-INDEX actualizados;
 | F-R22 | Session compaction consume más tokens de los que ahorra al resumir | ●●○ | 🟡 | 🟡 |
 | F-R23 | Budgets asumen compactación de Manager Protocol que no se implementó | ●●○ | 🟡 | 🟡 |
 | F-R24 | Tests de calidad dependen de IDs de Engram que pueden cambiar | ●●○ | 🟡 | 🟡 |
+| F-R25 | Hooks `experimental.*` cambian en futuras versiones | ●●○ | 🟡 | 🟡 |
+| F-R26 | F4B guidance ignorado por compactor | ●●○ | 🟡 | 🟡 |
+| F-R27 | F4C selector guidance no enforcea DB-level | ●●○ | 🟡 | 🟡 |
+| F-R28 | F4A aplicado sin aprobación de config/skills | ●○○ | 🔴 | 🔴 |
+| F-R29 | QW#2 reduce tool-call accuracy | ●●○ | 🔴 | 🔴 |
+| F-R30 | Docs contradicen estado real | ●●○ | 🟡 | 🟡 |
+| F-R31 | F4B nunca experimenta compactación natural | ●●○ | 🟡 | 🟡 |
+| F-R32 | Decisiones backlog no se revisan | ●●○ | 🟡 | 🟡 |
 
 **P = Probabilidad (●○○ baja, ●●○ media, ●●● alta)**  
 **I = Impacto (🟢 bajo, 🟡 medio, 🔴 alto, 🔴 crítico)**  
@@ -502,4 +520,4 @@ Mitigación: README principal, README Fase F y DOCUMENTATION-INDEX actualizados;
 
 ---
 
-_Fin de risk-register.md_
+_Fin de risk-register.md — Fase F cerrada operativamente. 32 riesgos registrados._

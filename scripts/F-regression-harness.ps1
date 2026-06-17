@@ -73,9 +73,14 @@ Test-Check -id "F4B-T1" -name "RECENT_SESSION_PACK guidance in compaction hook" 
 Test-Check -id "F4C-T1" -name "Memory selector guidance in system transform" -ok ($pluginText -match 'MEMORY_SELECTOR_INSTRUCTIONS' -and $pluginText -match 'experimental\.chat\.system\.transform') -detail $engramPlugin
 Test-Check -id "F4C-T2" -name "Selector scoring and decay present" -ok ($pluginText -match 'relevance 0\.5 \+ recency 0\.3 \+ type 0\.2' -and $pluginText -match 'daysSince \* 0\.05') -detail "0.5/0.3/0.2 + 0.05"
 Test-Check -id "F4B-T2" -name "Secret and project isolation rules present" -ok ($pluginText -match '\[REDACTED\]' -and $pluginText -match 'Do not mix projects') -detail "Compaction safety"
+Test-Check -id "F4B-T3" -name "RECENT_SESSION_PACK hardening markers present" -ok ($pluginText -match 'RECENT_SESSION_PACK_VERSION: v1' -and $pluginText -match 'F4B_COMPACTION_CONTRACT_ACTIVE: true') -detail "v1 + active=true markers"
+Test-Check -id "F4B-T4" -name "RECENT_SESSION_PACK critical sections present" -ok ($pluginText -match 'RECENT_IDS_OR_ARTIFACTS' -and $pluginText -match 'ROLLBACK_NOTE') -detail "Artifacts + rollback sections"
+Test-Check -id "F4B-T5" -name "RECENT_SESSION_PACK safe compaction observability present" -ok ($pluginText -match 'F4B RECENT_SESSION_PACK compaction hook entered' -and $pluginText -match 'contractVersion: "v1"' -and $pluginText -match 'contractActive: true') -detail "Sanitized forced diag marker only"
 
 $backupPath = "$env:USERPROFILE\.config\opencode\plugins\engram.ts.f4b-f4c-backup-20260617"
 Test-Check -id "F4-RB1" -name "Runtime rollback backup exists" -ok (Test-Path $backupPath) -detail $backupPath
+$hardeningBackupPath = "$env:USERPROFILE\.config\opencode\plugins\engram.ts.f4b-hardening-backup-20260617"
+Test-Check -id "F4-RB2" -name "F4B hardening rollback backup exists" -ok (Test-Path $hardeningBackupPath) -detail $hardeningBackupPath
 
 Write-Host ""
 Write-Host "=== GATE 4: Decision Boundaries ==="
@@ -122,6 +127,7 @@ Write-Host ""
 
 $newDocs = @(
     "F4B-session-history-compaction-implementation-report.md",
+    "F4B-contract-hardening.md",
     "F4C-mem-context-selector-implementation-report.md",
     "F4A-skills-selective-loading-decision.md",
     "F4A-skills-trigger-matrix.md",

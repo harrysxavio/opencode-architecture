@@ -1,6 +1,6 @@
 # Fase F — Reducción Inteligente de Tokens
 
-**Estado:** ✅ F0-F3 complete · ✅ F4B/F4C implemented guidance-only · ✅ F5/F6/F7 documentation and gates updated
+**Estado:** ✅ F0-F3 complete · ⚠️ F4B partial + hardened + observable · ✅ F4C RUNTIME PASS · ✅ F5/F6/F7 docs/gates · ✅ Cierre operacional
 **Fecha:** 2026-06-17
 
 ## Objetivo
@@ -23,10 +23,10 @@ Reducir el consumo de contexto de OpenCode/Engram sin degradar calidad: seleccio
 
 | Work unit | Estado | Qué cambió |
 |---|---:|---|
-| F4B Session History Compaction | ✅ Implementado | `RECENT_SESSION_PACK_COMPACTION_CONTEXT` en `engram.ts` |
-| F4C mem_context Selector | ✅ Implementado | `MEMORY_SELECTOR_INSTRUCTIONS` en `engram.ts` |
+| F4B Session History Compaction | ⚠️ PARTIAL | Instalado en `engram.ts`; contrato endurecido; validación final no disparó compaction natural |
+| F4C mem_context Selector | ✅ Runtime-validado | `MEMORY_SELECTOR_INSTRUCTIONS` activo en contexto Manager |
 | F5A Harness Upgrade | ✅ Implementado | Gates F4-F6/docs/security/DB invariance |
-| F5B Regression Run | ✅ Ejecutado | Reporte generado |
+| F5B Regression Run | ✅ Ejecutado | Harness ampliado a 27 checks tras hardening |
 | F5C Rebaseline | ✅ Creado | Ahorro real/potencial separado |
 | F6A Rollout Plan | ✅ Creado | Plan + rollback |
 | F6B Executive Package | ✅ Creado | Decisiones y aprobaciones pendientes |
@@ -46,6 +46,7 @@ Reducir el consumo de contexto de OpenCode/Engram sin degradar calidad: seleccio
 | Documento | Propósito |
 |---|---|
 | `F4B-session-history-compaction-implementation-report.md` | Implementación F4B + rollback |
+| `F4B-contract-hardening.md` | Campos obligatorios + observabilidad segura F4B |
 | `F4C-mem-context-selector-implementation-report.md` | Implementación F4C + límites |
 | `F4A-skills-selective-loading-decision.md` | Decisión no-runtime F4A |
 | `F4D-tool-schema-loading-prototype-plan.md` | Plan prototype-only QW#2 |
@@ -77,4 +78,11 @@ Reiniciar OpenCode después.
 
 ## Próximo paso
 
-Reiniciar OpenCode, ejecutar una sesión canonical y validar una compactación real con `RECENT_SESSION_PACK`.
+Fase F está operativamente cerrada. No forzar compactación. Si ocurre compactación natural, ejecutar `F4B-natural-compaction-checklist.md`. Decisiones pendientes en `F-phase-backlog.md` y `F-next-decisions-matrix.md`.
+
+Documentos de cierre:
+
+- `F4B-natural-compaction-checklist.md` — checklist para validar compactación real
+- `F-phase-backlog.md` — backlog controlado de decisiones pendientes
+- `F-next-decisions-matrix.md` — matriz ejecutiva para aprobaciones
+- `F-phase-operational-closure-report.md` — reporte de cierre operacional

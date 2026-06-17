@@ -664,4 +664,85 @@
 
 ---
 
-_Fin de decision-log.md — F4-F6 autonomous block updated. 42 decisiones registradas._
+---
+
+## Decisiones de cierre operacional (2026-06-17)
+
+---
+
+## D-F-043: F4B contract hardening and observability patch
+
+| Campo | Detalle |
+|---|---|
+| **Fecha** | 2026-06-17 |
+| **Decisión** | Endurecer `RECENT_SESSION_PACK_COMPACTION_CONTEXT` para exigir explícitamente 11 campos obligatorios: `RECENT_SESSION_PACK_VERSION`, `F4B_COMPACTION_CONTRACT_ACTIVE`, `ACTIVE_PHASE`, `LAST_VALIDATED_OUTCOME`, `CURRENT_OBJECTIVE`, `OPEN_DECISIONS`, `OPEN_RISKS_AND_BLOCKERS`, `RECENT_IDS_OR_ARTIFACTS`, `NEXT_STEP`, `REGRESSION_GATES`, `ROLLBACK_NOTE`. Agregar marcadores observables (`v1`, `active=true`) y diag sanitizado en hook de compactación. |
+| **Contexto** | El contrato original no forzaba `RECENT_IDS_OR_ARTIFACTS` ni `ROLLBACK_NOTE` como secciones separadas, haciendo más difícil validar una compactación real. Sin observabilidad, no se podía detectar si el hook se ejecutó. |
+| **Alternativas** | No endurecer → riesgo de otra validación ambigua. Forzar compactación por API insegura → rechazado por restricciones de seguridad. |
+| **Fundamento** | Endurecer el contrato y agregar observabilidad es bajo riesgo, bajo costo, y mejora significativamente la próxima validación. Los marcadores `v1` permiten evolucionar el contrato. |
+| **Impacto** | F4B sigue PARTIAL. Hardening PASS. Harness ampliado a 27/27. Backup adicional creado. |
+
+---
+
+## D-F-044: Fase F operational closure
+
+| Campo | Detalle |
+|---|---|
+| **Fecha** | 2026-06-17 |
+| **Decisión** | Cerrar Fase F operativamente. No continuar intentando forzar compactación. Crear backlog controlado, matriz ejecutiva, checklist F4B y reporte de cierre. |
+| **Contexto** | F4B está instalado, endurecido y observable. No puede pasarse a PASS sin compactación real. Forzar más validaciones sin evento natural no produciría evidencia nueva. |
+| **Alternativas** | Seguir intentando forzar compactación → rechazado porque requiere manipular runtime sin garantía de éxito. Esperar pasivamente sin documentar → rechazado porque se pierde trazabilidad. |
+| **Fundamento** | Cerrar operativamente no es abandonar. Es dejar el estado documentado, las decisiones pendientes catalogadas y la validación futura lista para cuando ocurra el evento natural. El backlog permite retomar sin pérdida de contexto. |
+| **Impacto** | Fase F pasa de "activa" a "cerrada operativamente — monitoreo natural". Backlog de 4 categorías creado. Matriz ejecutiva para próximas decisiones. |
+
+---
+
+| # | Decisión | Fecha | Estado |
+|---|----------|:-----:|:------:|
+| D-F-001 | 9.5k no es límite rígido, es rango 8.5k–12k | 2026-06-16 | ✅ Aprobada |
+| D-F-002 | Modo Normal como default | 2026-06-16 | ✅ Aprobada |
+| D-F-003 | Fallback dinámico permitido | 2026-06-16 | ✅ Aprobada |
+| D-F-004 | No compresión agresiva inicial | 2026-06-16 | ✅ Aprobada |
+| D-F-005 | Primero token audit (F0) | 2026-06-16 | ✅ Aprobada |
+| D-F-006 | E6B + Suite F como gates | 2026-06-16 | ✅ Aprobada |
+| D-F-007 | Sesión canonical exclusiva | 2026-06-16 | ✅ Aprobada |
+| D-F-008 | Packs como estructuras lógicas | 2026-06-16 | ✅ Aprobada |
+| D-F-009 | Manager Protocol como KEEP_FIXED compactable | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-010 | Session history como quick win #1 | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-011 | Design Skills Protocol a RETRIEVE_ON_DEMAND | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-012 | Tool schemas requieren investigación runtime | 2026-06-16 | 🔶 Resuelta (F2) — Opción C |
+| D-F-013 | Session summaries: dedup en retrieval, no eliminar | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-014 | Context Packs expandidos con 3 nuevos packs | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-015 | Tool schemas bajo demanda por fase SDD (Opción C) | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-016 | Session history compactado 3+7+acumulativo | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-017 | Manager Protocol compactado sin tocar core | 2026-06-16 | 🔶 Pendiente aprobación usuario |
+| D-F-018 | Skills block con descripciones 5–10 palabras | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-019 | gentle-ai en alineación estratégica, no integración | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-020 | F2 es diseño + auditoría, no implementación | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-021 | Regression plan extendido con gates F2 | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-022 | TOOLING_PACK como context pack separado | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-023 | QW#3 (Manager Protocol compaction) baja prioridad | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-024 | Escenario "sin compactación" añadido a budgets | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-025 | Verificar runtime API antes de F3 | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-026 | Regla R7 para decisiones explícitas | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-027 | Ahorro neto de session compaction documentado | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-028 | Tests calidad usan búsqueda semántica | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-029 | F2 apto para F3 | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-030 | F2 Critical Review como entrada de F3 | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-031 | Orden F4 confirmado: Skills → Session → Selector | 2026-06-16 | ✅ Aprobada (F4) |
+| D-F-032 | F4A Skills Quick Track — implementación directa | 2026-06-16 | ✅ Aprobada (F4) |
+| D-F-033 | F4B Session compaction design completed | 2026-06-16 | ✅ Diseño completado |
+| D-F-034 | F4C mem_context Selector design completed | 2026-06-16 | ✅ Diseño completado |
+| D-F-035 | F4 descompuesto en F4A-F4F | 2026-06-16 | ✅ Aprobada (F4) |
+| D-F-036 | Prioridad F4 actualizada a F4B → F4C → F5/F6/F7 | 2026-06-17 | ✅ Aprobada |
+| D-F-037 | F4B implementado como guidance-only en compaction hook | 2026-06-17 | ✅ Implementada |
+| D-F-038 | F4C implementado como Manager guidance | 2026-06-17 | ✅ Implementada |
+| D-F-039 | F4A queda decision-only | 2026-06-17 | ✅ No runtime |
+| D-F-040 | QW#2 tool schema loading queda prototype-only | 2026-06-17 | ✅ No rollout |
+| D-F-041 | QW#3 Manager Protocol compaction sigue proposal-only | 2026-06-17 | ✅ No config |
+| D-F-042 | F5/F6/F7 documentación, rebaseline y rollout plan | 2026-06-17 | ✅ Ejecutada |
+| D-F-043 | F4B contract hardening y observability patch | 2026-06-17 | ✅ Ejecutada |
+| D-F-044 | Fase F operational closure | 2026-06-17 | ✅ Cerrada |
+
+---
+
+_Fin de decision-log.md — 44 decisiones registradas. Fase F cerrada operativamente._

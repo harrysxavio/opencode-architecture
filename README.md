@@ -18,13 +18,14 @@ Este repositorio documenta, valida y evoluciona una arquitectura real de OpenCod
 | F1 Context Inventory | ✅ COMPLETE |
 | F2 Context Budget Contract | ✅ COMPLETE |
 | F3 Readiness / Prototype | ✅ COMPLETE |
-| F4B Session Compaction | ✅ Implementado como guidance en `engram.ts` |
-| F4C mem_context Selector | ✅ Implementado como guidance en `engram.ts` |
+| F4B Session Compaction | ⚠️ PARTIAL — instalado, hardened, observable; sin compactación real aún |
+| F4C mem_context Selector | ✅ RUNTIME PASS — guidance activo validado post-restart |
 | F4A Skills Selective Loading | ⏸️ Decision only — requiere aprobación para tocar config/skills |
-| QW#2 Tool Schema Loading | 🧪 Prototype/proposal only |
-| QW#3 Manager Protocol Compaction | ⏸️ Proposal only — no se tocó `opencode.json` |
-| F5 Regression/Rebaseline | ✅ Harness ampliado + rebaseline documentado |
+| QW#2 Tool Schema Loading | 🧪 Prototype only — sin runtime activo |
+| QW#3 Manager Protocol Compaction | ⏸️ Proposal only — ROI más bajo, no tocar `opencode.json` |
+| F5 Regression/Rebaseline | ✅ Harness 27/27 PASS + rebaseline documentado |
 | F6 Rollout/Executive Package | ✅ Plan listo |
+| F7 Documentation/Closure | ✅ Fase F cerrada operativamente; backlog controlado creado |
 
 ---
 
@@ -132,8 +133,8 @@ flowchart TD
 
 ### Qué se implementó
 
-- **F4B:** `RECENT_SESSION_PACK` como instrucciones al hook `experimental.session.compacting`.
-- **F4C:** selector de memorias como instrucciones al Manager vía `experimental.chat.system.transform`.
+- **F4B:** `RECENT_SESSION_PACK` como instrucciones endurecidas al hook `experimental.session.compacting`, con marcadores `RECENT_SESSION_PACK_VERSION: v1` y `F4B_COMPACTION_CONTRACT_ACTIVE: true` (validación final no disparó compaction natural; sigue PARTIAL).
+- **F4C:** selector de memorias como instrucciones al Manager vía `experimental.chat.system.transform` (runtime-validado post-restart).
 
 ### Qué NO se implementó
 
@@ -236,7 +237,8 @@ gentle-ai se considera como patrón estratégico y posible destino de aprendizaj
 | E0-E6B | ✅ | Engram estabilizado + Noise Gate |
 | Suite F | ✅ | mem_context read-only validado |
 | F0-F3 | ✅ | Baseline, inventory, budget, prototypes |
-| F4B/F4C | ✅ | Implementación guidance-only segura |
+| F4B | ⚠️ | Instalado + hardened; PARTIAL hasta compactación real |
+| F4C | ✅ | Guidance activo runtime-validado |
 | F4A/QW#2/QW#3 | ⏸️ | Propuestas/decisiones, no rollout |
 | F5 | ✅ | Harness + regression + rebaseline |
 | F6 | ✅ | Rollout plan + executive package |
@@ -248,10 +250,11 @@ gentle-ai se considera como patrón estratégico y posible destino de aprendizaj
 
 ## Cómo continuar
 
-1. Reiniciar OpenCode para cargar `engram.ts` actualizado.
-2. Ejecutar `scripts/F-regression-harness.ps1`.
-3. Validar una compactación real y confirmar que produce `RECENT_SESSION_PACK`.
-4. No aprobar F4A/QW#2/QW#3 hasta revisar sus propuestas.
+1. Fase F está operativamente cerrada. No forzar compactación.
+2. Ejecutar sesiones canonical largas; si ocurre compactación natural, usar `F4B-natural-compaction-checklist.md`.
+3. Revisar backlog controlado en `F-phase-backlog.md` para decisiones pendientes.
+4. Matriz ejecutiva en `F-next-decisions-matrix.md` para aprobaciones.
+5. No implementar F4A/QW#2/QW#3 sin aprobación explícita.
 
 ---
 

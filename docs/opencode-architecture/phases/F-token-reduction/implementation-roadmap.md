@@ -1,6 +1,6 @@
 # Implementation Roadmap — Fase F
 
-**Estado:** ✅ F0-F3 complete · ✅ F4B/F4C implemented guidance-only · ✅ F5/F6/F7 docs and gates updated
+**Estado:** ✅ F0-F3 complete · ⚠️ F4B partial + hardened · ✅ F4C RUNTIME PASS · ✅ F5/F6/F7 docs/gates · ✅ Cierre operacional
 **Fecha:** 2026-06-17
 
 ## Principio
@@ -16,7 +16,7 @@ Fase F reduce tokens seleccionando mejor el contexto, no recortando a ciegas. To
 | F2 Context Budget Contract | ✅ COMPLETE | Modos, capas L0-L5 y budgets definidos. |
 | F3 Readiness / Prototype | ✅ COMPLETE | F4 candidates medidos: Skills, Session, Selector. |
 | F4D Runtime API Verification | ✅ COMPLETE | Hooks confirmados: `session.compacting`, `system.transform`, `tool.definition`. |
-| F4B Session History Compaction | ✅ IMPLEMENTED | `RECENT_SESSION_PACK_COMPACTION_CONTEXT` inyectado en `engram.ts`. |
+| F4B Session History Compaction | ⚠️ PARTIAL | Instalado + hardened v1 + observable; pendiente compactación real. |
 | F4C mem_context Selector | ✅ IMPLEMENTED | `MEMORY_SELECTOR_INSTRUCTIONS` inyectado al Manager. |
 | F4A Skills Selective Loading | ⏸️ DECISION ONLY | No runtime/config change; requiere aprobación. |
 | QW#2 Tool Schema Loading | 🧪 PROTOTYPE ONLY | Plan/proposal sin rollout. |
@@ -24,6 +24,7 @@ Fase F reduce tokens seleccionando mejor el contexto, no recortando a ciegas. To
 | F5 Regression/Rebaseline | ✅ COMPLETE | Harness ampliado; rebaseline creado; run report generado. |
 | F6 Rollout/Executive Package | ✅ READY | Rollout plan + executive package. |
 | F7 README/Documentation | ✅ COMPLETE | README principal + DOCUMENTATION-INDEX actualizados. |
+| Closure/Backlog | ✅ COMPLETE | Backlog controlado, matriz ejecutiva, checklist F4B, reporte de cierre. |
 
 ## Orden de implementación vigente
 
@@ -52,9 +53,9 @@ Fase F reduce tokens seleccionando mejor el contexto, no recortando a ciegas. To
 
 ## Verification plan
 
-1. Ejecutar `scripts/F-regression-harness.ps1`.
-2. Reiniciar OpenCode para cargar plugin actualizado.
-3. Validar primer compaction real y revisar `RECENT_SESSION_PACK`.
+1. Ejecutar `scripts/F-regression-harness.ps1` — 27/27 PASS verificado.
+2. Si ocurre compactación natural, ejecutar `F4B-natural-compaction-checklist.md`.
+3. Si F4B pasa, promover a RUNTIME PASS.
 4. Si falla, restaurar backup y reiniciar.
 
 ## Rollback
