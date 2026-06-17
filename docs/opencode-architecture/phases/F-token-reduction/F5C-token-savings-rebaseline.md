@@ -26,5 +26,5 @@
 ## Advertencias
 
 - El ahorro en tokens es estimado por ratio chars/token.
-- OpenCode debe reiniciarse para observar el nuevo <available_skills>.
+- ✅ OpenCode reiniciado. El ahorro de 3,532 chars ya está activo en runtime `<available_skills>`.
 - F4B no se promueve a PASS hasta evidencia real de compactación natural.

@@ -1,14 +1,16 @@
 ﻿# F5B Regression Run Report
 
-**Fecha:** 2026-06-17 11:10  
-**Estado:** ✅ PASS — 34/34
+**Fecha:** 2026-06-17 11:24  
+**Estado:** ✅ PASS — 34/34 (pre y post-restart)
 
-## Canary
+## Pre-restart (2026-06-17 11:10)
+
+### Canary
 
 - Validación canary: PASS, 0 errores.
 - Harness tras canary: 27/27 PASS.
 
-## Lote completo
+### Lote completo
 
 - Validación completa: PASS, 0 errores.
 - Skills modificadas: 36.
@@ -16,11 +18,7 @@
 - .system untouched: PASS.
 - Backups presentes: PASS.
 
-## Harness final
-
-`powershell
-powershell -ExecutionPolicy Bypass -File scripts\F-regression-harness.ps1
-`
+### Harness final (pre-restart)
 
 Resultado:
 
@@ -30,7 +28,7 @@ Resultado:
 | PASS | 34 |
 | FAIL | 0 |
 
-## Checks F4A-lite añadidos
+### Checks F4A-lite añadidos
 
 - F4A-L1: backup manifest existe.
 - F4A-L2: 36 skills visibles modificadas.
@@ -39,3 +37,18 @@ Resultado:
 - F4A-L5: .system no modificado.
 - F4A-L6: cuerpos de skills intactos.
 - F4A-L7: archivos críticos presentes, incluido opencode.json.
+
+## Real Post-restart (2026-06-17 11:24)
+
+*OpenCode reiniciado. Harness ejecutado en sesión con runtime `<available_skills>` actualizado.*
+
+Resultado:
+
+| Métrica | Valor |
+|---|---:|
+| Total checks | 34 |
+| PASS | 34 |
+| FAIL | 0 |
+| Read-only | ✅ (no se modificaron archivos) |
+
+**Conclusión:** Sin regresión entre pre y post-restart. 34/34 PASS en ambas corridas.

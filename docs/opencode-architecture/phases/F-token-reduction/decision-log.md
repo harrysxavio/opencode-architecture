@@ -784,3 +784,15 @@ _Fin de decision-log.md — 44 decisiones registradas. Fase F cerrada operativam
 | **Warning** | No promover F4B a PASS hasta evidencia real de RECENT_SESSION_PACK. |
 | **Impacto** | Cierre permite avanzar sin bloquear por una compactación natural que aún no ocurrió. |
 
+---
+
+## D-F-048: F4A-lite RUNTIME PASS post-restart
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-17 |
+| **Decisión** | F4A-lite pasa de "PASS WITH WARNINGS — restart required" a "RUNTIME PASS — restart completed + runtime confirms compact prompts". |
+| **Contexto** | OpenCode fue reiniciado. El runtime `<available_skills>` ahora carga las 36 descripciones compactas. `hatch-pet`: 71 chars compact (vs ~572 original). No desapareció ninguna skill. No hay descripciones vacías. |
+| **Fundamento** | La validación post-restart real confirmó que el runtime reconstruye `<available_skills>` desde los SKILL.md en disco al iniciar. Con las 36 descripciones compactas en disco, el runtime ahora las refleja correctamente. |
+| **Impacto** | Ahorro real de 3,532 chars activo en runtime. No se requiere restart adicional ni corrección de skills. |
+

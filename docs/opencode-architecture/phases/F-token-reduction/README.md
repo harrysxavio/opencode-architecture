@@ -64,7 +64,7 @@ Reducir el consumo de contexto de OpenCode/Engram sin degradar calidad: seleccio
 |---|---:|---|
 | F4B session compaction | ~7,070 tokens / sesión 30-turn | Implementado guidance-only; medición real pendiente compaction |
 | F4C selector | ~500-2,000 tokens / turno potencial | Implementado guidance-only |
-| F4A-lite skills | 3,532 chars (~883-1,177 tokens) | Implementado; requiere restart para observar runtime |
+| F4A-lite skills | 3,532 chars (~883-1,177 tokens) | ✅ Activo en runtime post-restart |
 | QW#2 tool schemas | ~2,000-4,000 tokens | Prototype-only |
 | QW#3 Manager Protocol | ~1,200-2,300 tokens | Proposal-only |
 

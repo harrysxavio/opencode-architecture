@@ -12,9 +12,11 @@ F4A-lite quedó implementado y validado. F4B sigue PARTIAL porque todavía requi
 | Condición | Estado |
 |---|---:|
 | F4A-lite PASS/PASS WITH WARNINGS | ✅ |
-| Harness final PASS (pre y post-restart) | ✅ 34/34 PASS |
+| Harness final (pre y post-restart) | ✅ 34/34 PASS en ambas corridas |
 | On-disk descriptions 36/36 coinciden con manifest | ✅ |
-| Runtime `<available_skills>` | ⚠️ Muestra descripciones viejas — requiere restart manual de OpenCode |
+| Runtime `<available_skills>` carga descripciones compactas | ✅ RUNTIME PASS |
+| `hatch-pet` runtime: 71 chars (compact) vs ~572 (original) | ✅ Confirmado |
+| Critical skills con Trigger | ✅ 7/7 |
 | F4C active | ✅ 9/9 PASS |
 | F4B contract markers | ✅ Presentes pero PARTIAL (sin compactación natural) |
 | opencode.json sin cambios | ✅ SHA256 confirmado |
@@ -22,22 +24,22 @@ F4A-lite quedó implementado y validado. F4B sigue PARTIAL porque todavía requi
 | Documentación actualizada | ✅ |
 | F4B warning preservado | ✅ |
 
-## Post-restart Findings (2026-06-17 11:18)
+## Real Post-restart Findings (2026-06-17 11:24)
 
-La validación post-restart confirmó:
+*OpenCode fue reiniciado. El runtime ahora refleja las descripciones compactas.*
 
-- **On-disk**: 36/36 descripciones compactas coinciden con el manifest de implementación.
-- **Runtime**: `<available_skills>` aún muestra descripciones originales — esperado porque OpenCode no fue reiniciado. El runtime cache persiste hasta el próximo restart del proceso.
+- **<available_skills>**: 36/36 descripciones compactas cargadas correctamente. `hatch-pet`: 71 chars (vs ~572 original).
 - **F4C**: 9/9 selector guidance checks PASS. Activo en sistema transform.
 - **F4B**: Contract markers presentes (`v1` + `active: true`) pero nunca se disparó compactación natural. PARTIAL correcto.
 - **Harness**: 34/34 PASS sin regresión post-restart.
-- **Seguridad**: Sin cambios en DB, schema, `opencode.json`, gentle-ai, ni skills no objetivo.
+- **Seguridad**: Sin cambios en DB, schema, `opencode.json`, gentle-ai, ni skills objetivo.
+- **Ahorro real activo**: 3,532 chars (~883-1,177 tokens) en runtime.
 
 ## Verdict final
 
 FASE F — **CLOSED — PASS WITH WARNINGS**
 
-TODO correcto en disco. El único pendiente operativo es que el usuario reinicie OpenCode para que el runtime refleje las descripciones compactas. No es un bug — es el comportamiento normal del cache de startup.
+F4A-lite runtime validado exitosamente. No se requiere restart adicional ni corrección de skills. F4B sigue PARTIAL pendiente de compactación natural.
 
 ## Warning permanente
 

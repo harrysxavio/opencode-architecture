@@ -20,7 +20,7 @@ Este repositorio documenta, valida y evoluciona una arquitectura real de OpenCod
 | F3 Readiness / Prototype | ✅ COMPLETE |
 | F4B Session Compaction | ⚠️ PARTIAL — instalado, hardened, observable; sin compactación real aún |
 | F4C mem_context Selector | ✅ RUNTIME PASS — guidance activo validado post-restart |
-| F4A-lite Skills Compact Descriptions | ✅ PASS WITH WARNINGS — 36 skill descriptions compacted; restart required |
+| F4A-lite Skills Compact Descriptions | ✅ RUNTIME PASS — 36 skill descriptions compacted; restart completed; runtime confirms compact prompts active |
 | QW#2 Tool Schema Loading | 🧪 Prototype only — sin runtime activo |
 | QW#3 Manager Protocol Compaction | ⏸️ Proposal only — ROI más bajo, no tocar `opencode.json` |
 | F5 Regression/Rebaseline | ✅ Harness 34/34 PASS + F4A-lite rebaseline documentado |

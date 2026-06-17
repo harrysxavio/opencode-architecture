@@ -18,7 +18,7 @@ Fase F reduce tokens seleccionando mejor el contexto, no recortando a ciegas. To
 | F4D Runtime API Verification | ✅ COMPLETE | Hooks confirmados: `session.compacting`, `system.transform`, `tool.definition`. |
 | F4B Session History Compaction | ⚠️ PARTIAL | Instalado + hardened v1 + observable; pendiente compactación real. |
 | F4C mem_context Selector | ✅ IMPLEMENTED | `MEMORY_SELECTOR_INSTRUCTIONS` inyectado al Manager. |
-| F4A-lite Skills Compact Descriptions | ✅ PASS WITH WARNINGS | 36 visible skill descriptions compacted; restart required to observe runtime prompt. |
+| F4A-lite Skills Compact Descriptions | ✅ RUNTIME PASS | 36 visible skill descriptions compacted; restart completed; runtime confirms compact prompts active. |
 | QW#2 Tool Schema Loading | 🧪 PROTOTYPE ONLY | Plan/proposal sin rollout. |
 | QW#3 Manager Protocol Compaction | ⏸️ PROPOSAL ONLY | No `opencode.json` change. |
 | F5 Regression/Rebaseline | ✅ COMPLETE | Harness ampliado; rebaseline creado; run report generado. |
