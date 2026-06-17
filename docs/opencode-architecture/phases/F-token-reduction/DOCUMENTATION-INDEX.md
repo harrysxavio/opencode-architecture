@@ -45,3 +45,17 @@
 - `F4A-lite-backup-manifest.md` — manifest de backups centralizados.
 - `F-phase-final-closure-report.md` — cierre final. Fase F: CLOSED — PASS WITH WARNINGS.
 
+## Manager Extensions Audit (Nueva)
+
+Los siguientes documentos auditan la integración de gentle-ai y Ponytail en la arquitectura OpenCode, como preparación para el repo `proyecto-opencode-mem`. No implementan cambios runtime.
+
+- `../../integrations/README.md` — índice de integraciones
+- `../../integrations/manager-extension-map.md` — mapa comparativo de sistemas
+- `../../integrations/gentle-ai-architecture-usage-audit.md` — auditoría de gentle-ai
+- `../../integrations/ponytail-integration-audit.md` — auditoría de Ponytail
+- `../../integrations/ponytail-manager-integration-proposal.md` — propuesta de integración (no aplicada)
+- `../../integrations/gentle-ai-boundary-test-plan.md` — tests de boundary para gentle-ai
+- `../../integrations/ponytail-integration-test-plan.md` — tests de integración para Ponytail
+- `../../integrations/manager-extension-decision-package.md` — paquete de decisión ejecutiva
+- `../../export-readiness/MANAGER-EXTENSIONS-EXPORT-PLAN.md` — plan de exportación al nuevo repo
+

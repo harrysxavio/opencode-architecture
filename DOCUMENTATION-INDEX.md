@@ -63,3 +63,17 @@
 - `docs/opencode-architecture/phases/F-token-reduction/F4A-lite-skills-audit.md` — auditoría de fuentes reales de `<available_skills>`.
 - `docs/opencode-architecture/phases/F-token-reduction/F4A-lite-skills-compact-format.md` — formato compacto aplicado.
 - `docs/opencode-architecture/phases/F-token-reduction/F-phase-final-closure-report.md` — cierre final. Fase F: CLOSED — PASS WITH WARNINGS.
+
+## Manager Extensions Audit (Nueva)
+
+Auditoría de integración de gentle-ai y Ponytail en la arquitectura OpenCode, como preparación para el repo `proyecto-opencode-mem`. Sin cambios runtime.
+
+- `docs/opencode-architecture/integrations/README.md` — índice de integraciones
+- `docs/opencode-architecture/integrations/manager-extension-map.md` — mapa comparativo de sistemas
+- `docs/opencode-architecture/integrations/gentle-ai-architecture-usage-audit.md` — auditoría de gentle-ai
+- `docs/opencode-architecture/integrations/ponytail-integration-audit.md` — auditoría de Ponytail
+- `docs/opencode-architecture/integrations/ponytail-manager-integration-proposal.md` — propuesta de integración (no aplicada)
+- `docs/opencode-architecture/integrations/gentle-ai-boundary-test-plan.md` — tests de boundary para gentle-ai
+- `docs/opencode-architecture/integrations/ponytail-integration-test-plan.md` — tests de integración para Ponytail
+- `docs/opencode-architecture/integrations/manager-extension-decision-package.md` — paquete de decisión ejecutiva
+- `docs/opencode-architecture/export-readiness/MANAGER-EXTENSIONS-EXPORT-PLAN.md` — plan de exportación al nuevo repo
