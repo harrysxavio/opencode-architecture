@@ -22,13 +22,14 @@
 ## 2. gentle-ai alignment pack
 
 ### Estado actual
-- Documentado en: `gentle-ai-alignment.md`, `context-packs-design.md` (GENTLE_AI_ALIGNMENT_PACK)
+- Documentado en: `gentle-ai-alignment.md`, `gentle-ai-activation-policy.md`, `context-packs-design.md` (GENTLE_AI_ALIGNMENT_PACK)
 - Decisión: alignment-only, sin runtime
 
 ### Formato de exportación
 | Componente | Exportar como | Destino |
 |------------|---------------|---------|
 | `gentle-ai-alignment.md` | Doc sanitizado | `docs/alignment/gentle-ai-alignment.md` |
+| `gentle-ai-activation-policy.md` | Doc de política | `docs/alignment/gentle-ai-activation-policy.md` |
 | GENTLE_AI_ALIGNMENT_PACK | Doc de referencia | `docs/alignment/context-packs.md` |
 | Política de alineación (P1-P6) | Incluida en doc | `docs/alignment/` |
 | Patrones transferibles | Incluidos en doc | `docs/alignment/` |
@@ -46,8 +47,8 @@
 ## 3. Ponytail integration proposal
 
 ### Estado actual
-- Documentado en: `ponytail-integration-audit.md`, `ponytail-manager-integration-proposal.md`, `ponytail-integration-test-plan.md`
-- Decisión: No implementado. Pendiente de aprobación.
+- Documentado en: `ponytail-integration-audit.md`, `ponytail-manager-integration-proposal.md`, `ponytail-integration-test-plan.md`, `ponytail-runtime-implementation-report.md`
+- Decisión: ✅ Implementado en AGENTS.md como code-task default.
 
 ### Formato de exportación
 | Componente | Exportar como | Destino |
@@ -55,8 +56,9 @@
 | `ponytail-integration-audit.md` | Doc de auditoría | `docs/integrations/ponytail-audit.md` |
 | `ponytail-manager-integration-proposal.md` | Propuesta | `docs/integrations/ponytail-proposal.md` |
 | `ponytail-integration-test-plan.md` | Test plan | `docs/integrations/ponytail-tests.md` |
-| Reglas de activación | Incluidas en propuesta | `docs/integrations/` |
-| Reglas de exclusión | Incluidas en propuesta | `docs/integrations/` |
+| `ponytail-runtime-implementation-report.md` | Reporte de implementación | `docs/integrations/ponytail-implementation.md` |
+| Reglas de activación | Incluidas en AGENTS.md | `docs/integrations/` |
+| Reglas de exclusión | Incluidas en AGENTS.md | `docs/integrations/` |
 
 ### NO exportar
 - Plugin `.mjs` real de Ponytail (no se instala como parte del kit)
@@ -64,9 +66,9 @@
 - Referencias a rutas locales donde se evaluó Ponytail
 
 ### Perfil destino
-- `ponytail-code-gate` — perfil opcional con la propuesta documentada.
-- Si se aprueba la integración, puede migrar a subperfil de `full`.
-- Si no se aprueba, queda como documentación de referencia.
+- `ponytail-code-gate` — perfil opcional con la propuesta documentada + reporte de implementación.
+- ✅ Implementado en AGENTS.md actual. Decidir si incluir la sección en el template del nuevo repo.
+- Si no se incluye, queda como documentación de referencia.
 
 ---
 
@@ -127,8 +129,8 @@
 | Regression harness | ❌ | ✅ | ❌ | ❌ | ✅ |
 | gentle-ai docs | ❌ | ❌ | ✅ | ❌ | ❌ |
 | Ponytail proposal | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Ponytail code gate | ❌ | ⏸️ | ❌ | ✅ | ✅ |
-| Ponytail plugin | ❌ | ❌ | ❌ | ⏸️ | ⏸️ |
+| Ponytail code gate | ❌ | ✅ | ❌ | ✅ | ✅ |
+| Ponytail plugin | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 ---
 
@@ -136,7 +138,7 @@
 
 | # | Regla | Fundamento |
 |:-:|-------|------------|
-| 1 | `full` puede incluir Manager + agents + skills + Engram + Ponytail guidance si se aprueba | El perfil completo debe ser usable sin dependencias externas |
+| 1 | `full` incluye Manager + agents + skills + Engram + Ponytail code gate | El perfil completo debe ser usable sin dependencias externas |
 | 2 | `full` NO debe incluir gentle-ai runtime | gentle-ai alignment-only, sin integración runtime |
 | 3 | `gentle-alignment` debe ser perfil opcional solo documental | Quien quiera referencias de gentle-ai puede consultarlo |
 | 4 | `ponytail-code-gate` puede ser perfil opcional o subperfil de full | Según recomendación final de la auditoría |

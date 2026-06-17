@@ -1,6 +1,6 @@
 # Integrations — Manager Extension Audit
 
-> **Estado:** ✅ AUDIT COMPLETE — Pendiente de aprobación para implementación runtime
+> **Estado:** ✅ AUDIT COMPLETE → PONYTAIL CODE GATE IMPLEMENTED
 > **Fecha:** 2026-06-17
 > **Propósito:** Documentar la auditoría, análisis y propuestas de integración de gentle-ai y Ponytail en la arquitectura OpenCode Manager, como paso previo al repo `proyecto-opencode-mem`.
 
@@ -13,10 +13,12 @@
 | `manager-extension-map.md` | Mapa comparativo: gentle-ai vs Ponytail vs Manager vs subsistemas |
 | `gentle-ai-architecture-usage-audit.md` | Auditoría de gentle-ai en la arquitectura actual |
 | `ponytail-integration-audit.md` | Auditoría completa de Ponytail |
-| `ponytail-manager-integration-proposal.md` | Propuesta de integración de Ponytail en AGENTS.md (no aplicada) |
+| `ponytail-manager-integration-proposal.md` | Propuesta de integración de Ponytail en AGENTS.md (base de la implementación) |
+| `ponytail-runtime-implementation-report.md` | Reporte de implementación runtime en AGENTS.md |
+| `gentle-ai-activation-policy.md` | Política de activación de gentle-ai alignment-only |
 | `gentle-ai-boundary-test-plan.md` | Tests para evitar integración accidental de gentle-ai |
 | `ponytail-integration-test-plan.md` | Tests para validar integración de Ponytail |
-| `manager-extension-decision-package.md` | Paquete de decisión ejecutiva final |
+| `manager-extension-decision-package.md` | Paquete de decisión ejecutiva final (actualizado post-implementación) |
 
 ## Documentos de exportación relacionados
 
@@ -28,11 +30,11 @@
 
 ## Reglas de esta auditoría
 
-- **No runtime changes.** Ningún archivo runtime se modifica (AGENTS.md, opencode.json, plugins, skills, DB).
-- **No instalaciones.** No se instala Ponytail, gentle-ai, ni ninguna dependencia.
-- **Propuesta, no implementación.** La integración de Ponytail en AGENTS.md está documentada como propuesta, no aplicada.
+- ✅ **AGENTS.md modificado** — Ponytail Code Gate insertado (108 líneas, marker `opencode-architecture:ponytail-integration`).
+- **No instalaciones.** No se instaló Ponytail, gentle-ai, ni ninguna dependencia.
+- **Propuesta implementada.** La integración de Ponytail en AGENTS.md pasó de propuesta a implementación.
 - **Decisión base validada:** gentle-ai se mantiene como `alignment-only`, no como dependencia runtime.
-- **Ponytail no está instalado localmente** — se audita desde repo público.
+- **Ponytail no está instalado localmente** — la integración es documental, no require plugin.
 
 ---
 
@@ -41,8 +43,8 @@
 | Sistema | Estado recomendado | ¿Implementar ahora? |
 |---------|-------------------|---------------------|
 | gentle-ai | alignment-only, sin runtime | ❌ No |
-| Ponytail | Code Gate (SDD Design → SDD Tasks) | ⏸️ Pendiente de aprobación |
-| Manager Protocol | Actualizar Completion Contract + Code Review | ⏸️ Pendiente de aprobación |
+| Ponytail | Code Gate — code-task default en AGENTS.md | ✅ Implementado |
+| Manager Protocol | Completion Contract + Ponytail Code Gate + Code Review agregados en AGENTS.md | ✅ Implementado |
 
 ---
 
