@@ -5,6 +5,9 @@
 | Need | Start here |
 |---|---|
 | Project overview | `README.md` |
+| Master architecture README | `README.md` |
+| Architecture assurance report | `docs/opencode-architecture/ARCHITECTURE-ASSURANCE-REPORT.md` |
+| README refresh plan | `docs/opencode-architecture/README-ARCHITECTURE-ASSURANCE-REFRESH-PLAN.md` |
 | Fase F token reduction | `docs/opencode-architecture/phases/F-token-reduction/README.md` |
 | Fase F index | `docs/opencode-architecture/phases/F-token-reduction/DOCUMENTATION-INDEX.md` |
 | Decisions | `docs/opencode-architecture/phases/F-token-reduction/decision-log.md` |
@@ -99,3 +102,15 @@ Auditoría de integración de gentle-ai y Ponytail en la arquitectura OpenCode, 
 - `docs/opencode-architecture/export-readiness/SDD-AGENTS-EXPORT-PLAN.md` — Task 11: plan exportación SDD agents
 - `docs/opencode-architecture/export-readiness/manager-sdd-decision-package.md` — Task 12: decision package Manager+SDD
 - `docs/opencode-architecture/export-readiness/pre-runtime-kit-gap-analysis.md` — Task 13: gap analysis pre-export
+
+## Architecture README & Assurance Refresh (2026-06-17)
+
+Fase final de documentación, auditoría y aseguramiento antes de avanzar a `proyecto-opencode-mem`. No modifica runtime.
+
+- `README.md` — documento maestro actualizado: Manager, memoria, agentes, SDD, Fase F, gentle-ai, Ponytail, tests, warnings y camino al repo nuevo.
+- `docs/opencode-architecture/README-ARCHITECTURE-ASSURANCE-REFRESH-PLAN.md` — auditoría previa del README y plan de refresh.
+- `docs/opencode-architecture/ARCHITECTURE-ASSURANCE-REPORT.md` — evidence-based assurance report, componentes confirmados, gaps y Go/No-Go.
+- `docs/opencode-architecture/integrations/manager-sdd-test-plan.md` — tests Manager/SDD diseñados; 7 críticos pendientes de automatizar.
+- `docs/opencode-architecture/integrations/gentle-ai-boundary-test-plan.md` — GA-B1..GA-B7 diseñados.
+- `docs/opencode-architecture/integrations/ponytail-integration-test-plan.md` — PT-I1..PT-I12 diseñados.
+- `docs/opencode-architecture/export-readiness/pre-runtime-kit-gap-analysis.md` — 10 gaps; 1 high: paths absolutos no portables.

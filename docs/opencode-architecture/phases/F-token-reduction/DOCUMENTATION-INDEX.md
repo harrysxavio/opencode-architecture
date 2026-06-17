@@ -47,15 +47,27 @@
 
 ## Manager Extensions Audit (Nueva)
 
-Los siguientes documentos auditan la integración de gentle-ai y Ponytail en la arquitectura OpenCode, como preparación para el repo `proyecto-opencode-mem`. No implementan cambios runtime.
+Los siguientes documentos auditan la integración de gentle-ai y Ponytail en la arquitectura OpenCode, como preparación para el repo `proyecto-opencode-mem`. La integración Ponytail en AGENTS.md ya fue implementada como guidance documental; la fase Architecture README & Assurance Refresh no modifica runtime.
 
 - `../../integrations/README.md` — índice de integraciones
 - `../../integrations/manager-extension-map.md` — mapa comparativo de sistemas
 - `../../integrations/gentle-ai-architecture-usage-audit.md` — auditoría de gentle-ai
 - `../../integrations/ponytail-integration-audit.md` — auditoría de Ponytail
-- `../../integrations/ponytail-manager-integration-proposal.md` — propuesta de integración (no aplicada)
+- `../../integrations/ponytail-manager-integration-proposal.md` — propuesta de integración (base de implementación)
+- `../../integrations/ponytail-runtime-state-reconciliation.md` — estado real: AGENTS.md guidance implementado, plugin/skills no instalados
+- `../../integrations/ponytail-post-restart-validation.md` — validación post-restart pendiente
+- `../../integrations/sdd-subagents-runtime-inventory.md` — inventario de 10 subagentes SDD
+- `../../integrations/sdd-init-role-spec.md` — rol de `sdd-init` v3.0
+- `../../integrations/sdd-pipeline-flow.md` — flujo SDD completo
+- `../../integrations/manager-sdd-test-plan.md` — tests Manager/SDD diseñados
 - `../../integrations/gentle-ai-boundary-test-plan.md` — tests de boundary para gentle-ai
 - `../../integrations/ponytail-integration-test-plan.md` — tests de integración para Ponytail
 - `../../integrations/manager-extension-decision-package.md` — paquete de decisión ejecutiva
 - `../../export-readiness/MANAGER-EXTENSIONS-EXPORT-PLAN.md` — plan de exportación al nuevo repo
+
+## Architecture README & Assurance Refresh
+
+- `../../README-ARCHITECTURE-ASSURANCE-REFRESH-PLAN.md` — plan/auditoría del refresh del README maestro.
+- `../../ARCHITECTURE-ASSURANCE-REPORT.md` — assurance report con Go/No-Go y gaps antes de `proyecto-opencode-mem`.
+- `../../../README.md` — README maestro actualizado.
 

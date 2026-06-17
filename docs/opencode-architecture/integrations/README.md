@@ -39,6 +39,14 @@ Documentos generados durante la fase de closure del Manager SDD Orchestration & 
 | `manager-sdd-test-plan.md` | Plan de 21 tests para Manager+SDD | 10 |
 | `manager-sdd-senior-challenge.md` | Adversarial review senior de toda la arquitectura | 14 |
 
+## Architecture README & Assurance Refresh
+
+| Documento | Propósito |
+|-----------|-----------|
+| `../README-ARCHITECTURE-ASSURANCE-REFRESH-PLAN.md` | Auditoría previa del README, contradicciones a corregir, fuentes y criterio de aceptación |
+| `../ARCHITECTURE-ASSURANCE-REPORT.md` | Assurance final: arquitectura esperada, evidencia, estado de componentes, gaps y Go/No-Go |
+| `../../README.md` | Documento maestro actualizado para audiencias técnicas y no técnicas |
+
 ## Documentos de exportación relacionados
 
 | Documento | Propósito |
@@ -54,6 +62,7 @@ Documentos generados durante la fase de closure del Manager SDD Orchestration & 
 
 - ✅ **AGENTS.md modificado** — Ponytail Code Gate insertado (108 líneas, marker `opencode-architecture:ponytail-integration`).
 - **No instalaciones.** No se instaló Ponytail, gentle-ai, ni ninguna dependencia.
+- **No cambios runtime en Architecture README & Assurance Refresh.** Esta fase solo actualizó documentación e índices.
 - **Propuesta implementada.** La integración de Ponytail en AGENTS.md pasó de propuesta a implementación.
 - **Decisión base validada:** gentle-ai se mantiene como `alignment-only`, no como dependencia runtime.
 - **Ponytail no está instalado localmente** — la integración es documental, no require plugin.
