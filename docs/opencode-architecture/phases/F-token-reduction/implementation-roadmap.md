@@ -173,6 +173,17 @@ Definir el presupuesto de tokens por capa y por modo, con reglas de expansión.
 **Condición de entrada:** F2 Critical Review veredicto APTO con observaciones  
 **Requiere aprobación:** Sí (Manager) — approval package listo
 
+### Sub-fases ejecutadas
+| # | Tarea | Estado | Ahorro/Resultado |
+|:-:|-------|:------:|:-----------------|
+| F3-A | Runtime API verification | 🔶 Condicional (no bloqueante) | Delegada a F4D |
+| F3-B | QW#5 Skills block compaction (prototipo) | ✅ COMPLETED | ~1,184 tokens (3× estimado F2) |
+| F3-C | QW#1 Session history compaction (prototipo) | ✅ COMPLETED | ~7,070 tokens neto (30-turn sesión) |
+| F3-D | QW#4 mem_context selector (prototipo) | ✅ COMPLETED | Scoring calibrado, decay 0.05/día |
+| F3-E | Regression harness creation | ✅ COMPLETED | 16/16 tests PASS |
+| F3-F | Approval package (diff, riesgos, tradeoffs) | ✅ COMPLETED | Listo para Manager |
+| F3-G | Context budget update (escenario sin compactación) | ✅ COMPLETED | Budgets actualizados |
+
 ### Objetivo
 Ejecutar la primera ola de implementación de Fase F: safe quick wins, prototipos aislados, regression harness, y approval package.
 
@@ -315,6 +326,87 @@ Implementar los cambios en producción (entorno real de OpenCode).
 
 ---
 
+## F4 — Quick Wins Implementation (Skills + Session + Selector)
+
+**Estado:** 🔶 **EN EJECUCIÓN** (F4-0 a F4C completados)  
+**Dependencias:** F3 completada ✅  
+**Requiere aprobación:** Sí (Manager + usuario) para implementación
+
+### Objetivo
+Implementar los 3 quick wins validados en F3 en orden Skills → Session → Selector, según el orden revalidado en F4-0.
+
+### Sub-fases
+
+| Sub-fase | Descripción | Estado | Riesgo | Implementación |
+|:--------:|-------------|:------:|:------:|:--------------:|
+| **F4-0** | Revalidación del Approval Package (5 alternativas evaluadas) | ✅ **COMPLETED** | 🟢 Bajo | Diseño |
+| **F4A** | Skills Selective Loading — descripciones compactas (38 skills, ~1,184 tokens) | ✅ **COMPLETED** | 🟢 Bajo | ⚠️ Pendiente aprobación (archivos fuera del proyecto) |
+| **F4B** | Session History Compaction — RECENT_SESSION_PACK (3+7+acumulativo+R7) | ✅ **COMPLETED** | 🟡 Medio | ⚠️ Pendiente aprobación (runtime) |
+| **F4C** | mem_context Selector — scoring + dedup + top-K + explain (23 tests) | ✅ **COMPLETED** | 🟡 Medio | ⚠️ Pendiente aprobación (runtime) |
+| **F4D** | Runtime API Verification — auditoría read-only de OpenCode runtime | ⏳ **PENDIENTE** | 🟢 Bajo | Read-only |
+| **F4E** | Manager Protocol Compaction v2 (sin tocar opencode.json) | ⏳ **PENDIENTE** | 🟡 Medio | Diseño |
+| **F4F** | Implementation Roadmap Update (este documento) | ✅ **COMPLETED** | 🟢 Bajo | Documentación |
+
+### Documentos creados en F4
+| Documento | Contenido |
+|-----------|-----------|
+| `F4-0-approval-revalidation.md` | Revalidación del orden de implementación |
+| `F4A-skills-selective-loading.md` | Diseño de compactación de skills con script de implementación |
+| `proposals/skills-selective-loading.proposal.md` | Propuesta con diff, backup y rollback |
+| `F4B-session-history-compaction.md` | Diseño de compactación de session history |
+| `recent-session-pack.template.md` | Template RECENT_SESSION_PACK (RAW+SUMMARY+ACCUMULATED+R7) |
+| `F4C-mem-context-selector.md` | Diseño del selector de memorias |
+| `F4C-selector-scoring-spec.md` | Especificación exacta del scoring (pesos, decay, floor) |
+| `F4C-selector-test-cases.md` | 23 tests funcionales del selector |
+
+### Documentos actualizados en F4
+| Documento | Cambio |
+|-----------|--------|
+| `decision-log.md` | Añadidas D-F-031 a D-F-035 |
+| `implementation-roadmap.md` | F4 descompuesto en F4-0 a F4F, F3 actualizado |
+
+---
+
+## F5 — Regression & Baseline Recalculation
+
+**Estado:** ⏳ **PENDIENTE** — Diseño listo (regression-plan.md), pendiente ejecución  
+**Dependencias:** F4 completada  
+**Requiere aprobación:** Sí (Manager)
+
+### Sub-fases
+| Sub-fase | Descripción | Estado |
+|:--------:|-------------|:------:|
+| F5A | Regression Harness Upgrade | ⏳ Pendiente |
+| F5B | Regression Execution (E6B + Suite F + Budget + Quality + Security + E2E) | ⏳ Pendiente |
+| F5C | Token Savings Rebaseline post-F4 | ⏳ Pendiente |
+
+---
+
+## F6 — Controlled Rollout & Executive Package
+
+**Estado:** ⏳ **PENDIENTE** — Plan listo en regression-plan.md  
+**Dependencias:** F5 completada  
+**Requiere aprobación:** Sí (Manager + Usuario)
+
+### Sub-fases
+| Sub-fase | Descripción | Estado |
+|:--------:|-------------|:------:|
+| F6A | Controlled Rollout Plan (días 1-7, feature flags, monitoreo) | ⏳ Pendiente |
+| F6B | Executive Decision Package | ⏳ Pendiente |
+| F6C | Autonomous 12-hour Report | ⏳ Pendiente |
+
+---
+
+## F7 — README Principal & Documentation Sweep
+
+**Estado:** ⏳ **PENDIENTE**  
+**Dependencias:** F4-F6 completadas  
+**Requiere aprobación:** Manager
+
+**Objetivo:** Actualizar el README principal del proyecto con visualizaciones Mermaid, DOCUMENTATION-INDEX.md, roadmaps y registros.
+
+---
+
 ## Resumen de fases
 
 | Fase | Nombre | Estado | Aprobación | Depende de |
@@ -322,10 +414,11 @@ Implementar los cambios en producción (entorno real de OpenCode).
 | F0 | Token Audit Baseline | ✅ **COMPLETED** | No aplica | Ninguna |
 | F1 | Context Inventory | ✅ **COMPLETED** | No aplica | F0 |
 | F2 | Context Budget Contract | ✅ **COMPLETED** | Manager + Usuario | F0 + F1 |
-| F3 | mem_context Selector | 📋 Diseñado | Manager | F2 |
-| F4 | Context Packs | 📋 Diseñado | Manager + Usuario | F3 |
-| F5 | Regression Plan | 📋 Diseñado | Manager | F3 + F4 |
-| F6 | Rollout Controlado | 📋 Planificado | Manager + Usuario | F5 |
+| F3 | Execution Strategy & Quick Wins | ✅ **COMPLETED** | Manager | F2 |
+| F4 | Quick Wins Implementation | 🔶 **EN EJECUCIÓN** (F4-0 a F4C ✅) | Manager + Usuario | F3 |
+| F5 | Regression & Baseline | ⏳ **PENDIENTE** | Manager | F4 |
+| F6 | Controlled Rollout | ⏳ **PENDIENTE** | Manager + Usuario | F5 |
+| F7 | README & Documentation Sweep | ⏳ **PENDIENTE** | Manager | F4-F6 |
 
 ## Reglas de aprobación
 

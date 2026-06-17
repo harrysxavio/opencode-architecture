@@ -461,6 +461,113 @@
 | D-F-029 | F2 apto para F3 | 2026-06-16 | ✅ Aprobada (CR) |
 | D-F-030 | F2 Critical Review como entrada de F3 | 2026-06-16 | ✅ Aprobada (CR) |
 
+## D-F-033: F4B Session compaction design completed
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | El diseño de F4B (Session History Compaction) se da por COMPLETED. Template RECENT_SESSION_PACK con 3 bloques (RAW+SUMMARY+ACCUMULATED) + regla R7 para decisiones explícitas + fallback para consultas sobre turns antiguos. |
+| **Contexto** | F3 midió ahorro neto de ~7,070 tokens para sesión de 30 turns. |
+| **Alternativas** | Formato 5+5+resto → más turns crudos pero menos ahorro. Formato 1+todo resumido → máximo ahorro pero alto riesgo de pérdida de contexto. |
+| **Fundamento** | 3 turns crudos garantizan precisión inmediata. R7 preserva decisiones. Fallback protege contra pérdida de contexto histórico. |
+| **Impacto** | Template listo en `recent-session-pack.template.md`. Pendiente aprobación para implementación en runtime. |
+
 ---
 
-_Fin de decision-log.md — F2 CRITICAL REVIEW COMPLETED. 30 decisiones registradas (13 de F1, 9 de F2, 8 de Critical Review)._
+## D-F-034: F4C mem_context Selector design completed
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | El diseño del mem_context Selector se da por COMPLETED. Algoritmo de 6 pasos (project match → score → dedup → top-K → fallback → explain) con 23 tests funcionales. |
+| **Contexto** | F3 validó scoring 0.5/0.3/0.2 con 25 observaciones realistas. 1 ajuste (decay 0.05/día + floor para decisiones). |
+| **Alternativas** | ML-based ranking → más preciso pero menos auditable y reversible. Sin selector → se pierde ~500-2,000 tokens/turno. |
+| **Fundamento** | Reglas fijas son predecibles, auditables y reversibles. Pesos configurables permiten ajuste sin cambiar algoritmo. |
+| **Impacto** | Scoring spec + 23 tests documentados en `F4C-selector-scoring-spec.md` y `F4C-selector-test-cases.md`. Pendiente aprobación para implementación. |
+
+---
+
+## D-F-035: F4 descompuesto en F4A-F4F
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | La fase F4 se descompone en 7 sub-fases: F4-0 (revalidación), F4A (Skills), F4B (Session), F4C (Selector), F4D (Runtime API), F4E (Manager Protocol v2), F4F (Roadmap Update). |
+| **Contexto** | El roadmap original mostraba F4 como "Context Packs Design & Implementation", que no reflejaba el trabajo real de implementación de quick wins. |
+| **Alternativas** | Mantener la descripción original de F4 → confunde con la realidad del trabajo. Fusionar F4 con F3 → se pierde visibilidad del progreso. |
+| **Fundamento** | La descomposición en sub-fases pequeñas da visibilidad granular del progreso y permite aprobar/rechazar cada quick win individualmente. |
+| **Impacto** | Implementation roadmap actualizado. Decision log actualizado con D-F-031 a D-F-035. |
+
+---
+
+## Decisiones de F4 (2026-06-16)
+
+---
+
+## D-F-031: Orden de implementación F4 confirmado
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | El orden Skills → Session → Selector se mantiene. Skills se implementa en Quick Track (sin esperar regression plan completo). |
+| **Contexto** | F4-0 revalidó 5 alternativas de orden. Skills primero por ser el de menor riesgo, implementación inmediata y sin dependencias runtime. |
+| **Alternativas** | Session primero (❌ mayor riesgo sin experiencia previa). Selector primero (❌ ahorro incierto). Paralelo (⚠️ complejidad innecesaria). Solo docs (❌ no avanza). |
+| **Fundamento** | Skills es cambio puramente textual en system prompt — no requiere runtime, feature flag ni regresión extensiva. |
+| **Impacto** | Skills se implementa en F4A. Session y Selector pasan por validación completa. |
+
+---
+
+## D-F-032: F4A Skills se implementa directamente (Quick Track)
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-16 |
+| **Decisión** | Skills Selective Loading (QW#5) se implementa como cambio de descripciones en el bloque XML del system prompt. No requiere feature flag, no toca runtime. |
+| **Contexto** | F3 midió ahorro real de ~1,184 tokens. Es cambio puramente textual. |
+| **Alternativas** | No implementar → se pierde ~1,184 tokens. Esperar a F5 → riesgo bajo, no justifica demora. |
+| **Fundamento** | Las descripciones de skills son solo informativas para el Manager. El Manager invoca skills por nombre, no por descripción. Cambiar descripciones no afecta funcionalidad. |
+| **Impacto** | System prompt se reduce en ~1,184 tokens inmediatamente. |
+
+---
+
+| # | Decisión | Fecha | Estado |
+|---|----------|:-----:|:------:|
+| D-F-001 | 9.5k no es límite rígido, es rango 8.5k–12k | 2026-06-16 | ✅ Aprobada |
+| D-F-002 | Modo Normal como default | 2026-06-16 | ✅ Aprobada |
+| D-F-003 | Fallback dinámico permitido | 2026-06-16 | ✅ Aprobada |
+| D-F-004 | No compresión agresiva inicial | 2026-06-16 | ✅ Aprobada |
+| D-F-005 | Primero token audit (F0) | 2026-06-16 | ✅ Aprobada |
+| D-F-006 | E6B + Suite F como gates | 2026-06-16 | ✅ Aprobada |
+| D-F-007 | Sesión canonical exclusiva | 2026-06-16 | ✅ Aprobada |
+| D-F-008 | Packs como estructuras lógicas | 2026-06-16 | ✅ Aprobada |
+| D-F-009 | Manager Protocol como KEEP_FIXED compactable | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-010 | Session history como quick win #1 | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-011 | Design Skills Protocol a RETRIEVE_ON_DEMAND | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-012 | Tool schemas requieren investigación runtime | 2026-06-16 | 🔶 Resuelta (F2) — Opción C |
+| D-F-013 | Session summaries: dedup en retrieval, no eliminar | 2026-06-16 | ✅ Aprobada (F1) |
+| D-F-014 | Context Packs expandidos con 3 nuevos packs | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-015 | Tool schemas bajo demanda por fase SDD (Opción C) | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-016 | Session history compactado 3+7+acumulativo | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-017 | Manager Protocol compactado sin tocar core | 2026-06-16 | 🔶 Pendiente aprobación usuario |
+| D-F-018 | Skills block con descripciones 5–10 palabras | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-019 | gentle-ai en alineación estratégica, no integración | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-020 | F2 es diseño + auditoría, no implementación | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-021 | Regression plan extendido con gates F2 | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-022 | TOOLING_PACK como context pack separado | 2026-06-16 | ✅ Aprobada (F2) |
+| D-F-023 | QW#3 (Manager Protocol compaction) baja prioridad | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-024 | Escenario "sin compactación" añadido a budgets | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-025 | Verificar runtime API antes de F3 | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-026 | Regla R7 para decisiones explícitas | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-027 | Ahorro neto de session compaction documentado | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-028 | Tests calidad usan búsqueda semántica | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-029 | F2 apto para F3 | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-030 | F2 Critical Review como entrada de F3 | 2026-06-16 | ✅ Aprobada (CR) |
+| D-F-031 | Orden F4 confirmado: Skills → Session → Selector | 2026-06-16 | ✅ Aprobada (F4) |
+| D-F-032 | F4A Skills Quick Track — implementación directa | 2026-06-16 | ✅ Aprobada (F4) |
+| D-F-033 | F4B Session compaction design completed | 2026-06-16 | ✅ Diseño completado |
+| D-F-034 | F4C mem_context Selector design completed | 2026-06-16 | ✅ Diseño completado |
+| D-F-035 | F4 descompuesto en F4A-F4F | 2026-06-16 | ✅ Aprobada (F4) |
+
+---
+
+_Fin de decision-log.md — F4 REVALIDATION COMPLETED. 32 decisiones registradas._

@@ -1,7 +1,7 @@
 # Fase F — Reducción Inteligente de Tokens
 
-**Estado:** 📋 PLANNING → ✅ **F0** → ✅ **F1** → ✅ **F2** → ✅ **F3 COMPLETE**  
-**Versión:** 1.0 (F0–F3 completados. F4 pendiente de aprobación)  
+**Estado:** 📋 PLANNING → ✅ **F0** → ✅ **F1** → ✅ **F2** → ✅ **F3** → 🔶 **F4 EN EJECUCIÓN**  
+**Versión:** 1.1 (F0–F3 completados. F4A–F4C diseño completado. Pendiente implementación)  
 **Fecha:** 2026-06-16
 
 ---
@@ -93,9 +93,15 @@ No se trata de comprimir todo con un algoritmo único. Se trata de **mejorar la 
 | **F3 — QW#4 Selector** | ✅ **Validado** | Scoring calibrado. Decay recomendado: 0.05/día. |
 | **F3 — Regression Harness** | ✅ **16/16 PASS** | Script read-only con 4 gates y 16 tests. |
 | **F3 — Approval Package** | ✅ **LISTO** | Ahorro total ~8,500–10,200 tokens. Pendiente aprobación para F4. |
-| **F4** — Quick Wins Implementation | 📋 Pendiente aprobación | QW#5 → QW#1 → QW#4 en orden de riesgo creciente. |
-| **F5** — Regression Execution | 📋 Pendiente F4 | Ejecutar regression plan completo post-cambios. |
-| **F6** — Rollout Controlado | 📋 Pendiente F5 | Feature flag + monitoreo. |
+| **F4** — Quick Wins Implementation | 🔶 **EN EJECUCIÓN** | F4-0 ✅, F4A ✅, F4B ✅, F4C ✅, F4D ⏳, F4E ⏳ |
+| **F4A — Skills Selective Loading** | ✅ **Diseño completado** | 38 skills compactados. Script de implementación listo (~1,184 tokens ahorro). |
+| **F4B — Session History Compaction** | ✅ **Diseño completado** | RECENT_SESSION_PACK template. 3+7+acumulativo+R7. Pendiente aprobación runtime. |
+| **F4C — mem_context Selector** | ✅ **Diseño completado** | Scoring spec + 23 tests. Algoritmo de 6 pasos. Pendiente aprobación runtime. |
+| **F4D — Runtime API Verification** | ⏳ Pendiente | Auditoría read-only de OpenCode runtime. |
+| **F4E — Manager Protocol v2** | ⏳ Pendiente | Propuesta sin tocar opencode.json. |
+| **F5** — Regression & Baseline | ⏳ Pendiente F4 | Ejecutar regression plan + recalcular ahorros post-F4. |
+| **F6** — Controlled Rollout | ⏳ Pendiente F5 | Feature flag + rollout progresivo + executive package. |
+| **F7** — README & Documentation | ⏳ Pendiente F4-F6 | README principal con Mermaid + DOCUMENTATION-INDEX.md. |
 
 ## Documentos de la fase
 
@@ -122,7 +128,7 @@ No se trata de comprimir todo con un algoritmo único. Se trata de **mejorar la 
 | `risk-register.md` | 24 riesgos documentados (F-R01 a F-R24) | ✅ Actualizado |
 | `regression-plan.md` | 9 gates, 52 tests | ✅ Actualizado |
 | `implementation-roadmap.md` | Secuencia F0–F6 | ✅ Actualizado |
-| `decision-log.md` | 30 decisiones registradas (D-F-001 a D-F-030) | ✅ Actualizado |
+| `decision-log.md` | 35 decisiones registradas (D-F-001 a D-F-035) | ✅ Actualizado |
 | **`F2-critical-review.md`** | **F3: Revisión crítica de F2** | **✅ COMPLETE** |
 | **`F3-execution-strategy.md`** | **F3: Estrategia de implementación** | **✅ COMPLETE** |
 | **`F3-B-skills-diff.md`** | **F3: Prototipo QW#5 (~1,184t)** | **✅ COMPLETE** |
@@ -130,6 +136,14 @@ No se trata de comprimir todo con un algoritmo único. Se trata de **mejorar la 
 | **`F3-D-selector-result.md`** | **F3: Prototipo QW#4 (validado)** | **✅ COMPLETE** |
 | **`F3-F-approval-package.md`** | **F3: Paquete de aprobación** | **✅ LISTO** |
 | `scripts/F-regression-harness.ps1` | **F3: Harness de regresión (16/16 PASS)** | **✅ COMPLETE** |
+| **`F4-0-approval-revalidation.md`** | **F4: Revalidación del orden Skills→Session→Selector** | **✅ COMPLETE** |
+| **`F4A-skills-selective-loading.md`** | **F4: Diseño de compactación de skills** | **✅ COMPLETE** |
+| **`proposals/skills-selective-loading.proposal.md`** | **F4: Propuesta con script, diff y rollback** | **✅ COMPLETE** |
+| **`F4B-session-history-compaction.md`** | **F4: Diseño de compactación de session** | **✅ COMPLETE** |
+| **`recent-session-pack.template.md`** | **F4: Template RECENT_SESSION_PACK** | **✅ COMPLETE** |
+| **`F4C-mem-context-selector.md`** | **F4: Diseño del selector de memorias** | **✅ COMPLETE** |
+| **`F4C-selector-scoring-spec.md`** | **F4: Scoring spec (pesos, decay, floor)** | **✅ COMPLETE** |
+| **`F4C-selector-test-cases.md`** | **F4: 23 tests funcionales del selector** | **✅ COMPLETE** |
 
 ## Cómo leer esta fase
 
@@ -148,17 +162,25 @@ No se trata de comprimir todo con un algoritmo único. Se trata de **mejorar la 
 10. Lee **F3-D-selector-result.md** para el prototipo de QW#4 (selector calibrado).
 11. Lee **F3-F-approval-package.md** para el paquete de aprobación.
 
+### Para entender los diseños detallados (F4):
+12. Lee **F4-0-approval-revalidation.md** para la revalidación del orden de implementación.
+13. Lee **F4A-skills-selective-loading.md** para el diseño de compactación de skills.
+14. Lee **F4B-session-history-compaction.md** para el diseño de compactación de session.
+15. Lee **F4C-mem-context-selector.md** para el diseño del selector de memorias.
+16. Lee **F4C-selector-scoring-spec.md** para la especificación exacta del scoring.
+17. Lee **F4C-selector-test-cases.md** para los 23 tests del selector.
+
 ### Para referencia:
-12. Lee **context-layers-design.md** para la arquitectura L0–L5.
-13. Lee **context-packs-design.md** para los 11 packs de contexto.
-14. Lee **mem-context-selector-design.md** para la lógica de selección.
-15. Lee **tool-schema-demand-loading-audit.md** para la auditoría de tools.
-16. Lee **session-history-compaction-audit.md** para el diseño de compactación.
-17. Lee **manager-protocol-compaction-audit.md** para la propuesta de compactación.
-18. Lee **skills-selective-loading-audit.md** para la compactación de skills.
-19. Lee **gentle-ai-alignment.md** para la alineación estratégica (profundizada en F3).
-20. Lee **regression-plan.md** para las validaciones (9 gates, 52 tests).
+18. Lee **context-layers-design.md** para la arquitectura L0–L5.
+19. Lee **context-packs-design.md** para los 11 packs de contexto.
+20. Lee **mem-context-selector-design.md** para la lógica de selección.
+21. Lee **tool-schema-demand-loading-audit.md** para la auditoría de tools.
+22. Lee **session-history-compaction-audit.md** para el diseño de compactación.
+23. Lee **manager-protocol-compaction-audit.md** para la propuesta de compactación.
+24. Lee **skills-selective-loading-audit.md** para la compactación de skills.
+25. Lee **gentle-ai-alignment.md** para la alineación estratégica (profundizada en F3).
+26. Lee **regression-plan.md** para las validaciones (9 gates, 52 tests).
 
 ---
 
-_Fin de README — Fase F: F0 ✅, F1 ✅, F2 ✅, F3 ✅ (prototipos completados). Pendiente aprobación del approval package para F4. Sin cambios funcionales implementados._
+_Fin de README — Fase F: F0 ✅, F1 ✅, F2 ✅, F3 ✅, F4A-C ✅ (diseños completados). Pendiente aprobación para implementar cambios funcionales._
