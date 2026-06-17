@@ -543,14 +543,14 @@ flowchart LR
 
 | Gap | Severidad | Impacto | Acción recomendada |
 |---|---|---|---|
-| Paths absolutos no portables | 🔴 Alta | Templates fallan en otro equipo | **Must fix before repo nuevo**: `opencode.example.json` con paths relativos |
-| Return envelope no aplicado a prompts SDD | 🟡 Media | Output no estructurado | **Should fix**: actualizar prompts SDD |
-| Tests críticos no automatizados | 🟡 Media | Assurance manual | **Should fix**: automatizar 7 tests críticos |
+| Paths absolutos no portables | 🔴 Alta | Templates fallan en otro equipo | **Must fix before repo nuevo**: definido en `PORTABILITY-MAP.md` + `OPENCODE-CONFIG-TEMPLATE-SPEC.md` |
+| Return envelope no aplicado a prompts SDD | 🟡 Media | Output no estructurado | **Should fix**: implementar en templates según `SDD-RETURN-ENVELOPE-IMPLEMENTATION-PLAN.md` |
+| Tests críticos no automatizados | 🟡 Media | Assurance manual | **Should fix**: `scripts/manager-sdd-assurance.ps1` cubre validación read-only automatizable |
 | Ponytail plugin no instalado | 🟢 Baja | No enforcement automático | Can move: mantener guidance, plugin opcional |
 | Ponytail skills no instalados | 🟢 Baja | Sin comandos `ponytail-*` | Can move: opcional |
-| Post-restart Ponytail pendiente | 🟡 Media | No observado tras restart | Should fix localmente antes de confiar runtime |
-| Contingencia GPT-5.5 | 🟡 Media | Quality gate puede no estar disponible | Should fix: documentar fallback Judgment Day/inline |
-| Ambigüedad Tiny/Medium | 🟡 Media | Saltar SDD por error | Should fix: regla de ambigüedad |
+| Post-restart Ponytail pendiente | 🟡 Media | No observado tras restart | Can move: guidance-only; validar post-restart luego |
+| Contingencia GPT-5.5 | 🟡 Media | Quality gate puede no estar disponible | Definida en `GPT-5.5-FALLBACK-PLAN.md` |
+| Ambigüedad Tiny/Medium | 🟡 Media | Saltar SDD por error | Definida en `MANAGER-TINY-AMBIGUITY-GUARD.md` |
 | `sdd-init` standalone | 🟡 Media | Runtime limpio puede necesitar templates | Can move to repo nuevo |
 | install/validate scripts SDD | 🟡 Media | Instalación manual riesgosa | Must/Should en repo nuevo |
 
@@ -583,7 +583,8 @@ No copiar DB real, memorias, `opencode.json` personal, `.codex/memories_1.sqlite
 ```mermaid
 flowchart TD
     A[opencode-architecture assurance] --> B[Fix/triage must-fix gaps]
-    B --> C[Create proyecto-opencode-mem]
+    B --> GATE[Pre-Runtime Kit Readiness Gate]
+    GATE --> C[Create proyecto-opencode-mem]
     C --> D[Sanitize templates]
     D --> E[Add profiles]
     E --> F[Add tests + CI]
@@ -621,6 +622,7 @@ flowchart TD
 ### Para validar
 
 - `scripts/F-regression-harness.ps1`
+- `scripts/manager-sdd-assurance.ps1`
 - `docs/opencode-architecture/integrations/manager-sdd-test-plan.md`
 - `docs/opencode-architecture/integrations/gentle-ai-boundary-test-plan.md`
 - `docs/opencode-architecture/integrations/ponytail-integration-test-plan.md`
@@ -653,6 +655,10 @@ flowchart TD
 ### Para exportar al repo nuevo
 
 - `docs/opencode-architecture/export-readiness/SDD-AGENTS-EXPORT-PLAN.md`
+- `docs/opencode-architecture/export-readiness/PRE-RUNTIME-KIT-READINESS-GATE.md`
+- `docs/opencode-architecture/export-readiness/PRE-RUNTIME-KIT-READINESS-REPORT.md`
+- `docs/opencode-architecture/export-readiness/PORTABILITY-MAP.md`
+- `docs/opencode-architecture/export-readiness/OPENCODE-CONFIG-TEMPLATE-SPEC.md`
 - `docs/opencode-architecture/export-readiness/MANAGER-EXTENSIONS-EXPORT-PLAN.md`
 - `docs/opencode-architecture/export-readiness/SHAREABLE-REPO-BLUEPRINT.md`
 - `docs/opencode-architecture/export-readiness/NEW-REPO-MIGRATION-PLAN.md`
@@ -661,6 +667,7 @@ flowchart TD
 ### Para riesgos/gaps
 
 - `docs/opencode-architecture/export-readiness/pre-runtime-kit-gap-analysis.md`
+- `docs/opencode-architecture/export-readiness/PRE-RUNTIME-KIT-READINESS-GATE.md`
 - `docs/opencode-architecture/integrations/manager-sdd-senior-challenge.md`
 
 ---
@@ -695,5 +702,5 @@ flowchart TD
 
 ---
 
-> **Estado actual:** Architecture README & Assurance Refresh — PASS WITH WARNINGS esperado tras harness.  
-> **No avanzar a `proyecto-opencode-mem`** hasta revisar el Architecture Assurance Report y decidir qué gaps son must-fix, should-fix o trasladables.
+> **Estado actual:** Pre-Runtime Kit Readiness Gate — PASS WITH WARNINGS esperado tras harness.  
+> **Siguiente decisión:** avanzar solo con `GO CONTROLADO PARA CREAR PROYECTO-OPENCODE-MEM` si `F-regression-harness.ps1` y `manager-sdd-assurance.ps1` pasan.

@@ -38,6 +38,9 @@ Documentos generados durante la fase de closure del Manager SDD Orchestration & 
 | `manager-delegation-rules.md` | Reglas de cuándo Manager delega vs ejecuta directo | 9 |
 | `manager-sdd-test-plan.md` | Plan de 21 tests para Manager+SDD | 10 |
 | `manager-sdd-senior-challenge.md` | Adversarial review senior de toda la arquitectura | 14 |
+| `SDD-RETURN-ENVELOPE-IMPLEMENTATION-PLAN.md` | Plan para aplicar `SUBAGENT_RESULT` en templates SDD | Pre-runtime |
+| `GPT-5.5-FALLBACK-PLAN.md` | Fallback para review/debug cuando GPT-5.5 subagent no esté disponible | Pre-runtime |
+| `MANAGER-TINY-AMBIGUITY-GUARD.md` | Regla de una pregunta para ambigüedad Tiny/Small | Pre-runtime |
 
 ## Architecture README & Assurance Refresh
 
@@ -55,6 +58,10 @@ Documentos generados durante la fase de closure del Manager SDD Orchestration & 
 | `../export-readiness/SDD-AGENTS-EXPORT-PLAN.md` | Plan de exportación de SDD agents | Task 11 |
 | `../export-readiness/manager-sdd-decision-package.md` | Decision package Manager+SDD | Task 12 |
 | `../export-readiness/pre-runtime-kit-gap-analysis.md` | Gap analysis pre-export | Task 13 |
+| `../export-readiness/PRE-RUNTIME-KIT-READINESS-GATE.md` | Gate final antes de crear `proyecto-opencode-mem` | Pre-runtime |
+| `../export-readiness/PRE-RUNTIME-KIT-READINESS-REPORT.md` | Reporte final del gate con GO CONTROLADO | Pre-runtime |
+| `../export-readiness/PORTABILITY-MAP.md` | Mapa de paths absolutos a placeholders | Pre-runtime |
+| `../export-readiness/OPENCODE-CONFIG-TEMPLATE-SPEC.md` | Spec de config portable `opencode.example.jsonc` | Pre-runtime |
 
 ---
 
@@ -66,6 +73,7 @@ Documentos generados durante la fase de closure del Manager SDD Orchestration & 
 - **Propuesta implementada.** La integración de Ponytail en AGENTS.md pasó de propuesta a implementación.
 - **Decisión base validada:** gentle-ai se mantiene como `alignment-only`, no como dependencia runtime.
 - **Ponytail no está instalado localmente** — la integración es documental, no require plugin.
+- **Pre-Runtime Kit Gate agregado** — mantiene runtime intacto y mueve cambios de prompts/config a templates futuros.
 
 ---
 

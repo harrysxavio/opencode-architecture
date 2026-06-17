@@ -1,6 +1,6 @@
 # Ponytail Post-Restart Validation
 
-> **Estado:** ⚠️ PENDING — OpenCode no fue reiniciado después de la edición de AGENTS.md
+> **Estado:** ⚠️ PENDING — OpenCode no fue reiniciado después de la edición de AGENTS.md; Pre-Runtime Kit gate mantiene Ponytail como guidance-only
 > **Fecha:** 2026-06-17
 > **Propósito:** Validar que Ponytail Code Gate funciona correctamente tras un restart de OpenCode. Documentar procedimiento y resultados.
 
@@ -109,6 +109,22 @@ Get-FileHash "$env:USERPROFILE\.config\opencode\AGENTS.md" -Algorithm SHA256
 
 Y comparar con el SHA256 after registrado en el backup manifest:
 `EABBDBD32396D737D49FB72CF0B6E2145F0B60595F74EEBC8048B410E3698FF3`
+
+---
+
+## 7. Pre-Runtime Kit readiness decision
+
+Durante el Pre-Runtime Kit Readiness Gate se mantiene esta validación como **PENDING** porque no hay evidencia de restart runtime dentro del alcance de la sesión.
+
+Decisiones explícitas:
+
+- Ponytail sigue siendo **guidance-only / code-task default**.
+- No se instaló Ponytail plugin.
+- No se instalaron Ponytail command skills.
+- `full` profile del repo futuro no debe instalar Ponytail plugin por defecto.
+- La validación post-restart puede moverse al repo nuevo como test manual/controlado.
+
+Este warning **no bloquea** crear `proyecto-opencode-mem` si el gate de portabilidad y los harnesses pasan, porque no afecta memoria, SDD core ni seguridad de runtime.
 
 ---
 

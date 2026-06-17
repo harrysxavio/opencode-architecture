@@ -7,6 +7,10 @@
 | Project overview | `README.md` |
 | Master architecture README | `README.md` |
 | Architecture assurance report | `docs/opencode-architecture/ARCHITECTURE-ASSURANCE-REPORT.md` |
+| Pre-Runtime Kit Readiness Gate | `docs/opencode-architecture/export-readiness/PRE-RUNTIME-KIT-READINESS-GATE.md` |
+| Pre-Runtime Kit final report | `docs/opencode-architecture/export-readiness/PRE-RUNTIME-KIT-READINESS-REPORT.md` |
+| Portability map | `docs/opencode-architecture/export-readiness/PORTABILITY-MAP.md` |
+| OpenCode config template spec | `docs/opencode-architecture/export-readiness/OPENCODE-CONFIG-TEMPLATE-SPEC.md` |
 | README refresh plan | `docs/opencode-architecture/README-ARCHITECTURE-ASSURANCE-REFRESH-PLAN.md` |
 | Fase F token reduction | `docs/opencode-architecture/phases/F-token-reduction/README.md` |
 | Fase F index | `docs/opencode-architecture/phases/F-token-reduction/DOCUMENTATION-INDEX.md` |
@@ -58,6 +62,10 @@
 - `docs/opencode-architecture/export-readiness/NEW-REPO-MIGRATION-PLAN.md` — plan de migración en 10 fases.
 - `docs/opencode-architecture/export-readiness/EXPORT-DECISION-PACKAGE.md` — recomendación ejecutiva.
 - `docs/opencode-architecture/export-readiness/EXPORT-READINESS-FINAL-REPORT.md` — reporte final de cierre.
+- `docs/opencode-architecture/export-readiness/PRE-RUNTIME-KIT-READINESS-GATE.md` — clasificación final must/should/can/defer antes del repo nuevo.
+- `docs/opencode-architecture/export-readiness/PRE-RUNTIME-KIT-READINESS-REPORT.md` — reporte final: PASS WITH WARNINGS y GO CONTROLADO.
+- `docs/opencode-architecture/export-readiness/PORTABILITY-MAP.md` — mapa de paths absolutos a variables portables.
+- `docs/opencode-architecture/export-readiness/OPENCODE-CONFIG-TEMPLATE-SPEC.md` — spec de `opencode.example.jsonc` sanitizado.
 
 ## F4A-lite current implementation (RUNTIME PASS)
 
@@ -102,6 +110,14 @@ Auditoría de integración de gentle-ai y Ponytail en la arquitectura OpenCode, 
 - `docs/opencode-architecture/export-readiness/SDD-AGENTS-EXPORT-PLAN.md` — Task 11: plan exportación SDD agents
 - `docs/opencode-architecture/export-readiness/manager-sdd-decision-package.md` — Task 12: decision package Manager+SDD
 - `docs/opencode-architecture/export-readiness/pre-runtime-kit-gap-analysis.md` — Task 13: gap analysis pre-export
+- `docs/opencode-architecture/export-readiness/PRE-RUNTIME-KIT-READINESS-GATE.md` — Pre-Runtime Kit gate: PASS WITH WARNINGS
+- `docs/opencode-architecture/export-readiness/PRE-RUNTIME-KIT-READINESS-REPORT.md` — reporte final del gate
+- `docs/opencode-architecture/export-readiness/PORTABILITY-MAP.md` — plan de portabilidad de paths
+- `docs/opencode-architecture/export-readiness/OPENCODE-CONFIG-TEMPLATE-SPEC.md` — spec de templates OpenCode
+- `docs/opencode-architecture/integrations/SDD-RETURN-ENVELOPE-IMPLEMENTATION-PLAN.md` — plan para aplicar `SUBAGENT_RESULT` en templates
+- `docs/opencode-architecture/integrations/GPT-5.5-FALLBACK-PLAN.md` — fallback review/debug si GPT-5.5 subagent no está disponible
+- `docs/opencode-architecture/integrations/MANAGER-TINY-AMBIGUITY-GUARD.md` — regla de una pregunta para ambigüedad Tiny/Small
+- `scripts/manager-sdd-assurance.ps1` — harness read-only Manager/SDD
 
 ## Architecture README & Assurance Refresh (2026-06-17)
 

@@ -60,6 +60,9 @@ Los siguientes documentos auditan la integración de gentle-ai y Ponytail en la 
 - `../../integrations/sdd-init-role-spec.md` — rol de `sdd-init` v3.0
 - `../../integrations/sdd-pipeline-flow.md` — flujo SDD completo
 - `../../integrations/manager-sdd-test-plan.md` — tests Manager/SDD diseñados
+- `../../integrations/SDD-RETURN-ENVELOPE-IMPLEMENTATION-PLAN.md` — plan para aplicar `SUBAGENT_RESULT` en templates
+- `../../integrations/GPT-5.5-FALLBACK-PLAN.md` — fallback review/debug
+- `../../integrations/MANAGER-TINY-AMBIGUITY-GUARD.md` — regla de ambigüedad Tiny/Small
 - `../../integrations/gentle-ai-boundary-test-plan.md` — tests de boundary para gentle-ai
 - `../../integrations/ponytail-integration-test-plan.md` — tests de integración para Ponytail
 - `../../integrations/manager-extension-decision-package.md` — paquete de decisión ejecutiva
@@ -70,4 +73,12 @@ Los siguientes documentos auditan la integración de gentle-ai y Ponytail en la 
 - `../../README-ARCHITECTURE-ASSURANCE-REFRESH-PLAN.md` — plan/auditoría del refresh del README maestro.
 - `../../ARCHITECTURE-ASSURANCE-REPORT.md` — assurance report con Go/No-Go y gaps antes de `proyecto-opencode-mem`.
 - `../../../README.md` — README maestro actualizado.
+
+## Pre-Runtime Kit Readiness Gate
+
+- `../../export-readiness/PRE-RUNTIME-KIT-READINESS-GATE.md` — gate final must/should/can/defer antes del repo nuevo.
+- `../../export-readiness/PRE-RUNTIME-KIT-READINESS-REPORT.md` — reporte final PASS WITH WARNINGS y GO CONTROLADO.
+- `../../export-readiness/PORTABILITY-MAP.md` — sanitización de paths absolutos.
+- `../../export-readiness/OPENCODE-CONFIG-TEMPLATE-SPEC.md` — spec de config template portable.
+- `../../../scripts/manager-sdd-assurance.ps1` — harness read-only Manager/SDD.
 
