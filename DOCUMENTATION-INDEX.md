@@ -81,3 +81,21 @@ Auditoría de integración de gentle-ai y Ponytail en la arquitectura OpenCode, 
 - `docs/opencode-architecture/integrations/ponytail-integration-test-plan.md` — tests de integración para Ponytail
 - `docs/opencode-architecture/integrations/manager-extension-decision-package.md` — paquete de decisión ejecutiva (actualizado post-implementación)
 - `docs/opencode-architecture/export-readiness/MANAGER-EXTENSIONS-EXPORT-PLAN.md` — plan de exportación al nuevo repo
+
+**Manager SDD Closure Phase (2026-06-17):**
+
+- `docs/opencode-architecture/integrations/ponytail-runtime-state-reconciliation.md` — Task 0: reconciliación estado runtime
+- `docs/opencode-architecture/integrations/ponytail-post-restart-validation.md` — Task 1: validación post-restart (PENDING)
+- `docs/opencode-architecture/integrations/sdd-subagents-runtime-inventory.md` — Task 2: inventario de subagentes SDD
+- `docs/opencode-architecture/integrations/gentle-sdd-boundary.md` — Task 3: boundary gentle-ai ↔ SDD
+- `docs/opencode-architecture/integrations/manager-orchestration-contract.md` — Task 4: contrato de orquestación Manager
+- `docs/opencode-architecture/integrations/manager-routing-flow.md` — Task 5: flujo de routing Manager
+- `docs/opencode-architecture/integrations/sdd-init-role-spec.md` — Task 6: rol de sdd-init
+- `docs/opencode-architecture/integrations/sdd-pipeline-flow.md` — Task 7: flujo SDD pipeline
+- `docs/opencode-architecture/integrations/subagent-return-envelope.md` — Task 8: return envelope estandarizado
+- `docs/opencode-architecture/integrations/manager-delegation-rules.md` — Task 9: reglas de delegación
+- `docs/opencode-architecture/integrations/manager-sdd-test-plan.md` — Task 10: plan de tests Manager+SDD
+- `docs/opencode-architecture/integrations/manager-sdd-senior-challenge.md` — Task 14: senior challenge adversarial
+- `docs/opencode-architecture/export-readiness/SDD-AGENTS-EXPORT-PLAN.md` — Task 11: plan exportación SDD agents
+- `docs/opencode-architecture/export-readiness/manager-sdd-decision-package.md` — Task 12: decision package Manager+SDD
+- `docs/opencode-architecture/export-readiness/pre-runtime-kit-gap-analysis.md` — Task 13: gap analysis pre-export
