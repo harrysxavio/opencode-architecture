@@ -1,6 +1,6 @@
 # F4C: mem_context Selector
 
-**Estado:** ✅ COMPLETED — Diseño completo con scoring spec y test cases  
+**Estado:** ✅ IMPLEMENTED — guidance-only via `experimental.chat.system.transform`
 **Propósito:** Implementar un selector de memorias que reduzca tokens (~500-2,000 por turno) y mejore relevancia del contexto recuperado.
 
 ---
@@ -140,6 +140,7 @@ type      = decision:1.0 | constraint:0.9 | architecture:0.7 | bugfix:0.6 | disc
 
 ## I. Documentación técnica
 
+- **Implementation report**: `F4C-mem-context-selector-implementation-report.md`
 - **Scoring spec**: `F4C-selector-scoring-spec.md`
 - **Test cases**: `F4C-selector-test-cases.md`
 - **Algoritmo**: 6 pasos (project match → score → dedup → top-K → fallback → explain)
@@ -174,4 +175,4 @@ El filtro de project match evita mezclar proyectos. El legacy penalty evita cont
 
 ---
 
-*Fin de F4C-mem-context-selector.md — Diseño completo con especificaciones.*
+*Fin de F4C-mem-context-selector.md — Implementación guidance-only aplicada y documentada.*

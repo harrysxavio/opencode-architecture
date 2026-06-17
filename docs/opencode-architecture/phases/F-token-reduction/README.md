@@ -1,186 +1,80 @@
 # Fase F — Reducción Inteligente de Tokens
 
-**Estado:** 📋 PLANNING → ✅ **F0** → ✅ **F1** → ✅ **F2** → ✅ **F3** → 🔶 **F4 EN EJECUCIÓN**  
-**Versión:** 1.1 (F0–F3 completados. F4A–F4C diseño completado. Pendiente implementación)  
-**Fecha:** 2026-06-16
+**Estado:** ✅ F0-F3 complete · ✅ F4B/F4C implemented guidance-only · ✅ F5/F6/F7 documentation and gates updated
+**Fecha:** 2026-06-17
 
----
+## Objetivo
 
-## ¿Qué es Fase F?
+Reducir el consumo de contexto de OpenCode/Engram sin degradar calidad: seleccionar mejor, compactar con continuidad, rankear memorias y mantener fallback.
 
-Fase F es la fase de reducción inteligente del consumo de contexto (tokens) del pipeline OpenCode/Engram. El objetivo no es "recortar tokens a ciegas", sino **usar el mínimo contexto necesario para mantener o mejorar la calidad del resultado del agente**.
+## Estado validado
 
-## ¿Por qué existe?
+| Validación | Estado |
+|---|---:|
+| E6B Noise Gate | ✅ COMPLETE — T1-T7 PASS |
+| Suite F mem_context read-only | ✅ COMPLETE — F-T1-F-T6 PASS |
+| F0 Token Audit Baseline | ✅ COMPLETE |
+| F1 Context Inventory | ✅ COMPLETE |
+| F2 Context Budget Contract | ✅ COMPLETE |
+| F3 Readiness / Prototype | ✅ COMPLETE |
+| F4D Runtime API Verification | ✅ COMPLETE |
 
-El consumo de contexto del sistema se estima en ~40k tokens fijos por sesión típica. Esto limita:
+## Implementado en este bloque
 
-- Capacidad de procesar tareas largas sin perder contexto por límite de ventana.
-- Costo operativo por uso excesivo de tokens.
-- Velocidad de respuesta al procesar más datos de los necesarios.
-- Escalabilidad para sesiones múltiples o complejas.
+| Work unit | Estado | Qué cambió |
+|---|---:|---|
+| F4B Session History Compaction | ✅ Implementado | `RECENT_SESSION_PACK_COMPACTION_CONTEXT` en `engram.ts` |
+| F4C mem_context Selector | ✅ Implementado | `MEMORY_SELECTOR_INSTRUCTIONS` en `engram.ts` |
+| F5A Harness Upgrade | ✅ Implementado | Gates F4-F6/docs/security/DB invariance |
+| F5B Regression Run | ✅ Ejecutado | Reporte generado |
+| F5C Rebaseline | ✅ Creado | Ahorro real/potencial separado |
+| F6A Rollout Plan | ✅ Creado | Plan + rollback |
+| F6B Executive Package | ✅ Creado | Decisiones y aprobaciones pendientes |
+| F7 README/Docs | ✅ Creado | README principal + DOCUMENTATION-INDEX |
 
-## ¿Qué problema resuelve?
+## No implementado por seguridad/aprobación
 
-1. **Contexto inflado**: se incluye más información de la necesaria para tareas simples.
-2. **Duplicación**: el mismo contexto aparece en múltiples fuentes (system prompt, memorias, historial).
-3. **Falta de selectividad**: no hay distinción entre contexto crítico y ruido.
-4. **Ausencia de modos**: todas las tareas reciben el mismo presupuesto de contexto.
+- F4A skills selective loading funcional.
+- QW#2 tool schema loading en runtime activo.
+- QW#3 Manager Protocol compaction.
+- Cualquier cambio de `opencode.json`.
+- Cualquier modificación de gentle-ai.
+- DB/schema migration.
 
-## ¿Qué NO va a hacer Fase F?
+## Documentos clave
 
-- ❌ No va a eliminar memoria persistida.
-- ❌ No va a truncar contexto indiscriminadamente.
-- ❌ No va a comprometer calidad del agente por ahorro de tokens.
-- ❌ No va a modificar DB, schema ni config sin aprobación.
-- ❌ No va a tocar el Noise Gate (E6B).
-- ❌ No va a romper E6B ni Suite F.
-- ❌ No va a mezclar sesiones legacy salvo riesgo documentado.
-- ❌ No va a exponer secretos ni datos sensibles.
-- ❌ No va a implementar cambios funcionales durante la planificación.
+| Documento | Propósito |
+|---|---|
+| `F4B-session-history-compaction-implementation-report.md` | Implementación F4B + rollback |
+| `F4C-mem-context-selector-implementation-report.md` | Implementación F4C + límites |
+| `F4A-skills-selective-loading-decision.md` | Decisión no-runtime F4A |
+| `F4D-tool-schema-loading-prototype-plan.md` | Plan prototype-only QW#2 |
+| `F4E-manager-protocol-compaction-decision.md` | Proposal-only QW#3 |
+| `F5A-regression-harness-upgrade.md` | Cobertura nueva del harness |
+| `F5B-regression-run-report.md` | Resultado de regresión |
+| `F5C-token-savings-rebaseline.md` | Ahorros real/propuesto/potencial |
+| `F6A-controlled-rollout-plan.md` | Rollout y rollback |
+| `F6B-executive-decision-package.md` | Paquete ejecutivo |
+| `autonomous-F4-F6-report.md` | Reporte final del bloque |
 
-## Estado previo validado
+## Ahorro esperado
 
-| Validación | Estado | Evidencia |
-|:-----------|:------:|:----------|
-| E6B Noise Gate | ✅ COMPLETE (T1-T7 PASS) | Session summaries #408-#426 en Engram |
-| Suite F mem_context RO | ✅ COMPLETE (F-T1-F-T6 PASS) | Observation #427 en Engram |
-| F0 Token Audit Baseline | ✅ COMPLETE | baseline-tokens.md con medición real |
-| F1 Context Inventory | ✅ COMPLETE | F1-context-inventory.md + 3 sub-documentos |
-| **F2 Context Budget Contract** | ✅ **COMPLETE** | F2-context-budget-contract.md + 14 tareas ejecutadas |
-| **F2 Critical Review** | ✅ **COMPLETE** | F2-critical-review.md — 8 hallazgos, veredicto APTO |
-| **F3 Execution Strategy** | ✅ **COMPLETE** | F3-execution-strategy.md — 7 tareas (F3-A a F3-G) |
-| **F3 Prototypes** | ✅ **QW#5: ~1,184t / QW#1: ~7,070t / QW#4: Validado** | F3-B-skills-diff.md, F3-C-session-result.md, F3-D-selector-result.md |
-| **F3 Approval Package** | ✅ **LISTO** | F3-F-approval-package.md — ahorro total: ~8,500–10,200 tokens |
-| **Regression Harness** | ✅ **16/16 PASS** | scripts/F-regression-harness.ps1 |
-| Store real | ✅ `C:\Users\harry\.engram\engram.db` | DB intacta, 326 observations, 312 user_prompts |
-| `.codex/memories_1.sqlite` | Existe (40KB) pero **no se usa** | Engram es el store real |
+| Fuente | Ahorro | Estado |
+|---|---:|---|
+| F4B session compaction | ~7,070 tokens / sesión 30-turn | Implementado guidance-only; medición real pendiente compaction |
+| F4C selector | ~500-2,000 tokens / turno potencial | Implementado guidance-only |
+| F4A skills | ~400-1,184 tokens | Pendiente aprobación |
+| QW#2 tool schemas | ~2,000-4,000 tokens | Prototype-only |
+| QW#3 Manager Protocol | ~1,200-2,300 tokens | Proposal-only |
 
-## Objetivo de reducción
+## Rollback runtime
 
-Reducir el consumo fijo de contexto desde ~40k tokens hacia un modo normal de **~8.5k–12k tokens**, con objetivo operativo cercano a **~9.5k**, sin comprometer calidad, seguridad, recuperación de contexto ni estabilidad del sistema.
+```powershell
+Copy-Item -LiteralPath "$env:USERPROFILE\.config\opencode\plugins\engram.ts.f4b-f4c-backup-20260617" -Destination "$env:USERPROFILE\.config\opencode\plugins\engram.ts" -Force
+```
 
-## Modos de operación objetivo
+Reiniciar OpenCode después.
 
-| Modo | Rango de tokens | Cuándo se usa |
-|:----:|:---------------:|---------------|
-| Simple | 6k–8.5k | Tareas triviales, consultas rápidas, confirmaciones |
-| Normal | 8.5k–12k | Tareas estándar (diseño, implementación, revisión) |
-| Arquitectura | 12k–16k | Diseño arquitectónico, cambios multi-módulo |
-| Auditoría/Regresión | 16k–22k | Validación completa de suites, regresiones |
-| Excepcional | >22k | Solo con justificación explícita documentada |
+## Próximo paso
 
-## Enfoque de contexto inteligente
-
-No se trata de comprimir todo con un algoritmo único. Se trata de **mejorar la selección de qué entra y qué no entra en el contexto activo**:
-
-1. **Por capas**: contexto crítico siempre presente (L0-L1), contexto recuperable bajo demanda (L5).
-2. **Por packs**: agrupación lógica de contexto en unidades intercambiables.
-3. **Por modo**: el presupuesto de tokens varía según la complejidad de la tarea.
-4. **Por ranking**: las memorias no se incluyen todas — se rankean, filtran y deduplican.
-5. **Por fallback**: si no hay contexto suficiente, se pide más.
-
-## Progreso de fases
-
-| Sub-fase | Estado | Descripción |
-|:--------:|:------:|-------------|
-| **F0** — Token Audit Baseline | ✅ **COMPLETE** | ~35k–45k tokens medido y desglosado por fuente. 6 quick wins identificados. |
-| **F1** — Context Inventory | ✅ **COMPLETE** | 15 fuentes catalogadas, 7 duplicaciones detectadas, 5 quick wins analizados. |
-| **F2** — Context Budget Contract | ✅ **COMPLETE** | Contrato formal de presupuesto + 6 auditorías + alineación gentle-ai. 14 tareas. 22 docs. |
-| **F2 Critical Review** | ✅ **COMPLETE** | 8 hallazgos, veredicto APTO con observaciones. Budgets actualizados. |
-| **F3 — Execution Strategy** | ✅ **COMPLETE** | 7 tareas (F3-A a F3-G) en 3 bloques. Prototipos de QW#5, QW#1, QW#4. |
-| **F3 — QW#5 Skills Block** | ✅ **~1,184 tokens** | Skills compactados: 38 skills, 70% menos caracteres. 3× estimado F2. |
-| **F3 — QW#1 Session Compaction** | ✅ **~7,070 tokens** | 3+7+acumulativo+R7. Ahorro neto para sesión típica 30 turns. |
-| **F3 — QW#4 Selector** | ✅ **Validado** | Scoring calibrado. Decay recomendado: 0.05/día. |
-| **F3 — Regression Harness** | ✅ **16/16 PASS** | Script read-only con 4 gates y 16 tests. |
-| **F3 — Approval Package** | ✅ **LISTO** | Ahorro total ~8,500–10,200 tokens. Pendiente aprobación para F4. |
-| **F4** — Quick Wins Implementation | 🔶 **EN EJECUCIÓN** | F4-0 ✅, F4A ✅, F4B ✅, F4C ✅, F4D ⏳, F4E ⏳ |
-| **F4A — Skills Selective Loading** | ✅ **Diseño completado** | 38 skills compactados. Script de implementación listo (~1,184 tokens ahorro). |
-| **F4B — Session History Compaction** | ✅ **Diseño completado** | RECENT_SESSION_PACK template. 3+7+acumulativo+R7. Pendiente aprobación runtime. |
-| **F4C — mem_context Selector** | ✅ **Diseño completado** | Scoring spec + 23 tests. Algoritmo de 6 pasos. Pendiente aprobación runtime. |
-| **F4D — Runtime API Verification** | ⏳ Pendiente | Auditoría read-only de OpenCode runtime. |
-| **F4E — Manager Protocol v2** | ⏳ Pendiente | Propuesta sin tocar opencode.json. |
-| **F5** — Regression & Baseline | ⏳ Pendiente F4 | Ejecutar regression plan + recalcular ahorros post-F4. |
-| **F6** — Controlled Rollout | ⏳ Pendiente F5 | Feature flag + rollout progresivo + executive package. |
-| **F7** — README & Documentation | ⏳ Pendiente F4-F6 | README principal con Mermaid + DOCUMENTATION-INDEX.md. |
-
-## Documentos de la fase
-
-| Doc | Propósito | Estado |
-|:---:|-----------|:------:|
-| `README.md` | **Este archivo** — visión general de Fase F | ✅ Actualizado |
-| `F0-token-audit-plan.md` | Cómo se hará el baseline | ✅ Plan |
-| `baseline-tokens.md` | **F0**: Baseline medido | ✅ **COMPLETE** |
-| `F1-context-inventory.md` | **F1**: Inventario de fuentes | ✅ **COMPLETE** |
-| `context-source-catalog.md` | **F1**: Catálogo de 15 fuentes | ✅ **COMPLETE** |
-| `duplication-map.md` | **F1**: Mapa de duplicaciones | ✅ **COMPLETE** |
-| `quick-wins-analysis.md` | **F1**: Quick wins priorizados | ✅ **COMPLETE** |
-| **`F2-context-budget-contract.md`** | **F2: Contrato formal de presupuesto por modo** | **✅ COMPLETE** |
-| `context-budget-contract.md` | Presupuesto resumido (referencia F2) | ✅ Alineado |
-| `context-layers-design.md` | Arquitectura L0–L5 con F1/F2 data | ✅ Actualizado |
-| `context-packs-design.md` | 11 packs de contexto | ✅ Actualizado |
-| `mem-context-selector-design.md` | Selector con pseudocódigo y scoring | ✅ Actualizado |
-| **`tool-schema-demand-loading-audit.md`** | **F2: Auditoría tools** | **✅ COMPLETE** |
-| **`session-history-compaction-audit.md`** | **F2: Auditoría session history** | **✅ COMPLETE** |
-| **`manager-protocol-compaction-audit.md`** | **F2: Propuesta compactación Manager** | **✅ COMPLETE** |
-| **`skills-selective-loading-audit.md`** | **F2: Auditoría skills block** | **✅ COMPLETE** |
-| **`gentle-ai-alignment.md`** | **F2: Alineación gentle-ai** | **✅ COMPLETE** |
-| **`autonomous-work-report.md`** | **F2: Reporte ejecutivo del bloque** | **✅ COMPLETE** |
-| `risk-register.md` | 24 riesgos documentados (F-R01 a F-R24) | ✅ Actualizado |
-| `regression-plan.md` | 9 gates, 52 tests | ✅ Actualizado |
-| `implementation-roadmap.md` | Secuencia F0–F6 | ✅ Actualizado |
-| `decision-log.md` | 35 decisiones registradas (D-F-001 a D-F-035) | ✅ Actualizado |
-| **`F2-critical-review.md`** | **F3: Revisión crítica de F2** | **✅ COMPLETE** |
-| **`F3-execution-strategy.md`** | **F3: Estrategia de implementación** | **✅ COMPLETE** |
-| **`F3-B-skills-diff.md`** | **F3: Prototipo QW#5 (~1,184t)** | **✅ COMPLETE** |
-| **`F3-C-session-result.md`** | **F3: Prototipo QW#1 (~7,070t)** | **✅ COMPLETE** |
-| **`F3-D-selector-result.md`** | **F3: Prototipo QW#4 (validado)** | **✅ COMPLETE** |
-| **`F3-F-approval-package.md`** | **F3: Paquete de aprobación** | **✅ LISTO** |
-| `scripts/F-regression-harness.ps1` | **F3: Harness de regresión (16/16 PASS)** | **✅ COMPLETE** |
-| **`F4-0-approval-revalidation.md`** | **F4: Revalidación del orden Skills→Session→Selector** | **✅ COMPLETE** |
-| **`F4A-skills-selective-loading.md`** | **F4: Diseño de compactación de skills** | **✅ COMPLETE** |
-| **`proposals/skills-selective-loading.proposal.md`** | **F4: Propuesta con script, diff y rollback** | **✅ COMPLETE** |
-| **`F4B-session-history-compaction.md`** | **F4: Diseño de compactación de session** | **✅ COMPLETE** |
-| **`recent-session-pack.template.md`** | **F4: Template RECENT_SESSION_PACK** | **✅ COMPLETE** |
-| **`F4C-mem-context-selector.md`** | **F4: Diseño del selector de memorias** | **✅ COMPLETE** |
-| **`F4C-selector-scoring-spec.md`** | **F4: Scoring spec (pesos, decay, floor)** | **✅ COMPLETE** |
-| **`F4C-selector-test-cases.md`** | **F4: 23 tests funcionales del selector** | **✅ COMPLETE** |
-
-## Cómo leer esta fase
-
-### Para entender el diseño (F0–F2):
-1. Empieza por **este README** para entender el qué y el por qué.
-2. Lee **F2-context-budget-contract.md** para el contrato formal de presupuesto.
-3. Lee **decision-log.md** para las 30 decisiones registradas.
-4. Lee **risk-register.md** para los 24 riesgos documentados.
-5. Lee **implementation-roadmap.md** para la secuencia de ejecución.
-
-### Para entender los prototipos (F3):
-6. Lee **F2-critical-review.md** para la revisión crítica de F2 (8 hallazgos).
-7. Lee **F3-execution-strategy.md** para la estrategia de implementación.
-8. Lee **F3-B-skills-diff.md** para el prototipo de QW#5 (~1,184 tokens).
-9. Lee **F3-C-session-result.md** para el prototipo de QW#1 (~7,070 tokens).
-10. Lee **F3-D-selector-result.md** para el prototipo de QW#4 (selector calibrado).
-11. Lee **F3-F-approval-package.md** para el paquete de aprobación.
-
-### Para entender los diseños detallados (F4):
-12. Lee **F4-0-approval-revalidation.md** para la revalidación del orden de implementación.
-13. Lee **F4A-skills-selective-loading.md** para el diseño de compactación de skills.
-14. Lee **F4B-session-history-compaction.md** para el diseño de compactación de session.
-15. Lee **F4C-mem-context-selector.md** para el diseño del selector de memorias.
-16. Lee **F4C-selector-scoring-spec.md** para la especificación exacta del scoring.
-17. Lee **F4C-selector-test-cases.md** para los 23 tests del selector.
-
-### Para referencia:
-18. Lee **context-layers-design.md** para la arquitectura L0–L5.
-19. Lee **context-packs-design.md** para los 11 packs de contexto.
-20. Lee **mem-context-selector-design.md** para la lógica de selección.
-21. Lee **tool-schema-demand-loading-audit.md** para la auditoría de tools.
-22. Lee **session-history-compaction-audit.md** para el diseño de compactación.
-23. Lee **manager-protocol-compaction-audit.md** para la propuesta de compactación.
-24. Lee **skills-selective-loading-audit.md** para la compactación de skills.
-25. Lee **gentle-ai-alignment.md** para la alineación estratégica (profundizada en F3).
-26. Lee **regression-plan.md** para las validaciones (9 gates, 52 tests).
-
----
-
-_Fin de README — Fase F: F0 ✅, F1 ✅, F2 ✅, F3 ✅, F4A-C ✅ (diseños completados). Pendiente aprobación para implementar cambios funcionales._
+Reiniciar OpenCode, ejecutar una sesión canonical y validar una compactación real con `RECENT_SESSION_PACK`.

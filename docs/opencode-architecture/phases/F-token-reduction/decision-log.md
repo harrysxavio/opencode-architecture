@@ -530,6 +530,93 @@
 
 ---
 
+## D-F-036: Prioridad F4 actualizada a F4B → F4C → F5/F6/F7
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-17 |
+| **Decisión** | Se reemplaza el orden F4A → F4B → F4C por F4B → F4C → F5/F6/F7. |
+| **Contexto** | F4D confirmó que F4A requiere tocar `opencode.json` o skills reales para ahorro neto, mientras F4B/F4C pueden implementarse por hooks existentes. |
+| **Alternativas** | Mantener F4A primero → rechazado por requerir aprobación de config/global skills. |
+| **Fundamento** | F4B tiene mejor ROI/riesgo; F4C es seguro como guidance; F4A queda decision-only. |
+| **Impacto** | D-F-032 queda superada por esta decisión para implementación funcional. |
+
+---
+
+## D-F-037: F4B implementado como guidance-only en compaction hook
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-17 |
+| **Decisión** | Implementar `RECENT_SESSION_PACK_COMPACTION_CONTEXT` en `experimental.session.compacting` de `engram.ts`. |
+| **Contexto** | El hook ya existía y ya era usado por Engram; no se necesita modificar core runtime. |
+| **Alternativas** | Reimplementar compactación → rechazado por riesgo. Solo documentar → menor impacto. |
+| **Fundamento** | Guidance-only mantiene fallback actual y evita DB/schema/config migration. |
+| **Impacto** | Requiere reiniciar OpenCode; compaction real debe validarse en runtime. |
+
+---
+
+## D-F-038: F4C implementado como Manager guidance, no Engram core
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-17 |
+| **Decisión** | Implementar reglas compactas del selector en `experimental.chat.system.transform`, sin modificar `mem_context` ni Engram DB. |
+| **Contexto** | F4C puede dar valor con bajo riesgo si el Manager rankea memorias recuperadas. |
+| **Alternativas** | Modificar Engram Go → mayor enforcement pero mayor riesgo. Wrapper MCP → más complejo. |
+| **Fundamento** | Guidance primero permite medir calidad antes de enforcement DB-level. |
+| **Impacto** | Ahorro potencial ~500-2,000 tokens/turno; requiere disciplina del Manager. |
+
+---
+
+## D-F-039: F4A queda decision-only sin runtime/config changes
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-17 |
+| **Decisión** | No implementar F4A funcional sin aprobación explícita para `opencode.json` o skills reales. |
+| **Contexto** | `system.transform` agrega contenido pero no remueve el bloque original de skills. |
+| **Fundamento** | Sin remover/compactar fuente original no hay ahorro neto confiable. |
+| **Impacto** | F4A documentado en `F4A-skills-selective-loading-decision.md`. |
+
+---
+
+## D-F-040: QW#2 Tool Schema Loading queda prototype-only
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-17 |
+| **Decisión** | No activar demand-loading de tool schemas en runtime; solo propuesta/prototipo aislado. |
+| **Contexto** | `tool.definition` y `tool.execute.before` existen, pero pueden afectar tool-call accuracy. |
+| **Fundamento** | Requiere pruebas de accuracy antes de rollout. |
+| **Impacto** | Plan creado en `F4D-tool-schema-loading-prototype-plan.md`. |
+
+---
+
+## D-F-041: QW#3 Manager Protocol compaction sigue proposal-only
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-17 |
+| **Decisión** | No aplicar compactación del Manager Protocol ni tocar `opencode.json`. |
+| **Contexto** | Ahorro moderado con riesgo alto sobre reglas críticas. |
+| **Fundamento** | F4B/F4C entregan mejor ROI/riesgo. |
+| **Impacto** | Propuesta v2 creada sin cambios runtime/config. |
+
+---
+
+## D-F-042: F5/F6/F7 completan documentación, rebaseline y rollout plan
+
+| Campo | Detalle |
+|-------|---------|
+| **Fecha** | 2026-06-17 |
+| **Decisión** | Completar harness, regression run, rebaseline, rollout plan, executive package y README principal como parte del bloque autónomo. |
+| **Contexto** | La implementación guidance-only necesita evidencia documental y gates. |
+| **Fundamento** | Sin documentación y rollback, el cambio no es operable. |
+| **Impacto** | README principal, DOCUMENTATION-INDEX y reportes F5/F6 actualizados. |
+
+---
+
 | # | Decisión | Fecha | Estado |
 |---|----------|:-----:|:------:|
 | D-F-001 | 9.5k no es límite rígido, es rango 8.5k–12k | 2026-06-16 | ✅ Aprobada |
@@ -567,7 +654,14 @@
 | D-F-033 | F4B Session compaction design completed | 2026-06-16 | ✅ Diseño completado |
 | D-F-034 | F4C mem_context Selector design completed | 2026-06-16 | ✅ Diseño completado |
 | D-F-035 | F4 descompuesto en F4A-F4F | 2026-06-16 | ✅ Aprobada (F4) |
+| D-F-036 | Prioridad F4 actualizada a F4B → F4C → F5/F6/F7 | 2026-06-17 | ✅ Aprobada |
+| D-F-037 | F4B implementado como guidance-only en compaction hook | 2026-06-17 | ✅ Implementada |
+| D-F-038 | F4C implementado como Manager guidance | 2026-06-17 | ✅ Implementada |
+| D-F-039 | F4A queda decision-only | 2026-06-17 | ✅ No runtime |
+| D-F-040 | QW#2 tool schema loading queda prototype-only | 2026-06-17 | ✅ No rollout |
+| D-F-041 | QW#3 Manager Protocol compaction sigue proposal-only | 2026-06-17 | ✅ No config |
+| D-F-042 | F5/F6/F7 documentación, rebaseline y rollout plan | 2026-06-17 | ✅ Ejecutada |
 
 ---
 
-_Fin de decision-log.md — F4 REVALIDATION COMPLETED. 32 decisiones registradas._
+_Fin de decision-log.md — F4-F6 autonomous block updated. 42 decisiones registradas._

@@ -1,6 +1,6 @@
 # F4B: Session History Compaction
 
-**Estado:** ✅ COMPLETED — Propuesta lista con template RECENT_SESSION_PACK  
+**Estado:** ✅ IMPLEMENTED — guidance-only via `experimental.session.compacting`
 **Propósito:** Implementar compactación de session history (3+7+acumulativo + R7) usando el formato RECENT_SESSION_PACK.
 
 ---
@@ -39,7 +39,7 @@ Turno N → ¿Sesión > 10 turns? → No → Mantener RAW
 
 ## C. Diseño
 
-Ver `recent-session-pack.template.md` para el template completo.
+Ver `recent-session-pack.template.md` para el template completo y `F4B-session-history-compaction-implementation-report.md` para la implementación.
 
 ### Componentes
 
@@ -145,10 +145,10 @@ R7 evita perder decisiones. El fallback evita perder acceso a contexto antiguo.
 
 | Documento | Acción |
 |-----------|:------:|
-| `decision-log.md` | D-F-016 ya registrada |
+| `decision-log.md` | D-F-037 registrada |
 | `risk-register.md` | F-R22 actualizado (costo de compactación) |
 | `implementation-roadmap.md` | F4B completado |
 
 ---
 
-*Fin de F4B-session-history-compaction.md — Propuesta lista con template.*
+*Fin de F4B-session-history-compaction.md — Implementación guidance-only aplicada y documentada.*

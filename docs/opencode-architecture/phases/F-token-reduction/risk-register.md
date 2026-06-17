@@ -23,6 +23,40 @@
 | F-R10 | E6B o Suite F dejan de pasar por cambios | Baja | 🔴 Alto | 🔴 Crítico | Regression plan obligatorio |
 | F-R11 | Falsos negativos en selector de memorias | Media | 🟢 Bajo | 🟢 Medio | Fallback L5 definido |
 | F-R12 | Inflado de tokens por packs mal diseñados | Media | 🟡 Medio | 🟡 Medio | Budget contract |
+| F-R25 | Hooks `experimental.*` cambian en futuras versiones | Media | 🟡 Medio | 🟡 Alto | Backup + rollback + restart requerido |
+| F-R26 | F4B guidance ignorado por compactor | Media | 🟡 Medio | 🟡 Medio | Fallback Engram existente intacto |
+| F-R27 | F4C selector guidance no enforcea DB-level | Media | 🟡 Medio | 🟡 Medio | Explainability + future Engram enforcement si se valida |
+| F-R28 | F4A aplicado sin aprobación de config/skills | Baja | 🔴 Alto | 🔴 Crítico | Decision-only; harness boundary |
+| F-R29 | QW#2 tool schema loading reduce tool-call accuracy | Media | 🔴 Alto | 🔴 Crítico | Prototype-only antes de rollout |
+| F-R30 | README/docs contradicen estado real | Media | 🟡 Medio | 🟡 Alto | DOCUMENTATION-INDEX + harness docs gate |
+
+---
+
+## Riesgos F4-F6 añadidos (2026-06-17)
+
+### F-R25: Hooks `experimental.*` cambian en futuras versiones
+
+Mitigación: mantener backup de `engram.ts`, documentar rollback y validar tras cada upgrade de OpenCode.
+
+### F-R26: F4B guidance ignorado por compactor
+
+Mitigación: mantener instrucción Engram `FIRST ACTION REQUIRED` intacta y validar primer compacted summary real tras restart.
+
+### F-R27: F4C selector guidance no enforcea DB-level
+
+Mitigación: exigir explainability al Manager y considerar enforcement en Engram core solo después de pruebas.
+
+### F-R28: F4A aplicado sin aprobación de config/skills
+
+Mitigación: F4A queda decision-only y el harness valida el boundary.
+
+### F-R29: QW#2 reduce tool-call accuracy
+
+Mitigación: mantener prototype-only y medir accuracy antes de rollout.
+
+### F-R30: README/docs contradicen estado real
+
+Mitigación: README principal, README Fase F y DOCUMENTATION-INDEX actualizados; harness verifica Mermaid/status básico.
 
 ---
 
