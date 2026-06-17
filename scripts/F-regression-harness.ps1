@@ -83,7 +83,10 @@ $hardeningBackupPath = "$env:USERPROFILE\.config\opencode\plugins\engram.ts.f4b-
 Test-Check -id "F4-RB2" -name "F4B hardening rollback backup exists" -ok (Test-Path $hardeningBackupPath) -detail $hardeningBackupPath
 
 Write-Host ""
-Write-Host "=== GATE 4: Decision Boundaries ==="
+Write-Host "=== GATE 4: Decision Boundaries (F4A-full) ==="
+Write-Host "     NOTE: F4A-T1/T2 refer to F4A-full (selective loading funcional),"
+Write-Host "     which remains decision-only. F4A-lite (compact descriptions only)"
+Write-Host "     is verified in GATE 4B below."
 Write-Host ""
 
 $f4aPath = "$faseFDir\F4A-skills-selective-loading-decision.md"

@@ -1,6 +1,6 @@
 # Implementation Roadmap — Fase F
 
-**Estado:** ✅ F0-F3 complete · ✅ F4A-lite PASS WITH WARNINGS · ⚠️ F4B partial + hardened · ✅ F4C RUNTIME PASS · ✅ F5/F6/F7 docs/gates · CLOSED — PASS WITH WARNINGS
+**Estado:** ✅ F0-F3 complete · ✅ F4A-lite RUNTIME PASS · ⚠️ F4B partial + hardened · ✅ F4C RUNTIME PASS · ✅ F5/F6/F7 docs/gates · CLOSED — PASS WITH WARNINGS
 **Fecha:** 2026-06-17
 
 ## Principio

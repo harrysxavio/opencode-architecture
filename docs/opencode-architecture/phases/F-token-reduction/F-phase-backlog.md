@@ -41,23 +41,36 @@
 | **Decisión necesaria** | Ninguna — ya está activo post-restart. |
 | **Próximo paso** | Evaluar si se necesita enforcement en Engram core después de recolectar data de uso real. |
 
+### B2. F4A-lite Skills Compact Descriptions
+
+| Campo | Detalle |
+|---|---|
+| **Descripción** | Compactación de solo `description:` en frontmatter de 36 SKILL.md. No se tocaron cuerpos, rutas, ni `opencode.json`. |
+| **Estado** | ✅ RUNTIME PASS — 36 descripciones compactas activas post-restart. Ahorro real: 3,532 chars. |
+| **Beneficio real** | 3,532 chars (~883-1,177 tokens) — medido, verificado, activo en runtime. |
+| **Riesgo** | Bajo — solo cambia descripción visible, no afecta matching ni invocación de skills. Body hashes intactos. |
+| **Archivos afectados** | 36 SKILL.md en `.codex/skills/`, `.config/opencode/skills/`, `Tools/.agents/skills/`, `.agents/skills/graphify/` |
+| **Pruebas requeridas** | Harness F4A-L1..L7 — PASS. Post-restart runtime validation — PASS. |
+| **Decisión necesaria** | Ninguna — ya implementado, aprobado, validado y activo. |
+| **Próximo paso** | Ninguno — F4A-lite está completo. |
+
 ---
 
 ## C. Requiere aprobación explícita
 
 Ítems que no deben implementarse ni activarse sin aprobación del usuario.
 
-### C1. F4A Skills Selective Loading
+### C1. F4A-full Skills Selective Loading Funcional
 
 | Campo | Detalle |
 |---|---|
-| **Descripción** | Reducir descripciones de skills en el bloque `<available_skills>` del system prompt. Ahorro estimado ~400–1,184 tokens. |
-| **Estado** | ⏸️ DECISION ONLY — no runtime, no config change. |
-| **Beneficio esperado** | ~400–1,184 tokens/sesión. |
-| **Riesgo** | Las descripciones actuales son informativas; el Manager invoca skills por nombre. Riesgo de falsos negativos en matching si se reduce demasiado. |
-| **Archivos afectados** | System prompt de OpenCode (requiere modificar cómo se genera). Probablemente `opencode.json` o configuración de skills. |
+| **Descripción** | Carga selectiva dinámica de bloques de skills vía `opencode.json` o cambio de rutas. **NO confundir con F4A-lite** (que ya está implementado y solo compactó descripciones). |
+| **Estado** | ⏸️ DECISION ONLY — F4A-lite ya cubrió el ahorro de descripciones. F4A-full sigue sin implementar. |
+| **Beneficio esperado** | ~400–1,184 tokens adicionales (además de los ~883-1,177 ya ahorrados por F4A-lite). |
+| **Riesgo** | Medio — puede causar falsos negativos en skill matching si se ocultan skills completas. |
+| **Archivos afectados** | `opencode.json` o configuración de skills. |
 | **Pruebas requeridas** | Validar que no hay falsos negativos en skill matching tras reducción. |
-| **Decisión necesaria** | ✅ **Aprobación del usuario** — requiere tocar configuración de skills. |
+| **Decisión necesaria** | ✅ **Aprobación del usuario** — requiere tocar configuración o rutas. |
 | **Documento de referencia** | `F4A-skills-selective-loading-decision.md` |
 
 ---

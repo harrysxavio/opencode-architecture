@@ -1,6 +1,6 @@
 # Fase F — Reducción Inteligente de Tokens
 
-**Estado:** ✅ F0-F3 complete · ✅ F4A-lite PASS WITH WARNINGS · ⚠️ F4B partial + hardened + observable · ✅ F4C RUNTIME PASS · ✅ F5/F6/F7 docs/gates · CLOSED — PASS WITH WARNINGS
+**Estado:** ✅ F0-F3 complete · ✅ F4A-lite RUNTIME PASS · ⚠️ F4B partial + hardened + observable · ✅ F4C RUNTIME PASS · ✅ F5/F6/F7 docs/gates · CLOSED — PASS WITH WARNINGS
 **Fecha:** 2026-06-17
 
 ## Objetivo
@@ -34,7 +34,8 @@ Reducir el consumo de contexto de OpenCode/Engram sin degradar calidad: seleccio
 
 ## No implementado por seguridad/aprobación
 
-- F4A full selective loading funcional (F4A-lite si fue implementado solo sobre `description:`).
+- **F4A-full** (selective loading funcional vía `opencode.json` o cambio de rutas): no implementado, requiere aprobación.
+- **F4A-lite** (compactación solo de `description:` en frontmatter): ✅ **SÍ implementado** — RUNTIME PASS, 36 skills compactas activas.
 - QW#2 tool schema loading en runtime activo.
 - QW#3 Manager Protocol compaction.
 - Cualquier cambio de `opencode.json`.

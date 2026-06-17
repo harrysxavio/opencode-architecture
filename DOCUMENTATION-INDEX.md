@@ -38,8 +38,19 @@
 - `F-next-decisions-matrix.md`
 - `F-phase-operational-closure-report.md`
 
-## F4A-lite current implementation
+## Export Readiness (senior closing phase)
 
-- `docs/opencode-architecture/phases/F-token-reduction/F4A-lite-skills-selective-loading-implementation-report.md`
-- `docs/opencode-architecture/phases/F-token-reduction/F4A-lite-backup-manifest.md`
-- `docs/opencode-architecture/phases/F-token-reduction/F-phase-final-closure-report.md`
+- `docs/opencode-architecture/export-readiness/EXPORT-READINESS-REPORT.md` — qué es compartible y qué no.
+- `docs/opencode-architecture/export-readiness/RUNTIME-EXPORT-INVENTORY.md` — inventario completo de componentes.
+- `docs/opencode-architecture/export-readiness/SHAREABLE-REPO-BLUEPRINT.md` — diseño del repo `opencode-agent-runtime-kit`.
+- `docs/opencode-architecture/export-readiness/SANITIZATION-CHECKLIST.md` — checklist para sanitizar antes de publicar.
+- `docs/opencode-architecture/export-readiness/SHAREABLE-TEST-STRATEGY.md` — estrategia de tests para el nuevo repo.
+- `docs/opencode-architecture/export-readiness/NEW-REPO-MIGRATION-PLAN.md` — plan de migración por fases.
+- `docs/opencode-architecture/export-readiness/EXPORT-DECISION-PACKAGE.md` — recomendación ejecutiva.
+- `docs/opencode-architecture/export-readiness/EXPORT-READINESS-FINAL-REPORT.md` — reporte final de cierre.
+
+## F4A-lite current implementation (RUNTIME PASS)
+
+- `docs/opencode-architecture/phases/F-token-reduction/F4A-lite-skills-selective-loading-implementation-report.md` — implementación + validación post-restart.
+- `docs/opencode-architecture/phases/F-token-reduction/F4A-lite-backup-manifest.md` — backups centralizados.
+- `docs/opencode-architecture/phases/F-token-reduction/F-phase-final-closure-report.md` — cierre final. CLOSED — PASS WITH WARNINGS.
