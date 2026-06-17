@@ -463,7 +463,7 @@ powershell -ExecutionPolicy Bypass -File scripts\F-regression-harness.ps1
 
 ## 16. Camino hacia un repositorio compartible
 
-El contenido de este repositorio tiene **~90% de componentes exportables** (skills, documentación, scripts, templates). El objetivo es crear un repositorio público llamado **`opencode-agent-runtime-kit`** con una versión sanitizada, testeable e instalable.
+El contenido de este repositorio tiene **~80% de contenido compartible/exportable** (skills, documentación, scripts, templates). El objetivo es crear un repositorio público llamado **`opencode-agent-runtime-kit`** con una versión sanitizada, testeable e instalable.
 
 ```mermaid
 flowchart TD
@@ -478,11 +478,13 @@ flowchart TD
 
 | Se puede exportar | No se puede exportar | Requiere sanitización | Requiere tests |
 |---|---|---|---|
-| 37 skills SKILL.md | `~/.engram/engram.db` (DB real) | Paths `C:\Users\...` | Estructura de directorios |
+| 37 skills SKILL.md¹ | `~/.engram/engram.db` (DB real) | Paths `C:\Users\...` | Estructura de directorios |
 | Documentación completa | `~/.codex/memories_1.sqlite` | Tokens y secretos en ejemplos | Frontmatter YAML de skills |
 | Templates de plugins | `~/.config/opencode/opencode.json` personal | Emails personales | Detección de secretos |
 | Regression harness | Backups locales con paths absolutos | Nombres de usuario | Compilación de plugins |
 | Decision log sanitizado | Logs de sesiones personales | Rutas OneDrive | Regression harness |
+
+> ¹ El inventario de exportación registra 37 skills exportables. El runtime visible incluye 38 skills totales (36 con descripciones compactas por F4A-lite + 2 no modificadas: `_shared` y `customize-opencode`). La diferencia es que una skill del runtime corresponde a un skill interno del sistema no incluido en el inventario exportable.
 
 **El nuevo repo NO será una copia directa del runtime personal.** Será una versión:
 - **Sanitizada** — sin paths personales, sin tokens, sin datos sensibles.
